@@ -4,8 +4,8 @@ import AppTable from '../../components/tables/AppTable'
 
 export default function Partenaire() {
   return (
-    <div><Outlet />
-    <AppTable />
+    <div>
+      <Outlet />
     </div>
     
   )

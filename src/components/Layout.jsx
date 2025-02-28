@@ -136,6 +136,7 @@ const NAVIGATION = [
 
 function DemoPageContent({ pathname }) {
   const renderPage = () => {
+    console.log("pathname : " + pathname ) ;
     switch (pathname) {
       case "/home":
         return <Home />;
@@ -161,7 +162,8 @@ function DemoPageContent({ pathname }) {
         return <Cabine />;
       case "/camion/remorque":
         return <Remorque />;
-      
+      default:
+        return <Home/>;
     }
   };
   return (
@@ -185,7 +187,7 @@ DemoPageContent.propTypes = {
 
 function Layout(props) {
   const { window } = props;
-  const router = useDemoRouter('/home');
+  const router = useDemoRouter('');  // hna 7ydt /home kant katdina par defaut l home mor makanbrko 3la partenaire
   const demoWindow = window !== undefined ? window() : undefined;
 
   return (
