@@ -60,6 +60,22 @@ const NAVIGATION = [
         icon: <DescriptionIcon />,
         pattern: '/partenaire/morale',
         kind: 'page',
+        children: [
+          {
+            segment: 'client',
+            title: 'Client',
+            icon: <DescriptionIcon />,
+            pattern: '/partenaire/physique/client',
+            kind: 'page',
+          },
+          {
+            segment: 'fournisseur',
+            title: 'Fournisseur',
+            icon: <DescriptionIcon />,
+            pattern: '/partenaire/physique/fournisseur',
+            kind: 'page',
+          },
+        ],
       },
       {
         segment: 'physique',
@@ -127,6 +143,10 @@ function DemoPageContent({ pathname }) {
         return <Partenaire />;
       case "/partenaire/morale":
         return <Morale />;
+      case "/partenaire/morale/client":
+        return <Client />;
+      case "/partenaire/morale/fournisseur":
+        return <Fournisseur />;
       case "/partenaire/physique":
         return <Physique />;
       case "/partenaire/physique/chauffeur":
