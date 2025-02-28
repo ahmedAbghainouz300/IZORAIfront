@@ -9,15 +9,15 @@ import { AppProvider } from '@toolpad/core/AppProvider';
 import { DashboardLayout } from '@toolpad/core/DashboardLayout';
 import { useDemoRouter } from '@toolpad/core/internal';
 import Home from "../pages/Home";
-import Partenaire from "../pages/Partenaire";
-import Morale from "../pages/Morale";
-import Physique from "../pages/Physique";
-import Client from "../pages/Client";
-import Fournisseur from "../pages/Fournisseur";
-import Chauffeur from "../pages/Chauffeur";
-import Camion from "../pages/Camion";
-import Cabine from "../pages/Cabine";
-import Remorque from "../pages/Remorque";
+import Partenaire from "../pages/partenaire/Partenaire";
+import Morale from "../pages/partenaire/Morale";
+import Physique from "../pages/partenaire/Physique";
+import Client from "../pages/partenaire/Client";
+import Fournisseur from "../pages//partenaire/Fournisseur";
+import Chauffeur from "../pages/Partenaire/Chauffeur";
+import Camion from "../pages/Camion/Camion";
+import Cabine from "../pages/camion/Cabine";
+import Remorque from "../pages/camion/Remorque";
 
 const theme = createTheme({
   cssVariables: {
