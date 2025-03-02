@@ -1,37 +1,32 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import TextField from "@mui/material/TextField";
 import {
   DataGrid,
   GridToolbarContainer,
   GridToolbarExport,
-  useGridApiRef,
 } from "@mui/x-data-grid";
+import CabineDialog from "../../components/dialog/Camion/CabineDialog";
 
 const columns = [
   { field: "id", headerName: "ID", width: 90 },
   {
     field: "firstName",
     headerName: "First name",
-    width: 150,
+    flex: 1,
     editable: true,
   },
   {
     field: "lastName",
     headerName: "Last name",
-    width: 150,
+    flex: 1,
     editable: true,
   },
   {
     field: "age",
     headerName: "Age",
     type: "number",
-    width: 110,
+    flex: 1,
     editable: true,
   },
   {
@@ -39,7 +34,7 @@ const columns = [
     headerName: "Full name",
     description: "This column has a value getter and is not sortable.",
     sortable: false,
-    width: 160,
+    flex: 1,
     valueGetter: (value, row) => `${row.firstName || ""} ${row.lastName || ""}`,
   },
 ];
@@ -65,37 +60,26 @@ function CustomToolbar() {
   );
 }
 
-export default function IZORAI() {
-  const [open, setOpen] = React.useState(false);
+export default function Cabine() {
+  const [dialogOpen, setDialogOpen] = React.useState(false);
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleOpenDialog = () => {
+    setDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+  };
 
   return (
     <Box sx={{ height: 500, width: "100%" }}>
-      <Button variant="contained" onClick={handleOpen} sx={{ mb: 2 }}>
+      <Button variant="contained" onClick={handleOpenDialog} sx={{ mb: 2 }}>
         Add Cabine
       </Button>
 
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Add Cabine</DialogTitle>
-        <DialogContent>
-          <TextField margin="dense" label="Nom" fullWidth />
-          <TextField
-            margin="dense"
-            label="Poids Vide"
-            fullWidth
-            type="number"
-          />
-          <TextField margin="dense" label="Poids Max" fullWidth type="number" />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button variant="contained" onClick={handleClose}>
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {dialogOpen && (
+        <CabineDialog vopen={dialogOpen} onClose={handleCloseDialog} />
+      )}
 
       <DataGrid
         rows={rows}

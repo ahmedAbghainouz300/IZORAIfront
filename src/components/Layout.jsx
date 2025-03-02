@@ -1,13 +1,18 @@
-import * as React from 'react';
-import PropTypes from 'prop-types';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import { createTheme } from '@mui/material/styles';
-import DescriptionIcon from '@mui/icons-material/Description';
-import FolderIcon from '@mui/icons-material/Folder';
-import { AppProvider } from '@toolpad/core/AppProvider';
-import { DashboardLayout } from '@toolpad/core/DashboardLayout';
-import { useDemoRouter } from '@toolpad/core/internal';
+import * as React from "react";
+import PropTypes from "prop-types";
+import Box from "@mui/material/Box";
+import PeopleIcon from "@mui/icons-material/People";
+import PersonIcon from "@mui/icons-material/Person";
+import { BsTruckFlatbed } from "react-icons/bs";
+import { createTheme } from "@mui/material/styles";
+import DescriptionIcon from "@mui/icons-material/Description";
+import Diversity3Icon from "@mui/icons-material/Diversity3";
+import HomeIcon from "@mui/icons-material/Home";
+import { GoContainer } from "react-icons/go";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import { AppProvider } from "@toolpad/core/AppProvider";
+import { DashboardLayout } from "@toolpad/core/DashboardLayout";
+import { useDemoRouter } from "@toolpad/core/internal";
 import Home from "../pages/Home";
 import Partenaire from "../pages/partenaire/Partenaire";
 import Morale from "../pages/partenaire/Morale";
@@ -20,8 +25,13 @@ import Cabine from "../pages/camion/Cabine";
 import Remorque from "../pages/camion/Remorque";
 
 const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#fff", // Change this to your desired primary color
+    },
+  },
   cssVariables: {
-    colorSchemeSelector: 'data-toolpad-color-scheme',
+    colorSchemeSelector: "data-toolpad-color-scheme",
   },
   colorSchemes: { light: true, dark: true },
   breakpoints: {
@@ -37,98 +47,98 @@ const theme = createTheme({
 
 const NAVIGATION = [
   {
-    kind: 'header',
-    title: 'Main items',
+    kind: "header",
+    title: "Main items",
   },
   {
-    segment: 'home',
-    title: 'Home',
-    icon: <FolderIcon />,
-    pattern: '/home',
-    kind: 'page',
+    segment: "home",
+    title: "Home",
+    icon: <HomeIcon />,
+    pattern: "/home",
+    kind: "page",
   },
   {
-    segment: 'partenaire',
-    title: 'Partenaire',
-    icon: <FolderIcon />,
-    pattern: '/partenaire',
-    kind: 'page',
+    segment: "partenaire",
+    title: "Partenaire",
+    icon: <Diversity3Icon />,
+    pattern: "/partenaire",
+    kind: "page",
     children: [
       {
-        segment: 'morale',
-        title: 'Morale',
-        icon: <DescriptionIcon />,
-        pattern: '/partenaire/morale',
-        kind: 'page',
+        segment: "morale",
+        title: "Morale",
+        icon: <PeopleIcon />,
+        pattern: "/partenaire/morale",
+        kind: "page",
         children: [
           {
-            segment: 'client',
-            title: 'Client',
-            icon: <DescriptionIcon />,
-            pattern: '/partenaire/physique/client',
-            kind: 'page',
+            segment: "client",
+            title: "Client",
+            icon: <PersonIcon />,
+            pattern: "/partenaire/physique/client",
+            kind: "page",
           },
           {
-            segment: 'fournisseur',
-            title: 'Fournisseur',
-            icon: <DescriptionIcon />,
-            pattern: '/partenaire/physique/fournisseur',
-            kind: 'page',
+            segment: "fournisseur",
+            title: "Fournisseur",
+            icon: <PersonIcon />,
+            pattern: "/partenaire/physique/fournisseur",
+            kind: "page",
           },
         ],
       },
       {
-        segment: 'physique',
-        title: 'Physique',
-        icon: <DescriptionIcon />,
-        pattern: '/partenaire/physique',
-        kind: 'page',
+        segment: "physique",
+        title: "Physique",
+        icon: <PeopleIcon />,
+        pattern: "/partenaire/physique",
+        kind: "page",
         children: [
           {
-            segment: 'chauffeur',
-            title: 'Chauffeur',
-            icon: <DescriptionIcon />,
-            pattern: '/partenaire/physique/chauffeur',
-            kind: 'page',
+            segment: "chauffeur",
+            title: "Chauffeur",
+            icon: <PersonIcon />,
+            pattern: "/partenaire/physique/chauffeur",
+            kind: "page",
           },
           {
-            segment: 'client',
-            title: 'Client',
-            icon: <DescriptionIcon />,
-            pattern: '/partenaire/physique/client',
-            kind: 'page',
+            segment: "client",
+            title: "Client",
+            icon: <PersonIcon />,
+            pattern: "/partenaire/physique/client",
+            kind: "page",
           },
           {
-            segment: 'fournisseur',
-            title: 'Fournisseur',
-            icon: <DescriptionIcon />,
-            pattern: '/partenaire/physique/fournisseur',
-            kind: 'page',
+            segment: "fournisseur",
+            title: "Fournisseur",
+            icon: <PersonIcon />,
+            pattern: "/partenaire/physique/fournisseur",
+            kind: "page",
           },
         ],
       },
     ],
   },
   {
-    segment: 'camion',
-    title: 'Camion',
-    icon: <FolderIcon />,
-    pattern: '/camion',
-    kind: 'page',
+    segment: "camion",
+    title: "Camion",
+    icon: <LocalShippingIcon />,
+    pattern: "/camion",
+    kind: "page",
     children: [
       {
-        segment: 'cabine',
-        title: 'Cabine',
-        icon: <DescriptionIcon />,
-        pattern: '/camion/cabine',
-        kind: 'page',
+        segment: "cabine",
+        title: "Cabine",
+        icon: <BsTruckFlatbed />,
+        pattern: "/camion/cabine",
+        kind: "page",
       },
       {
-        segment: 'remorque',
-        title: 'Remorque',
-        icon: <DescriptionIcon />,
-        pattern: '/camion/remorque',
-        kind: 'page',
+        segment: "remorque",
+        title: "Remorque",
+        icon: <GoContainer />,
+        pattern: "/camion/remorque",
+        kind: "page",
       },
     ],
   },
@@ -136,7 +146,7 @@ const NAVIGATION = [
 
 function DemoPageContent({ pathname }) {
   const renderPage = () => {
-    console.log("pathname : " + pathname ) ;
+    console.log("pathname : " + pathname);
     switch (pathname) {
       case "/home":
         return <Home />;
@@ -163,17 +173,17 @@ function DemoPageContent({ pathname }) {
       case "/camion/remorque":
         return <Remorque />;
       default:
-        return <Home/>;
+        return <Home />;
     }
   };
   return (
     <Box
       sx={{
         py: 4,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        textAlign: 'center',
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        textAlign: "center",
       }}
     >
       {renderPage()}
@@ -187,15 +197,27 @@ DemoPageContent.propTypes = {
 
 function Layout(props) {
   const { window } = props;
-  const router = useDemoRouter('');  // hna 7ydt /home kant katdina par defaut l home mor makanbrko 3la partenaire
+  const router = useDemoRouter(""); // hna 7ydt /home kant katdina par defaut l home mor makanbrko 3la partenaire
   const demoWindow = window !== undefined ? window() : undefined;
 
   return (
-    <AppProvider navigation={NAVIGATION.map((item) => ({
-      ...item,
-      onClick: () => handleNavigation(item.pattern), // Add onClick handler
-    }))} router={router} theme={theme} window={demoWindow}>
-      <DashboardLayout>
+    <AppProvider
+      navigation={NAVIGATION.map((item) => ({
+        ...item,
+        onClick: () => handleNavigation(item.pattern), // Add onClick handler
+      }))}
+      branding={{
+        logo: <img src="src/assets/0.png" alt="MUI logo" />,
+        title: "IZORAI",
+        color: "primary",
+        homeUrl: "/toolpad/core/introduction",
+        sidebarExpandedWidth: "250px",
+      }}
+      router={router}
+      theme={theme}
+      window={demoWindow}
+    >
+      <DashboardLayout sidebarExpandedWidth="250px">
         <DemoPageContent pathname={router.pathname} />
       </DashboardLayout>
     </AppProvider>
