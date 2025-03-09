@@ -1,4 +1,4 @@
-const allRoutes = {
+const AllRoutes = {
   home: "/home",
   about: "/about",
   partenaire: {
@@ -10,10 +10,15 @@ const allRoutes = {
     },
     physique: {
       base: "/partenaire/physique",
-      chauffeur: "/partenaire/physique/chauffeur",
       client: "/partenaire/physique/client",
       fournisseur: "/partenaire/physique/fournisseur",
     },
+    typePartenaire:{
+      base: "/partenaire/typePartenaire",
+    },
+    chauffeur: "/partenaire/chauffeur",
+
+    
   },
   camion: {
     base: "/camion",
@@ -22,4 +27,4 @@ const allRoutes = {
   },
 };
 
-export default allRoutes;
+export default AllRoutes;

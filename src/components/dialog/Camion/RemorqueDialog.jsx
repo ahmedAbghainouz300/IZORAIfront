@@ -12,133 +12,133 @@ import AssuranceDialog from "./AssuranceDialog";
 import EntretienDialog from "./EntretienDialog";
 import KilometrageDialog from "./KilometrageDialog";
 
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
-
-export default function RemorqueDialog({ vopen, onClose }) {
-  const [openCarburant, setOpenCarburant] = React.useState(false);
-  const [openAssurance, setOpenAssurance] = React.useState(false);
-  const [openEntretien, setOpenEntretien] = React.useState(false);
-  const [openKilometrage, setOpenKilometrage] = React.useState(false);
-
-  const [remorqueData, setRemorqueData] = React.useState({
-    typeRemorque: "",
-    poidsMax: "",
-    consommation: "",
+  const Transition = React.forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
   });
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setRemorqueData({ ...remorqueData, [name]: value });
-  };
+  export default function RemorqueDialog({ vopen, onClose }) {
+    const [openCarburant, setOpenCarburant] = React.useState(false);
+    const [openAssurance, setOpenAssurance] = React.useState(false);
+    const [openEntretien, setOpenEntretien] = React.useState(false);
+    const [openKilometrage, setOpenKilometrage] = React.useState(false);
 
-  const handleSubmit = () => {
-    console.log("Remorque Data:", remorqueData);
-    onClose();
-  };
+    const [remorqueData, setRemorqueData] = React.useState({
+      typeRemorque: "",
+      poidsMax: "",
+      consommation: "",
+    });
 
-  return (
-    <Dialog
-      fullScreen
-      open={vopen}
-      onClose={onClose}
-      TransitionComponent={Transition}
-    >
-      <AppBar sx={{ position: "relative" }}>
-        <Toolbar>
-          <IconButton
-            edge="start"
-            color="inherit"
-            onClick={onClose}
-            aria-label="close"
-          >
-            <CloseIcon />
-          </IconButton>
-          <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
-            Ajout d'une Remorque
-          </Typography>
-          <Button autoFocus color="inherit" onClick={handleSubmit}>
-            Save
-          </Button>
-        </Toolbar>
-      </AppBar>
+    const handleInputChange = (e) => {
+      const { name, value } = e.target;
+      setRemorqueData({ ...remorqueData, [name]: value });
+    };
 
-      <Box sx={{ p: 3 }}>
-        <TextField
-          fullWidth
-          label="Type de Remorque"
-          name="typeRemorque"
-          value={remorqueData.typeRemorque}
-          onChange={handleInputChange}
-          margin="normal"
-        />
-        <TextField
-          fullWidth
-          label="Poids Max"
-          name="poidsMax"
-          value={remorqueData.poidsMax}
-          onChange={handleInputChange}
-          margin="normal"
-        />
-        <TextField
-          fullWidth
-          label="Consommation"
-          name="consommation"
-          value={remorqueData.consommation}
-          onChange={handleInputChange}
-          margin="normal"
-        />
+    const handleSubmit = () => {
+      console.log("Remorque Data:", remorqueData);
+      onClose();
+    };
 
-        <Box sx={{ mt: 2 }}>
-          <Button
-            variant="contained"
-            onClick={() => setOpenCarburant(true)}
-            sx={{ mr: 2 }}
-          >
-            Carburant
-          </Button>
-          <Button
-            variant="contained"
-            onClick={() => setOpenAssurance(true)}
-            sx={{ mr: 2 }}
-          >
-            Assurance
-          </Button>
-          <Button
-            variant="contained"
-            onClick={() => setOpenEntretien(true)}
-            sx={{ mr: 2 }}
-          >
-            Entretien
-          </Button>
-          <Button
-            variant="contained"
-            onClick={() => setOpenKilometrage(true)}
-            sx={{ mr: 2 }}
-          >
-            Kilométrage
-          </Button>
+    return (
+      <Dialog
+        fullScreen
+        open={vopen}
+        onClose={onClose}
+        TransitionComponent={Transition}
+      >
+        <AppBar sx={{ position: "relative" }}>
+          <Toolbar>
+            <IconButton
+              edge="start"
+              color="inherit"
+              onClick={onClose}
+              aria-label="close"
+            >
+              <CloseIcon />
+            </IconButton>
+            <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+              Ajout d'une Remorque
+            </Typography>
+            <Button autoFocus color="inherit" onClick={handleSubmit}>
+              Save
+            </Button>
+          </Toolbar>
+        </AppBar>
+
+        <Box sx={{ p: 3 }}>
+          <TextField
+            fullWidth
+            label="Type de Remorque"
+            name="typeRemorque"
+            value={remorqueData.typeRemorque}
+            onChange={handleInputChange}
+            margin="normal"
+          />
+          <TextField
+            fullWidth
+            label="Poids Max"
+            name="poidsMax"
+            value={remorqueData.poidsMax}
+            onChange={handleInputChange}
+            margin="normal"
+          />
+          <TextField
+            fullWidth
+            label="Consommation"
+            name="consommation"
+            value={remorqueData.consommation}
+            onChange={handleInputChange}
+            margin="normal"
+          />
+
+          <Box sx={{ mt: 2 }}>
+            <Button
+              variant="contained"
+              onClick={() => setOpenCarburant(true)}
+              sx={{ mr: 2 }}
+            >
+              Carburant
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => setOpenAssurance(true)}
+              sx={{ mr: 2 }}
+            >
+              Assurance
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => setOpenEntretien(true)}
+              sx={{ mr: 2 }}
+            >
+              Entretien
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => setOpenKilometrage(true)}
+              sx={{ mr: 2 }}
+            >
+              Kilométrage
+            </Button>
+          </Box>
         </Box>
-      </Box>
 
-      {/* Sub-dialogs */}
-      <CarburantDialog
-        open={openCarburant}
-        onClose={() => setOpenCarburant(false)}
-      />
-      <AssuranceDialog
-        open={openAssurance}
-        onClose={() => setOpenAssurance(false)}
-      />
-      <EntretienDialog
-        open={openEntretien}
-        onClose={() => setOpenEntretien(false)}
-      />
-      <KilometrageDialog
-        open={openKilometrage}
-        onClose={() => setOpenKilometrage(false)}
-      />
-    </Dialog>
-  );
-}
+        {/* Sub-dialogs */}
+        <CarburantDialog
+          open={openCarburant}
+          onClose={() => setOpenCarburant(false)}
+        />
+        <AssuranceDialog
+          open={openAssurance}
+          onClose={() => setOpenAssurance(false)}
+        />
+        <EntretienDialog
+          open={openEntretien}
+          onClose={() => setOpenEntretien(false)}
+        />
+        <KilometrageDialog
+          open={openKilometrage}
+          onClose={() => setOpenKilometrage(false)}
+        />
+      </Dialog>
+    );
+  }

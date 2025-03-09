@@ -1,36 +1,164 @@
-import React from 'react';
-import { Stack } from "@mui/material";
-import { Box, styled } from "@mui/material";
-import Breadcrumb from "../../components/Breadcrumb";
-import FormulaireChaufeur from "../../components/form/ChauffeurForm";
-import AppTable from "../../components/tables/AppTable";
+
+import React, { useState, useEffect } from "react";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import { DataGrid, GridToolbarContainer, GridToolbarExport } from "@mui/x-data-grid";
+import ChauffeurDialog from "../../components/dialog/partenaire/chauffeur/ChauffeurDialog";
+import chauffeurService from "../../service/partenaire/chaufeurService";
+import VoirChauffeurDialog from "../../components/dialog/partenaire/chauffeur/VoirChauffeurDialog"; // Nouveau dialogue pour voir les détails
+import ModifierChauffeurDialog from "../../components/dialog/partenaire/chauffeur/ModifierChauffeurDialog..jsx"; // Nouveau dialogue pour modifier les détails
+const columns = (handleDelete, handleVoir,handleModifier) => [
+  { field: "idChauffeur", headerName: "ID", width: 90 },
+  { field: "nom", headerName: "Nom", flex: 1 },
+  { field: "prenom", headerName: "Prénom", flex: 1 },
+  { field: "CNI", headerName: "CNI", flex: 1 },
+  { field: "email", headerName: "Email", flex: 1 },
+  { field: "telephone", headerName: "Téléphone", flex: 1 },
+  { field: "cnss", headerName: "CNSS", flex: 1 },
+  { field: "dateRecrutement", headerName: "Date de Recrutement", flex: 1 },
+  { field: "disponibilite", headerName: "Disponibilité", flex: 1 },
+  { field: "adresse", headerName: "Adresse", flex: 1 },
+  {
+    field: "actions",
+    headerName: "Actions",
+    width: 250,
+    renderCell: (params) => (
+      <strong>
+        <Button
+          variant="contained"
+          color="primary"
+          size="small"
+          onClick={() => handleVoir(params.row)}
+          style={{ marginRight: 8 }}
+        >
+          Voir
+        </Button>
+        <Button
+          variant="contained"
+          color="warning"
+          size="small"
+          onClick={() => handleModifier(params.row)}
+          style={{ marginRight: 8 }}
+        >
+          Modifier
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          size="small"
+          onClick={() => handleDelete(params.row.idChauffeur)}
+          style={{ marginRight: 8 }}
+        >
+          Supprimer
+        </Button>
+      </strong>
+    ),
+  },
+];
 
 
+const rows = [
+  {
+    idChauffeur: 1,
+    nom: "Dupont",
+    prenom: "Jean",
+    CNI: "123456789",
+    email: "jean.dupont@example.com",
+    telephone: "0102030405",
+    cnss: "123456",
+    dateRecrutement: "2022-01-01",
+    disponibilite: "Disponible",
+  },
+  {
+    idChauffeur: 2,
+    nom: "Martin",
+    prenom: "Pierre",
+    CNI: "987654321",
+    email: "pierre.martin@example.com",
+    telephone: "0607080910",
+    cnss: "789101",
+    dateRecrutement: "2021-05-23",
+    disponibilite: "Indisponible",
+  },
+  // Ajoutez d'autres chauffeurs ici pour tester
+];
+
+function CustomToolbar() {
+  return (
+    <GridToolbarContainer>
+      <GridToolbarExport />
+    </GridToolbarContainer>
+  );
+}
 
 export default function Chauffeur() {
-  const Container = styled("div")(({ theme }) => ({
-    margin: "30px",
-    [theme.breakpoints.down("sm")]: { margin: "16px" },
-    "& .breadcrumb": {
-      marginBottom: "30px",
-      [theme.breakpoints.down("sm")]: { marginBottom: "16px" }
-    }
-  }));
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [voirDialogOpen, setVoirDialogOpen] = useState(false);
+  const [selectedChauffeur, setSelectedChauffeur] = useState(null);
+  const [modifierDialogOpen, setModifierDialogOpen] = useState(false);
+
+  const [rows1, setRows1] = useState([]);
+
+  useEffect(() => {
+    fetchChauffeurs();
+  }, []);
+
+  const fetchChauffeurs = () => {
+    chauffeurService.getAll()
+      .then((response) => setRows(response.data))
+      .catch((error) => console.error("Erreur:", error));
+  };
+
+  const handleDelete = (id) => {
+    chauffeurService.delete(id)
+      .then(() => {
+        setRows(rows.filter((row) => row.idChauffeur !== id));
+      })
+      .catch((error) => console.error("Erreur suppression:", error));
+  };
+
+  const handleVoir = (chauffeur) => {
+    setSelectedChauffeur(chauffeur);
+    setVoirDialogOpen(true);
+  };
+  const handleModifier = (chauffeur) => {
+    setSelectedChauffeur(chauffeur);
+    setModifierDialogOpen(true);
+  };
+
+  const handleOpenDialog = () => setDialogOpen(true);
+  const handleCloseDialog = () => setDialogOpen(false);
+
   return (
     <div>
-      
-      <Container>
-        <Box className="breadcrumb">
-          <Breadcrumb routeSegments={[{ name: "Material", path: "/material" }, { name: "Form" }]} />
-        </Box> 
-        <h2>Gestion des  de Chauffeur</h2>
+      <h1>Gestion des Chauffeurs :</h1>
+      <Box sx={{ height: 500, width: "100%" }}>
+        <Button variant="contained" onClick={() => setDialogOpen(true)} sx={{ mb: 2 }}>
+          Ajouter un Chauffeur
+        </Button>
 
-        <Stack spacing={3}>
-          <FormulaireChaufeur />
-        < AppTable />  
-        </Stack>
-    </Container>
+        {dialogOpen && <ChauffeurDialog open={dialogOpen} onClose={() => setDialogOpen(false)} />}
+        {voirDialogOpen && <VoirChauffeurDialog open={voirDialogOpen} onClose={() => setVoirDialogOpen(false)} chauffeur={selectedChauffeur} />}
+        {modifierDialogOpen && <ModifierChauffeurDialog open={modifierDialogOpen} onClose={() => setModifierDialogOpen(false)} chauffeur={selectedChauffeur} onUpdate={fetchChauffeurs} />}
+
+        <DataGrid
+          rows={rows}
+          columns={columns(handleDelete, handleVoir, handleModifier)}
+          getRowId={(row) => row.idChauffeur}
+          initialState={{
+            pagination: { paginationModel: { pageSize: 5 } },
+          }}
+          pageSizeOptions={[5, 10, 20]}
+          checkboxSelection
+          disableRowSelectionOnClick
+          slots={{ toolbar: CustomToolbar }}
+          sx={{
+            "@media print": {
+              ".MuiDataGrid-toolbarContainer": { display: "none" },
+            },
+          }}
+        />
+      </Box>
     </div>
-    
   );
 }

@@ -1,37 +1,159 @@
-import * as React from "react";
-import PropTypes from "prop-types";
-import Box from "@mui/material/Box";
-import PeopleIcon from "@mui/icons-material/People";
-import PersonIcon from "@mui/icons-material/Person";
-import { BsTruckFlatbed } from "react-icons/bs";
-import { createTheme } from "@mui/material/styles";
-import DescriptionIcon from "@mui/icons-material/Description";
-import Diversity3Icon from "@mui/icons-material/Diversity3";
-import HomeIcon from "@mui/icons-material/Home";
-import { GoContainer } from "react-icons/go";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
-import { AppProvider } from "@toolpad/core/AppProvider";
-import { DashboardLayout } from "@toolpad/core/DashboardLayout";
-import { useDemoRouter } from "@toolpad/core/internal";
-import Home from "../pages/Home";
-import Partenaire from "../pages/partenaire/Partenaire";
-import Morale from "../pages/partenaire/Morale";
-import Physique from "../pages/partenaire/Physique";
-import Client from "../pages/partenaire/Client";
-import Fournisseur from "../pages//partenaire/Fournisseur";
-import Chauffeur from "../pages/Partenaire/Chauffeur";
-import Camion from "../pages/Camion/Camion";
-import Cabine from "../pages/camion/Cabine";
-import Remorque from "../pages/camion/Remorque";
+// import React from "react";
+// import { Outlet, useLocation, useNavigate } from "react-router-dom";
+// import * as MuiMaterial from "@mui/material";
+// import * as MuiIcons from "@mui/icons-material";
+// import { BsTruckFlatbed } from "react-icons/bs";
+// import { GoContainer } from "react-icons/go";
+// import { AppProvider } from "@toolpad/core/AppProvider";
+// import { DashboardLayout } from "@toolpad/core/DashboardLayout";
+// import { createTheme } from "@mui/material/styles";
+// import allRoutes from "../routes/AllRoutes";
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#fff", // Change this to your desired primary color
-    },
-  },
+// const theme = createTheme({
+//   palette: {
+//     primary: {
+//       main: "#fff",
+//     },
+//   },
+//   breakpoints: {
+//     values: {
+//       xs: 0,
+//       sm: 600,
+//       md: 600,
+//       lg: 1200,
+//       xl: 1536,
+//     },
+//   },
+// });
+
+// const NAVIGATION = [
+//   {
+//     kind: "header",
+//     title: "Main items",
+//   },
+//   {
+//     segment: "home",
+//     title: "Home",
+//     icon: <MuiIcons.Home />,
+//     pattern: allRoutes.home,
+//     kind: "page",
+//   },
+//   {
+//     segment: "partenaire",
+//     title: "Partenaire",
+//     icon: <MuiIcons.Diversity3 />,
+//     pattern: allRoutes.partenaire.base,
+//     kind: "page",
+//     children: [
+//       {
+//         segment: "morale",
+//         title: "Morale",
+//         icon: <MuiIcons.People />,
+//         pattern: allRoutes.partenaire.morale.base,
+//         kind: "page",
+//       },
+//       {
+//         segment: "physique",
+//         title: "Physique",
+//         icon: <MuiIcons.Person />,
+//         pattern: allRoutes.partenaire.physique.base,
+//         kind: "page",
+//       },
+//       {
+//         segment: "chauffeur",
+//         title: "Chauffeur",
+//         icon: <MuiIcons.Person />,
+//         pattern: allRoutes.partenaire.physique.chauffeur,
+//         kind: "page",
+//       },
+//     ],
+//   },
+//   {
+//     segment: "camion",
+//     title: "Camion",
+//     icon: <MuiIcons.LocalShipping />,
+//     pattern: allRoutes.camion.base,
+//     kind: "page",
+//     children: [
+//       {
+//         segment: "cabine",
+//         title: "Cabine",
+//         icon: <BsTruckFlatbed />,
+//         pattern: allRoutes.camion.cabine,
+//         kind: "page",
+//       },
+//       {
+//         segment: "remorque",
+//         title: "Remorque",
+//         icon: <GoContainer />,
+//         pattern: allRoutes.camion.remorque,
+//         kind: "page",
+//       },
+//     ],
+//   },
+// ];
+
+// function Layout() {
+//   const location = useLocation();
+//   const navigate = useNavigate();
+
+//   const enhancedNavigation = React.useMemo(() => 
+//     NAVIGATION.map((item) => ({
+//       ...item,
+//       // Ajoutez une propriété personnalisée pour la navigation
+//       navigate: () => {
+//         if (item.pattern) {
+//           navigate(item.pattern, { 
+//             preventScrollReset: true 
+//           });
+//         }
+//       }
+//     })), 
+//     [navigate]
+//   );
+
+//   return (
+//     <AppProvider
+//       navigation={enhancedNavigation}
+//       onNavigate={(item) => {
+//         // Interceptez la navigation et utilisez notre méthode personnalisée
+//         const navItem = enhancedNavigation.find(n => n.segment === item.segment);
+//         if (navItem && navItem.navigate) {
+//           navItem.navigate();
+//           return false; // Empêche la navigation par défaut
+//         }
+//         return true;
+//       }}
+//       branding={{
+//         logo: <img src="/src/assets/0.png" alt="Logo" />,
+//         title: "IZORAI",
+//         homeUrl: allRoutes.home,
+//         sidebarExpandedWidth: "250px",
+//       }}
+//       theme={theme}
+//     >
+//       <DashboardLayout sidebarExpandedWidth="250px">
+//         <Outlet />
+//       </DashboardLayout>
+//     </AppProvider>
+//   );
+// }
+
+// export default Layout;
+
+
+import * as React from 'react';
+import { createTheme } from '@mui/material/styles';
+import { AppProvider } from '@toolpad/core';
+import { DashboardLayout } from '@toolpad/core/DashboardLayout';
+import { Outlet } from 'react-router-dom';
+import FolderIcon from '@mui/icons-material/Folder';
+import DescriptionIcon from '@mui/icons-material/Description';
+
+// Theme Setup
+const demoTheme = createTheme({
   cssVariables: {
-    colorSchemeSelector: "data-toolpad-color-scheme",
+    colorSchemeSelector: 'data-toolpad-color-scheme',
   },
   colorSchemes: { light: true, dark: true },
   breakpoints: {
@@ -45,187 +167,73 @@ const theme = createTheme({
   },
 });
 
+// Navigation Items
 const NAVIGATION = [
   {
-    kind: "header",
-    title: "Main items",
+    kind: 'header',
+    title: 'Main items',
   },
   {
-    segment: "home",
-    title: "Home",
-    icon: <HomeIcon />,
-    pattern: "/home",
-    kind: "page",
+    segment: 'home',
+    title: 'Home',
+    icon: <FolderIcon />,
+    path: '/',
   },
   {
-    segment: "partenaire",
-    title: "Partenaire",
-    icon: <Diversity3Icon />,
-    pattern: "/partenaire",
-    kind: "page",
+    segment: 'partenaire',
+    title: 'Partenaire',
+    icon: <FolderIcon />,
+    path: '/partenaire',
     children: [
       {
-        segment: "morale",
-        title: "Morale",
-        icon: <PeopleIcon />,
-        pattern: "/partenaire/morale",
-        kind: "page",
-        children: [
-          {
-            segment: "client",
-            title: "Client",
-            icon: <PersonIcon />,
-            pattern: "/partenaire/physique/client",
-            kind: "page",
-          },
-          {
-            segment: "fournisseur",
-            title: "Fournisseur",
-            icon: <PersonIcon />,
-            pattern: "/partenaire/physique/fournisseur",
-            kind: "page",
-          },
-        ],
+        segment: 'morale',
+        title: 'Morale',
+        icon: <DescriptionIcon />,
+        path: '/partenaire/morale',
+        // children: [
+        //   { segment: 'client', title: 'Client', icon: <DescriptionIcon />, path: '/partenaire/morale/client' },
+        //   { segment: 'fournisseur', title: 'Fournisseur', icon: <DescriptionIcon />, path: '/partenaire/morale/fournisseur' },
+        // ],
       },
       {
-        segment: "physique",
-        title: "Physique",
-        icon: <PeopleIcon />,
-        pattern: "/partenaire/physique",
-        kind: "page",
-        children: [
-          {
-            segment: "chauffeur",
-            title: "Chauffeur",
-            icon: <PersonIcon />,
-            pattern: "/partenaire/physique/chauffeur",
-            kind: "page",
-          },
-          {
-            segment: "client",
-            title: "Client",
-            icon: <PersonIcon />,
-            pattern: "/partenaire/physique/client",
-            kind: "page",
-          },
-          {
-            segment: "fournisseur",
-            title: "Fournisseur",
-            icon: <PersonIcon />,
-            pattern: "/partenaire/physique/fournisseur",
-            kind: "page",
-          },
-        ],
+        segment: 'physique',
+        title: 'Physique',
+        icon: <DescriptionIcon />,
+        path: '/partenaire/physique',
+         
+   
       },
+      { segment: 'chauffeur', 
+        title: 'Chauffeur',
+        icon: <DescriptionIcon />, 
+      },
+      {
+        segment: 'typePartenaire',
+        title: 'Type de Partenaire',
+        icon: <DescriptionIcon />,
+      }
     ],
   },
   {
-    segment: "camion",
-    title: "Camion",
-    icon: <LocalShippingIcon />,
-    pattern: "/camion",
-    kind: "page",
+    segment: 'camion',
+    title: 'Camion',
+    icon: <FolderIcon />,
+    path: '/camion',
     children: [
-      {
-        segment: "cabine",
-        title: "Cabine",
-        icon: <BsTruckFlatbed />,
-        pattern: "/camion/cabine",
-        kind: "page",
-      },
-      {
-        segment: "remorque",
-        title: "Remorque",
-        icon: <GoContainer />,
-        pattern: "/camion/remorque",
-        kind: "page",
-      },
+      { segment: 'cabine', title: 'Cabine', icon: <DescriptionIcon />, path: '/camion/cabine' },
+      { segment: 'remorque', title: 'Remorque', icon: <DescriptionIcon />, path: '/camion/remorque' },
     ],
   },
 ];
 
-function DemoPageContent({ pathname }) {
-  const renderPage = () => {
-    console.log("pathname : " + pathname);
-    switch (pathname) {
-      case "/home":
-        return <Home />;
-      case "/partenaire":
-        return <Partenaire />;
-      case "/partenaire/morale":
-        return <Morale />;
-      case "/partenaire/morale/client":
-        return <Client />;
-      case "/partenaire/morale/fournisseur":
-        return <Fournisseur />;
-      case "/partenaire/physique":
-        return <Physique />;
-      case "/partenaire/physique/chauffeur":
-        return <Chauffeur />;
-      case "/partenaire/physique/client":
-        return <Client />;
-      case "/partenaire/physique/fournisseur":
-        return <Fournisseur />;
-      case "/camion":
-        return <Camion />;
-      case "/camion/cabine":
-        return <Cabine />;
-      case "/camion/remorque":
-        return <Remorque />;
-      default:
-        return <Home />;
-    }
-  };
+function Layout() {
   return (
-    <Box
-      sx={{
-        py: 4,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        textAlign: "center",
-      }}
-    >
-      {renderPage()}
-    </Box>
-  );
-}
-
-DemoPageContent.propTypes = {
-  pathname: PropTypes.string.isRequired,
-};
-
-function Layout(props) {
-  const { window } = props;
-  const router = useDemoRouter(""); // hna 7ydt /home kant katdina par defaut l home mor makanbrko 3la partenaire
-  const demoWindow = window !== undefined ? window() : undefined;
-
-  return (
-    <AppProvider
-      navigation={NAVIGATION.map((item) => ({
-        ...item,
-        onClick: () => handleNavigation(item.pattern), // Add onClick handler
-      }))}
-      branding={{
-        logo: <img src="src/assets/0.png" alt="MUI logo" />,
-        title: "IZORAI",
-        color: "primary",
-        homeUrl: "/toolpad/core/introduction",
-        sidebarExpandedWidth: "250px",
-      }}
-      router={router}
-      theme={theme}
-      window={demoWindow}
-    >
-      <DashboardLayout sidebarExpandedWidth="250px">
-        <DemoPageContent pathname={router.pathname} />
+    <AppProvider navigation={NAVIGATION} theme={demoTheme} window={window}>
+      <DashboardLayout>
+        <Outlet />
       </DashboardLayout>
     </AppProvider>
   );
 }
-
-Layout.propTypes = {
-  window: PropTypes.func,
-};
 
 export default Layout;
