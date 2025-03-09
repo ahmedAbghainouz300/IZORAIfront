@@ -1,8 +1,14 @@
 import React, { useState } from "react";
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button } from "@mui/material";
 import moraleService from "../../../service/partenaire/moraleService";
+import AdressDialog from "./AdressDialog";
+
+
+
+
 
 export default function MoraleDialog({ open, onClose }) {
+  const [openAdress, setOpenAdress] = useState(false);  
   const [nom, setNom] = useState("");
   const [ice, setIce] = useState("");
   const [numeroRC, setNumeroRC] = useState("");
@@ -73,7 +79,11 @@ export default function MoraleDialog({ open, onClose }) {
         <Button onClick={handleSubmit} color="primary">
           Ajouter
         </Button>
+        <Button  onClick={() => setOpenAdress(true)}>
+          Ajouter une Adresse
+        </Button>
       </DialogActions>
+      <AdressDialog open={openAdress} onClose={() => setOpenAdress(false)} />
     </Dialog>
   );
 }
