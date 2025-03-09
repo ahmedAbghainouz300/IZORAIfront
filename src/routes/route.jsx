@@ -9,7 +9,6 @@ import Chauffeur from "../pages/partenaire/Chauffeur";
 import Camion from "../pages/camion/Camion";
 import Cabine from "../pages/camion/Cabine";
 import Remorque from "../pages/camion/Remorque";
-import Layout from "../components/layout";
 import Login from "../components/login";
 import allRoutes from "./AllRoutes";
 import TypePartenaire from "../pages/partenaire/typePartenaire";

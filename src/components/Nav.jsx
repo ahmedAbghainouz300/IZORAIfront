@@ -10,6 +10,9 @@ import Diversity3Icon from "@mui/icons-material/Diversity3";
 import { GoContainer } from "react-icons/go";
 import HomeIcon from "@mui/icons-material/Home";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import AllRoutes from "../routes/AllRoutes";
+import TypePartenaire from './../pages/partenaire/typePartenaire';
+import Morale from './../pages/partenaire/Morale';
 
 const Nav = () => {
   const [openSections, setOpenSections] = useState({
@@ -54,71 +57,31 @@ const Nav = () => {
           </div>
           {openSections.partenaire && (
             <ul>
-              <li>
-                <div
-                  className={`nav-toggle ${activeSection === "morale" ? "active" : ""}`}
-                  onClick={() => toggleSection("morale")}
-                >
-                  <Diversity3Icon />
+              
+              <li className="nav-item">
+                <Link to={AllRoutes.partenaire.morale.base}>
+                  <PersonIcon />
                   <span>Morale</span>
-                  {openSections.morale ? (
-                    <ExpandLessIcon />
-                  ) : (
-                    <ExpandMoreIcon />
-                  )}
-                </div>
-                {openSections.morale && (
-                  <ul>
-                    <li className="nav-item">
-                      <Link to="/partenaire/morale/client">
-                        <PersonIcon />
-                        <span>Client</span>
-                      </Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link to="/partenaire/morale/fournisseur">
-                        <PersonIcon />
-                        <span>Fournisseur</span>
-                      </Link>
-                    </li>
-                  </ul>
-                )}
+                </Link>
               </li>
-              <li>
-                <div
-                  className={`nav-toggle ${activeSection === "physique" ? "active" : ""}`}
-                  onClick={() => toggleSection("physique")}
-                >
-                  <Diversity3Icon />
-                  <span>Physique</span>
-                  {openSections.physique ? (
-                    <ExpandLessIcon />
-                  ) : (
-                    <ExpandMoreIcon />
-                  )}
-                </div>
-                {openSections.physique && (
-                  <ul>
-                    <li className="nav-item">
-                      <Link to="/partenaire/physique/chauffeur">
+              
+              <li className="nav-item">
+                  <Link to={AllRoutes.partenaire.physique.base}>
+                     <PersonIcon />
+                      <span>Physique</span>
+                  </Link>
+              </li>
+              <li className="nav-item">
+                      <Link to={AllRoutes.partenaire.typePartenaire.base}>
                         <PersonIcon />
-                        <span>Chauffeur</span>
+                        <span>TypePartenaire</span>
                       </Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link to="/partenaire/physique/client">
-                        <PersonIcon />
-                        <span>Client</span>
-                      </Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link to="/partenaire/physique/fournisseur">
-                        <PersonIcon />
-                        <span>Fournisseur</span>
-                      </Link>
-                    </li>
-                  </ul>
-                )}
+              </li>
+              <li className="nav-item">
+                  <Link to={AllRoutes.partenaire.chauffeur}>
+                    <PersonIcon />
+                    <span>Chauffeur</span>
+                  </Link>
               </li>
             </ul>
           )}
