@@ -23,15 +23,20 @@ function AppRoutes() {
 
         {/* Partenaire Section */}
         <Route path={allRoutes.partenaire.base} element={<Partenaire />}>
-          <Route path={allRoutes.partenaire.morale.base} element={<Morale />}>
-          </Route>
-          <Route path={allRoutes.partenaire.physique.base} element={<Physique />}>
-          </Route>
-          <Route path={allRoutes.partenaire.typePartenaire.base} element={<TypePartenaire/>}/>
-
+          <Route
+            path={allRoutes.partenaire.morale.base}
+            element={<Morale />}
+          ></Route>
+          <Route
+            path={allRoutes.partenaire.physique.base}
+            element={<Physique />}
+          ></Route>
+          <Route
+            path={allRoutes.partenaire.typePartenaire.base}
+            element={<TypePartenaire />}
+          />
         </Route>
         <Route path="/partenaire/chauffeur" element={<Chauffeur />} />
-
 
         {/* Camion Section */}
         <Route path={allRoutes.camion.base} element={<Camion />}>

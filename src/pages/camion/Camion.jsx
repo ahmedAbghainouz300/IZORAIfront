@@ -5,7 +5,6 @@ export default function Camion() {
   return (
     <div>
       <Outlet />
-      <h1>hello</h1>
     </div>
   );
 }

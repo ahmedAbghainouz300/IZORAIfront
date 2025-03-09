@@ -23,6 +23,7 @@
     "ag-grid-community": "^33.1.1",
     "ag-grid-enterprise": "^33.1.1",
     "ag-grid-react": "^33.1.1",
+    "antd": "^5.24.3",
     "apex-grid": "^1.0.1",
     "axios": "^1.8.2",
     "jspdf": "^3.0.0",
