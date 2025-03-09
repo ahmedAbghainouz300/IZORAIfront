@@ -10,11 +10,11 @@ import Camion from "../pages/camion/Cabine";
 import Cabine from "../pages/camion/Cabine";
 import Remorque from "../pages/camion/Remorque";
 import Layout from "../components/layout";
-
-
+import Login from "../components/login";
 function AppRoutes() {
   return (
     <Routes>
+      <Route path="/login" element={<Login />}></Route>
       <Route path="/" element={<Layout />}>
         <Route index element={<Home />} />
         <Route path="home" element={<Home />} />
@@ -32,11 +32,8 @@ function AppRoutes() {
           </Route>
         </Route>
 
-        {/* Camion Section */}
-        <Route path="camion" element={<Camion />}>
-          <Route path="cabine" element={<Cabine />} />
-          <Route path="remorque" element={<Remorque />} />
-        </Route>
+        <Route path="cabine" element={<Cabine />} />
+        <Route path="remorque" element={<Remorque />} />
       </Route>
     </Routes>
   );
