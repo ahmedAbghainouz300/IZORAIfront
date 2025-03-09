@@ -1,12 +1,10 @@
-import React from 'react'
-import { Outlet } from 'react-router-dom'
-import AppTable from '../../components/tables/AppTable'
+import React from "react";
+import { Outlet } from "react-router-dom";
 
 export default function Partenaire() {
   return (
     <div>
       <Outlet />
     </div>
-    
-  )
+  );
 }

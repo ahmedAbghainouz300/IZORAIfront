@@ -1,0 +1,26 @@
+/* Layout container */
+.layout-container {
+    display: flex; /* Use Flexbox for layout */
+    height: 100vh; /* Full viewport height */
+  }
+  
+  /* Navigation (fixed on the left) */
+  .layout-container > nav {
+    width: 250px; /* Fixed width for the navigation */
+    background-color: #2c3e50; /* Background color for the nav */
+    color: #fff; /* Text color */
+    padding: 20px; /* Add some padding */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Optional: Add a shadow */
+    position: fixed; /* Fix the nav to the left */
+    height: 100vh; /* Full height */
+    overflow-y: auto; /* Allow scrolling if content overflows */
+  }
+  
+  /* Content container (takes remaining space) */
+  .content-container {
+    flex: 1; /* Take up remaining space */
+    margin-left: 250px; /* Offset by the width of the nav */
+    padding: 20px; /* Add some padding */
+    overflow-y: auto; /* Allow scrolling if content overflows */
+    background-color: #f5f5f5; 
+  }

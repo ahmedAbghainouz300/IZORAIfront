@@ -74,7 +74,7 @@ export default function Cabine() {
   return (
     <Box sx={{ height: 500, width: "100%" }}>
       <Button variant="contained" onClick={handleOpenDialog} sx={{ mb: 2 }}>
-        Add Cabine
+        Add
       </Button>
 
       {dialogOpen && (
