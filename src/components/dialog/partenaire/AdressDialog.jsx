@@ -8,7 +8,7 @@ import {
   Button,
 } from "@mui/material";
 
-export default function AdressDialog({ open, onClose }) {
+export default function AdressDialog({ open, onClose, onSave }) {
   const [adressData, setAdressData] = React.useState({
     rue: "",
     ville: "",
@@ -16,18 +16,26 @@ export default function AdressDialog({ open, onClose }) {
     pays: "",
   });
 
+  // Gérer les changements dans les champs du formulaire
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setAdressData({ ...adressData, [name]: value });
   };
 
+  // Enregistrer l'adresse et réinitialiser le formulaire
+  const handleSave = () => {
+    onSave(adressData); // Envoyer les données de l'adresse au parent
+    onClose(); // Fermer le dialogue
+    setAdressData({ rue: "", ville: "", codePostal: "", pays: "" }); // Réinitialiser le formulaire
+  };
+
+  // Valider et soumettre le formulaire
   const handleSubmit = () => {
     if (Object.values(adressData).some((val) => val.trim() === "")) {
       alert("Tous les champs doivent être remplis !");
       return;
     }
-    console.log("Adresse Data:", adressData);
-    onClose();
+    handleSave(); // Appeler handleSave pour enregistrer l'adresse
   };
 
   return (

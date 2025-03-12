@@ -57,7 +57,7 @@ const columns = (handleDelete, handleVoir,handleModifier) => [
 ];
 
 
-const rows = [
+const rows1 = [
   {
     idChauffeur: 1,
     nom: "Dupont",
@@ -97,7 +97,7 @@ export default function Chauffeur() {
   const [selectedChauffeur, setSelectedChauffeur] = useState(null);
   const [modifierDialogOpen, setModifierDialogOpen] = useState(false);
 
-  const [rows1, setRows1] = useState([]);
+  const [rows, setRows] = useState([]);
 
   useEffect(() => {
     fetchChauffeurs();

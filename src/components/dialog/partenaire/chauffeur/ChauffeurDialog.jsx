@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, Grid } from "@mui/material";
-import chauffeurService from "../../../../service/partenaire/chaufeurService"; // Service pour envoyer les données au backend
+import chauffeurService from "../../../../service/partenaire/chaufeurService"; // Assurez-vous que le chemin est correct
 import AdressDialog from "../AdressDialog";
-export default function ChauffeurDialog({ open, onClose, chauffeur }) {
-    const [openAdress, setOpenAdress] = useState(false);
-  
+
+export default function ChauffeurDialog({ open, onClose }) {
+  const [openAdress, setOpenAdress] = useState(false);
   const [formData, setFormData] = useState({
-    idChauffeur: "",
     nom: "",
     prenom: "",
     CNI: "",
@@ -15,23 +14,9 @@ export default function ChauffeurDialog({ open, onClose, chauffeur }) {
     cnss: "",
     dateRecrutement: "",
     disponibilite: "",
-  });
+    adresses: [], // Tableau pour stocker les adresses
 
-  useEffect(() => {
-    if (chauffeur) {
-      setFormData({
-        idChauffeur: chauffeur.idChauffeur || "",
-        nom: chauffeur.nom || "",
-        prenom: chauffeur.prenom || "",
-        CNI: chauffeur.CNI || "",
-        email: chauffeur.email || "",
-        telephone: chauffeur.telephone || "",
-        cnss: chauffeur.cnss || "",
-        dateRecrutement: chauffeur.dateRecrutement || "",
-        disponibilite: chauffeur.disponibilite || "",
-      });
-    }
-  }, [chauffeur]);
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,33 +25,37 @@ export default function ChauffeurDialog({ open, onClose, chauffeur }) {
       [name]: value,
     }));
   };
+  const handleAddAdress = (newAdresse) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      adresses: [...prevData.adresses, newAdresse], // Ajouter la nouvelle adresse
+    }));
+  };
 
   const handleSubmit = () => {
-    // Vous pouvez créer ou mettre à jour un chauffeur en fonction de l'ID
-    if (formData.idChauffeur) {
-      // Update existing chauffeur
-      chauffeurService.update(formData.idChauffeur, formData)
-        .then(() => {
-          onClose();
-        })
-        .catch((error) => {
-          console.error("Erreur lors de la mise à jour du chauffeur:", error);
+    // Créer un nouveau chauffeur
+    chauffeurService.create(formData)
+      .then(() => {
+        onClose(); // Fermer le dialogue après la création
+        setFormData({ // Réinitialiser le formulaire
+          nom: "",
+          prenom: "",
+          CNI: "",
+          email: "",
+          telephone: "",
+          cnss: "",
+          dateRecrutement: "",
+          disponibilite: "",
         });
-    } else {
-      // Create new chauffeur
-      chauffeurService.create(formData)
-        .then(() => {
-          onClose();
-        })
-        .catch((error) => {
-          console.error("Erreur lors de la création du chauffeur:", error);
-        });
-    }
+      })
+      .catch((error) => {
+        console.error("Erreur lors de la création du chauffeur:", error);
+      });
   };
 
   return (
     <Dialog open={open} onClose={onClose}>
-      <DialogTitle>{chauffeur ? "Modifier le Chauffeur" : "Ajouter un Chauffeur"}</DialogTitle>
+      <DialogTitle>Ajouter un Chauffeur</DialogTitle>
       <DialogContent>
         <Grid container spacing={2}>
           <Grid item xs={6}>
@@ -146,21 +135,33 @@ export default function ChauffeurDialog({ open, onClose, chauffeur }) {
             />
           </Grid>
         </Grid>
+
+        
+        {/* Section pour afficher les adresses */}
+        <div style={{ marginTop: "20px" }}>
+          <h4>Adresses</h4>
+          {formData.adresses.map((adresse, index) => (
+            <div key={index} style={{ marginBottom: "10px" }}>
+              <p>
+                <strong>Adresse {index + 1}:</strong> {adresse.rue}, {adresse.ville}, {adresse.codePostal}, {adresse.pays}
+              </p>
+            </div>
+          ))}
+        </div>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="secondary">
           Annuler
         </Button>
         <Button onClick={handleSubmit} color="primary">
-          {chauffeur ? "Sauvegarder" : "Ajouter"}
+          Ajouter
         </Button>
-        <Button  color="primary" onClick={() => setOpenAdress(true)} sx={{ mr: 2 }}>
-                    Ajouter une Adresse
-                  </Button>
+        <Button color="primary" onClick={() => setOpenAdress(true)} sx={{ mr: 2 }}>
+          Ajouter une Adresse
+        </Button>
       </DialogActions>
 
-            <AdressDialog open={openAdress} onClose={() => setOpenAdress(false)} />
-      
+      <AdressDialog open={openAdress} onClose={() => setOpenAdress(false)} onSave={handleAddAdress} />
     </Dialog>
   );
 }
