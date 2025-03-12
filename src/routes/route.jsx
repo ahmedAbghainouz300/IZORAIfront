@@ -12,6 +12,10 @@ import Remorque from "../pages/camion/Remorque";
 import Login from "../components/login";
 import allRoutes from "./AllRoutes";
 import TypePartenaire from "../pages/partenaire/typePartenaire";
+import Document from "../pages/camion/Document/Document";
+import Assurance from "../pages/camion/Document/Assurance";
+import Entretient from "../pages/camion/Document/Entretient";
+import Carburant from "../pages/camion/Document/Carburant";
 
 function AppRoutes() {
   return (
@@ -42,6 +46,15 @@ function AppRoutes() {
         <Route path={allRoutes.camion.base} element={<Camion />}>
           <Route path={allRoutes.camion.cabine} element={<Cabine />} />
           <Route path={allRoutes.camion.remorque} element={<Remorque />} />
+        </Route>
+        <Route path={allRoutes.document.base} element={<Document />}>
+          <Route path={allRoutes.document.base} element={<Assurance />} />
+          <Route path={allRoutes.document.assurance} element={<Assurance />} />
+          <Route
+            path={allRoutes.document.entretient}
+            element={<Entretient />}
+          />
+          <Route path={allRoutes.document.carburant} element={<Carburant />} />
         </Route>
       </Route>
     </Routes>

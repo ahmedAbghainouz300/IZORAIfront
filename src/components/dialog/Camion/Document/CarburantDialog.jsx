@@ -8,7 +8,7 @@ import {
   Button,
 } from "@mui/material";
 
-export default function CarburantDialog({ open, onClose }) {
+export default function CarburantDialog({ vopen, onClose }) {
   const [carburantData, setCarburantData] = React.useState({
     dateRemplissage: "",
     quantiteLitres: "",
@@ -28,7 +28,7 @@ export default function CarburantDialog({ open, onClose }) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog open={vopen} onClose={onClose}>
       <DialogTitle>Ajouter Carburant</DialogTitle>
       <DialogContent>
         <TextField

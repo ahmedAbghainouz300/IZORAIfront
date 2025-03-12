@@ -1,0 +1,71 @@
+.buttons{
+    display: flex;
+    justify-content: space-evenly;
+    margin: 20px;
+}
+.blue-button {
+    all: unset;
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding: 0.6em 2em;
+    border: rgb(0, 79, 250) solid 0.15em;
+    border-radius: 0.25em;
+    color: whitesmoke;
+    font-size: 10pt;
+    font-weight: 600;
+    cursor: pointer;
+    overflow: hidden;
+    transition: border 300ms, color 300ms;
+    user-select: none;
+    background-color: #212121;
+    width: fit-content;
+    height: 20px;
+    align-items: center ;
+  }
+
+  .blue-button p {
+    z-index: 1;
+  }
+
+  .blue-button:hover {
+    color: whitesmoke;
+  }
+
+  .blue-button:active {
+    border-color: teal;
+  }
+
+  .blue-button::after, .blue-button::before {
+    content: "";
+    position: absolute;
+    width: 9em;
+    aspect-ratio: 1;
+    background: rgb(0, 79, 250);
+    opacity: 50%;
+    border-radius: 50%;
+    transition: transform 500ms, background 300ms;
+  }
+
+  .blue-button::before {
+    left: 0;
+    transform: translateX(-8em);
+  }
+
+  .blue-button::after {
+    right: 0;
+    transform: translateX(8em);
+  }
+
+  .blue-button:hover:before {
+    transform: translateX(-1em);
+  }
+
+  .blue-button:hover:after {
+    transform: translateX(1em);
+  }
+
+  .blue-button:active:before,
+  .blue-button:active:after {
+    background: teal;
+  }

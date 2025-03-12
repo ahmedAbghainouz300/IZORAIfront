@@ -13,17 +13,21 @@ const AllRoutes = {
       client: "/partenaire/physique/client",
       fournisseur: "/partenaire/physique/fournisseur",
     },
-    typePartenaire:{
+    typePartenaire: {
       base: "/partenaire/typePartenaire",
     },
     chauffeur: "/partenaire/chauffeur",
-
-    
   },
   camion: {
     base: "/camion",
     cabine: "/camion/cabine",
     remorque: "/camion/remorque",
+  },
+  document: {
+    base: "/document",
+    assurance: "/document/assurance",
+    entretient: "/document/entretient",
+    carburant: "/document/carburant",
   },
 };
 
