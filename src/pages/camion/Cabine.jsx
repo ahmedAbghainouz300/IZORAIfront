@@ -8,6 +8,11 @@ import {
 } from "@mui/x-data-grid";
 import CabineDialog from "../../components/dialog/Camion/CabineDialog";
 
+import "../../styles/cabine.css";
+import AssuranceDialog from "../../components/dialog/Camion/Document/AssuranceDialog";
+import EntretienDialog from "../../components/dialog/Camion/Document/EntretienDialog";
+import CarburantDialog from "../../components/dialog/Camion/Document/CarburantDialog";
+
 const columns = [
   { field: "id", headerName: "ID", width: 90 },
   {
@@ -61,24 +66,29 @@ function CustomToolbar() {
 }
 
 export default function Cabine() {
-  const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [cabineDialogOpen, setCabineDialogOpen] = React.useState(false);
 
-  const handleOpenDialog = () => {
-    setDialogOpen(true);
+  //cabine
+  const handleOpenCabineDialog = () => {
+    setCabineDialogOpen(true);
   };
-
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
+  const handleCloseCabineDialog = () => {
+    setCabineDialogOpen(false);
   };
 
   return (
     <Box sx={{ height: 500, width: "100%" }}>
-      <Button variant="contained" onClick={handleOpenDialog} sx={{ mb: 2 }}>
-        Add
-      </Button>
+      <div className="buttons">
+        <button className="blue-button" onClick={handleOpenCabineDialog}>
+          <p>Nouvelle Cabine</p>
+        </button>
+      </div>
 
-      {dialogOpen && (
-        <CabineDialog vopen={dialogOpen} onClose={handleCloseDialog} />
+      {cabineDialogOpen && (
+        <CabineDialog
+          vopen={cabineDialogOpen}
+          onClose={handleCloseCabineDialog}
+        />
       )}
 
       <DataGrid
@@ -95,6 +105,7 @@ export default function Cabine() {
         checkboxSelection
         disableRowSelectionOnClick
         slots={{ toolbar: CustomToolbar }}
+        style={{ border: "none", marginLeft: 30 }}
         sx={{
           "@media print": {
             ".MuiDataGrid-toolbarContainer": {

@@ -7,6 +7,7 @@ import {
   TeamOutlined,
   CarOutlined,
   UserOutlined,
+  FileOutlined,
 } from "@ant-design/icons";
 import { Button, Layout, Menu } from "antd";
 import allRoutes from "../routes/AllRoutes";
@@ -17,7 +18,7 @@ const NavComponent = (children) => {
   const navigate = useNavigate();
 
   return (
-    <Layout>
+    <Layout style={{ margin: "0px" }}>
       <Sider trigger={null} collapsible collapsed={collapsed}>
         <div className="demo-logo-vertical" />
         <Menu
@@ -66,6 +67,25 @@ const NavComponent = (children) => {
                 {
                   key: allRoutes.camion.remorque,
                   label: "Remorque",
+                },
+                {
+                  key: allRoutes.document.base,
+                  icon: <FileOutlined />,
+                  label: "Documents",
+                  children: [
+                    {
+                      key: allRoutes.document.assurance,
+                      label: "Assurance",
+                    },
+                    {
+                      key: allRoutes.document.entretient,
+                      label: "Entretient",
+                    },
+                    {
+                      key: allRoutes.document.carburant,
+                      label: "Carburant",
+                    },
+                  ],
                 },
               ],
             },

@@ -1,11 +1,17 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import {
   DataGrid,
   GridToolbarContainer,
   GridToolbarExport,
 } from "@mui/x-data-grid";
-import RemorqueDialog from "../../components/dialog/Camion/RemorqueDialog";
+import CabineDialog from "../../../components/dialog/Camion/CabineDialog";
+
+import "../../../styles/cabine.css";
+import AssuranceDialog from "../../../components/dialog/Camion/Document/AssuranceDialog";
+import EntretienDialog from "../../../components/dialog/Camion/Document/EntretienDialog";
+import CarburantDialog from "../../../components/dialog/Camion/Document/CarburantDialog";
 
 const columns = [
   { field: "id", headerName: "ID", width: 90 },
@@ -59,29 +65,28 @@ function CustomToolbar() {
   );
 }
 
-export default function Remorque() {
-  const [remorqueDialogOpen, setRemorqueDialogOpen] = React.useState(false);
+export default function Carburant() {
+  const [carburantDialogOpen, setCarburantDialogOpen] = React.useState(false);
 
-  const handleOpenRemorqueDialog = () => {
-    setRemorqueDialogOpen(true);
+  // Carburant
+  const handleOpenCarburantDialog = () => {
+    setCarburantDialogOpen(true);
   };
-
-  const handleCloseRemorqueDialog = () => {
-    setRemorqueDialogOpen(false);
+  const handleCloseCarburantDialog = () => {
+    setCarburantDialogOpen(false);
   };
 
   return (
     <Box sx={{ height: 500, width: "100%" }}>
       <div className="buttons">
-        <button className="blue-button" onClick={handleOpenRemorqueDialog}>
-          <p>Nouvelle Remorque</p>
+        <button className="blue-button" onClick={handleOpenCarburantDialog}>
+          <p>Nouveau Carburant</p>
         </button>
       </div>
-
-      {remorqueDialogOpen && (
-        <RemorqueDialog
-          vopen={remorqueDialogOpen}
-          onClose={handleCloseRemorqueDialog}
+      {carburantDialogOpen && (
+        <CarburantDialog
+          vopen={carburantDialogOpen}
+          onClose={handleCloseCarburantDialog}
         />
       )}
 
@@ -99,6 +104,7 @@ export default function Remorque() {
         checkboxSelection
         disableRowSelectionOnClick
         slots={{ toolbar: CustomToolbar }}
+        style={{ border: "none", marginLeft: 30 }}
         sx={{
           "@media print": {
             ".MuiDataGrid-toolbarContainer": {
