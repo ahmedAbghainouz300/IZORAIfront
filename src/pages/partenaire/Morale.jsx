@@ -7,36 +7,16 @@ import moraleService from "../../service/partenaire/moraleService"; // Import du
 
 // Colonnes pour le DataGrid
 const columns = [
-  { field: "idMorale", headerName: "ID", width: 90 },
-  {
-    field: "nom",
-    headerName: "Nom",
-    flex: 1,
-    editable: true,
+  { field: "idPartenaire", headerName: "ID", width: 90 },
+  { field: "nom", headerName: "Nom", flex: 1, editable: true,
   },
-  {
-    field: "ice",
-    headerName: "ICE",
-    flex: 1,
-    editable: true,
+  { field: "ice", headerName: "ICE", flex: 1, editable: true,
   },
-  {
-    field: "numeroRC",
-    headerName: "Numéro RC",
-    flex: 1,
-    editable: true,
+  { field: "numeroRC", headerName: "Numéro RC", flex: 1, editable: true,
   },
-  {
-    field: "abreviation",
-    headerName: "Abreviation",
-    flex: 1,
-    editable: true,
+  { field: "abreviation", headerName: "Abreviation", flex: 1, editable: true,
   },
-  {
-    field: "formeJuridique",
-    headerName: "Forme Juridique",
-    flex: 1,
-    editable: true,
+  { field: "formeJuridique", headerName: "Forme Juridique", flex: 1, editable: true,
   },
 ];
 
@@ -52,11 +32,11 @@ export default function Morale() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [rows, setRows] = useState([]);
 
-  // useEffect(() => {
-  //   moraleService.getAll()  // On récupère les données via le service
-  //     .then((response) => setRows(response.data))
-  //     .catch((error) => console.error("Erreur:", error));
-  // }, []);
+   useEffect(() => {
+     moraleService.getAll()  
+       .then((response) => setRows(response.data))
+       .catch((error) => console.error("Erreur:", error));
+    }, []);
 
   const handleOpenDialog = () => setDialogOpen(true);
   const handleCloseDialog = () => setDialogOpen(false);
@@ -75,7 +55,7 @@ export default function Morale() {
         <DataGrid
           rows={rows}
           columns={columns}
-          getRowId={(row) => row.idMorale} // Assure que l'ID est bien reconnu
+          getRowId={(row) => row.idPartenaire} // Assure que l'ID est bien reconnu
           initialState={{
             pagination: {
               paginationModel: {

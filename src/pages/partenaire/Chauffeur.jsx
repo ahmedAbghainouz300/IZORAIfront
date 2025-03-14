@@ -8,7 +8,7 @@ import chauffeurService from "../../service/partenaire/chaufeurService";
 import VoirChauffeurDialog from "../../components/dialog/partenaire/chauffeur/VoirChauffeurDialog"; // Nouveau dialogue pour voir les détails
 import ModifierChauffeurDialog from "../../components/dialog/partenaire/chauffeur/ModifierChauffeurDialog..jsx"; // Nouveau dialogue pour modifier les détails
 const columns = (handleDelete, handleVoir,handleModifier) => [
-  { field: "idChauffeur", headerName: "ID", width: 90 },
+  { field: "idPartenaire", headerName: "ID", width: 90 },
   { field: "nom", headerName: "Nom", flex: 1 },
   { field: "prenom", headerName: "Prénom", flex: 1 },
   { field: "CNI", headerName: "CNI", flex: 1 },
@@ -46,7 +46,7 @@ const columns = (handleDelete, handleVoir,handleModifier) => [
           variant="contained"
           color="secondary"
           size="small"
-          onClick={() => handleDelete(params.row.idChauffeur)}
+          onClick={() => handleDelete(params.row.idPartenaire)}
           style={{ marginRight: 8 }}
         >
           Supprimer
@@ -57,31 +57,31 @@ const columns = (handleDelete, handleVoir,handleModifier) => [
 ];
 
 
-const rows1 = [
-  {
-    idChauffeur: 1,
-    nom: "Dupont",
-    prenom: "Jean",
-    CNI: "123456789",
-    email: "jean.dupont@example.com",
-    telephone: "0102030405",
-    cnss: "123456",
-    dateRecrutement: "2022-01-01",
-    disponibilite: "Disponible",
-  },
-  {
-    idChauffeur: 2,
-    nom: "Martin",
-    prenom: "Pierre",
-    CNI: "987654321",
-    email: "pierre.martin@example.com",
-    telephone: "0607080910",
-    cnss: "789101",
-    dateRecrutement: "2021-05-23",
-    disponibilite: "Indisponible",
-  },
-  // Ajoutez d'autres chauffeurs ici pour tester
-];
+// const rows1 = [
+//   {
+//     idChauffeur: 1,
+//     nom: "Dupont",
+//     prenom: "Jean",
+//     CNI: "123456789",
+//     email: "jean.dupont@example.com",
+//     telephone: "0102030405",
+//     cnss: "123456",
+//     dateRecrutement: "2022-01-01",
+//     disponibilite: "Disponible",
+//   },
+//   {
+//     idChauffeur: 2,
+//     nom: "Martin",
+//     prenom: "Pierre",
+//     CNI: "987654321",
+//     email: "pierre.martin@example.com",
+//     telephone: "0607080910",
+//     cnss: "789101",
+//     dateRecrutement: "2021-05-23",
+//     disponibilite: "Indisponible",
+//   },
+//   // Ajoutez d'autres chauffeurs ici pour tester
+// ];
 
 function CustomToolbar() {
   return (
@@ -112,7 +112,7 @@ export default function Chauffeur() {
   const handleDelete = (id) => {
     chauffeurService.delete(id)
       .then(() => {
-        setRows(rows.filter((row) => row.idChauffeur !== id));
+        setRows(rows.filter((row) => row.idPartenaire !== id));
       })
       .catch((error) => console.error("Erreur suppression:", error));
   };
@@ -144,9 +144,9 @@ export default function Chauffeur() {
         <DataGrid
           rows={rows}
           columns={columns(handleDelete, handleVoir, handleModifier)}
-          getRowId={(row) => row.idChauffeur}
+          getRowId={(row) => row.idPartenaire}
           initialState={{
-            pagination: { paginationModel: { pageSize: 5 } },
+            pagination: { paginationModel: { pageSize: 4 } },
           }}
           pageSizeOptions={[5, 10, 20]}
           checkboxSelection

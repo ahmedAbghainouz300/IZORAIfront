@@ -7,13 +7,6 @@ import typePartenaireService from "../../service/partenaire/typePartenaireServic
 import VoirTypePartenaireDialog from "../../components/dialog/partenaire/typepartenaire/VoirTypePartenaireDialog.jsx"; // Créez le dialogue pour voir un type de partenaire
 import ModifierTypePartenaireDialog from "../../components/dialog/partenaire/typepartenaire/ModifierTypePartenaireDialog.jsx"; // Créez le dialogue pour modifier un type de partenaire
 
-const rows   = [
-  { idTypePartenaire: 1, libelle: "Partenaire A", definition: "Définition A", genre: "Genre A" },
-  { idTypePartenaire: 2, libelle: "Partenaire B", definition: "Définition B", genre: "Genre B" },
-  { idTypePartenaire: 3, libelle: "Partenaire C", definition: "Définition C", genre: "Genre C" },
-  { idTypePartenaire: 4, libelle: "Partenaire D", definition: "Définition D", genre: "Genre D" },
-  { idTypePartenaire: 5, libelle: "Partenaire E", definition: "Définition E", genre: "Genre E" },
-];
 
 const columns = (handleVoir, handleModifier, handleDelete) => [
   { field: "idTypePartenaire", headerName: "ID", width: 90 },
@@ -70,7 +63,7 @@ export default function TypePartenaire() {
   const [voirDialogOpen, setVoirDialogOpen] = useState(false);
   const [modifierDialogOpen, setModifierDialogOpen] = useState(false);
   const [selectedTypePartenaire, setSelectedTypePartenaire] = useState(null);
-  const [rows1, setRows] = useState([]);
+  const [rows, setRows] = useState([]);
 
   useEffect(() => {
     fetchTypePartenaires();

@@ -15,6 +15,10 @@ const typePartenaireService = {
   
   // Supprimer un type de partenaire par son ID
   delete: (id) => axiosClient.delete(`/typePartenaires/${id}`),
+
+  getAllByNoms: () =>axiosClient.get("/typePartenaires/noms"),
+  
+  getByNom : (nom) => axiosClient.get(`/typePartenaires/nom/${nom}`,nom)
 };
 
 export default typePartenaireService;

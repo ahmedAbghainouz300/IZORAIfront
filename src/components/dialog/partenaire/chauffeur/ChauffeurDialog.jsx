@@ -142,7 +142,7 @@ export default function ChauffeurDialog({ open, onClose }) {
           <h4>Adresses</h4>
           {formData.adresses.map((adresse, index) => (
             <div key={index} style={{ marginBottom: "10px" }}>
-              <p>
+              <p> 
                 <strong>Adresse {index + 1}:</strong> {adresse.rue}, {adresse.ville}, {adresse.codePostal}, {adresse.pays}
               </p>
             </div>
