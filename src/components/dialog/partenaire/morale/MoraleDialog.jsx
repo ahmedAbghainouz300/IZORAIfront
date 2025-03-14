@@ -2,9 +2,9 @@ import React, { useState,useEffect } from "react";
 import { Dialog,  InputLabel,
   Select,
   MenuItem, FormControl , DialogActions, DialogContent, DialogTitle, TextField, Button } from "@mui/material";
-import moraleService from "../../../service/partenaire/moraleService";
-import AdressDialog from "./AdressDialog";
-import typePartenaireService from "../../../service/partenaire/typePartenaireService";
+import moraleService from "../../../../service/partenaire/moraleService";
+import AdressDialog from "../AdressDialog";
+import typePartenaireService from "../../../../service/partenaire/typePartenaireService";
 
 
 
