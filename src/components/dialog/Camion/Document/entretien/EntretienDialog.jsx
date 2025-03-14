@@ -11,16 +11,16 @@ import {
   InputLabel,
   FormControl,
 } from "@mui/material";
-import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker"; // Use MobileDatePicker
+import { DatePicker } from "@mui/x-date-pickers/DatePicker"; // Use DatePicker instead of MobileDatePicker
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 export default function EntretienDialog({ open, onClose }) {
   const [entretienData, setEntretienData] = React.useState({
-    dateEntretien: "",
+    dateEntretien: null,
     typeEntretien: "",
     description: "",
     cout: "",
-    prochainEntretien: "",
+    prochainEntretien: null,
     statut: "",
     camion: "", // Added camion field
   });
@@ -33,9 +33,11 @@ export default function EntretienDialog({ open, onClose }) {
   const handleCamionChange = (event) => {
     setEntretienData({ ...entretienData, camion: event.target.value });
   };
+
   const handleDateChange = (name) => (newValue) => {
     setEntretienData({ ...entretienData, [name]: newValue });
   };
+
   const handleSubmit = () => {
     console.log("Entretien Data:", entretienData);
     onClose();
@@ -46,7 +48,7 @@ export default function EntretienDialog({ open, onClose }) {
       <Dialog open={open} onClose={onClose}>
         <DialogTitle>Ajouter Entretien</DialogTitle>
         <DialogContent>
-          <MobileDatePicker
+          <DatePicker
             label="Date d'Entretien"
             value={entretienData.dateEntretien}
             onChange={handleDateChange("dateEntretien")}
@@ -79,7 +81,7 @@ export default function EntretienDialog({ open, onClose }) {
             onChange={handleInputChange}
             margin="normal"
           />
-          <MobileDatePicker
+          <DatePicker
             label="Prochain Entretien"
             value={entretienData.prochainEntretien}
             onChange={handleDateChange("prochainEntretien")}

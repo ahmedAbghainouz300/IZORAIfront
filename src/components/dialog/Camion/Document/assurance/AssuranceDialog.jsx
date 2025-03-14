@@ -7,7 +7,7 @@ import {
   TextField,
   Button,
 } from "@mui/material";
-import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker"; // Use MobileDatePicker
+import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 
@@ -17,8 +17,8 @@ export default function AssuranceDialog({ open, onClose }) {
     company: "",
     numCouverture: "",
     montant: "",
-    dateDebut: null, // Initialize as null for DatePicker
-    dateFin: null, // Initialize as null for DatePicker
+    dateDebut: null,
+    dateFin: null,
     primeAnnuelle: "",
     numCarteVerte: "",
     statutCarteVerte: "",
@@ -33,9 +33,37 @@ export default function AssuranceDialog({ open, onClose }) {
     setAssuranceData({ ...assuranceData, [name]: newValue });
   };
 
-  const handleSubmit = () => {
-    console.log("Assurance Data:", assuranceData);
-    onClose();
+  const handleSubmit = async () => {
+    try {
+      const payload = {
+        ...assuranceData,
+        dateDebut: assuranceData.dateDebut
+          ? assuranceData.dateDebut.toISOString()
+          : null,
+        dateFin: assuranceData.dateFin
+          ? assuranceData.dateFin.toISOString()
+          : null,
+      };
+
+      const response = await fetch("/api/assurances", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add assurance");
+      }
+
+      const newAssurance = await response.json();
+      console.log("Assurance added successfully:", newAssurance);
+      onClose();
+    } catch (error) {
+      console.error("Error adding assurance:", error);
+      alert("Failed to add assurance. Please try again.");
+    }
   };
 
   return (
