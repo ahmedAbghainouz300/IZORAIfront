@@ -20,7 +20,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export default function CabineDialog({ vopen, onClose }) {
+export default function CabineDialog({ open, onClose }) {
   const [openCarburant, setOpenCarburant] = React.useState(false);
   const [openAssurance, setOpenAssurance] = React.useState(false);
   const [openEntretien, setOpenEntretien] = React.useState(false);
@@ -48,7 +48,7 @@ export default function CabineDialog({ vopen, onClose }) {
   return (
     <Dialog
       fullScreen
-      open={vopen}
+      open={open}
       onClose={onClose}
       TransitionComponent={Transition}
     >

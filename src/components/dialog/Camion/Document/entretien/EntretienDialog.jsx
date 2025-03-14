@@ -14,7 +14,7 @@ import {
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker"; // Use MobileDatePicker
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
-export default function EntretienDialog({ vopen, onClose }) {
+export default function EntretienDialog({ open, onClose }) {
   const [entretienData, setEntretienData] = React.useState({
     dateEntretien: "",
     typeEntretien: "",
@@ -43,7 +43,7 @@ export default function EntretienDialog({ vopen, onClose }) {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Dialog open={vopen} onClose={onClose}>
+      <Dialog open={open} onClose={onClose}>
         <DialogTitle>Ajouter Entretien</DialogTitle>
         <DialogContent>
           <MobileDatePicker

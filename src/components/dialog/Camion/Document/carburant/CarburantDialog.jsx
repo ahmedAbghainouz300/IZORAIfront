@@ -11,7 +11,7 @@ import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker"; // Use 
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 
-export default function CarburantDialog({ vopen, onClose }) {
+export default function CarburantDialog({ open, onClose }) {
   const [carburantData, setCarburantData] = React.useState({
     dateRemplissage: "",
     quantiteLitres: "",
@@ -34,7 +34,7 @@ export default function CarburantDialog({ vopen, onClose }) {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Dialog open={vopen} onClose={onClose}>
+      <Dialog open={open} onClose={onClose}>
         <DialogTitle>Ajouter Carburant</DialogTitle>
         <DialogContent>
           <MobileDatePicker

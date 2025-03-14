@@ -20,7 +20,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export default function RemorqueDialog({ vopen, onClose }) {
+export default function RemorqueDialog({ open, onClose }) {
   const [remorqueData, setRemorqueData] = React.useState({
     typeRemorque: "",
     volumeStockage: "",
@@ -45,7 +45,7 @@ export default function RemorqueDialog({ vopen, onClose }) {
   return (
     <Dialog
       fullScreen
-      open={vopen}
+      open={open}
       onClose={onClose}
       TransitionComponent={Transition}
     >

@@ -11,7 +11,7 @@ import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker"; // Use 
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 
-export default function AssuranceDialog({ vopen, onClose }) {
+export default function AssuranceDialog({ open, onClose }) {
   const [assuranceData, setAssuranceData] = React.useState({
     numContrat: "",
     company: "",
@@ -40,7 +40,7 @@ export default function AssuranceDialog({ vopen, onClose }) {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Dialog open={vopen} onClose={onClose}>
+      <Dialog open={open} onClose={onClose}>
         <DialogTitle>Ajouter Assurance</DialogTitle>
         <DialogContent>
           <TextField
