@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useEffect, useState } from "react"; // Importez useEffect et useState
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -11,28 +12,12 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CabineDialog from "../../components/dialog/Camion/cabinet/CabineDialog";
-import ViewCabineDialog from "../../components/dialog/Camion/cabinet/ViewCabineDialog"; // Dialogue pour voir les détails
-import EditCabineDialog from "../../components/dialog/Camion/cabinet/EditCabineDialog"; // Dialogue pour modifier
-
+import ViewCabineDialog from "../../components/dialog/Camion/cabinet/ViewCabineDialog";
+import EditCabineDialog from "../../components/dialog/Camion/cabinet/EditCabineDialog";
+import camionService from "../../service/camion/camionService"; // Importez le service
 import "../../styles/cabine.css";
-
-// Données de test pour les cabines
-const initialRows = [
-  {
-    id: 1,
-    immatriculation: "AB-123-CD",
-    typeCabine: "Standard",
-    poidsMax: 5000,
-    consommation: 10,
-  },
-  {
-    id: 2,
-    immatriculation: "EF-456-GH",
-    typeCabine: "Premium",
-    poidsMax: 7000,
-    consommation: 12,
-  },
-];
+import assuranceService from "../../service/camion/assuranceService";
+import carburantService from "../../service/camion/carburantService";
 
 // Custom Toolbar with only the CSV/Excel Export Button
 function CustomToolbar() {
@@ -48,8 +33,62 @@ export default function Cabine() {
   const [viewDialogOpen, setViewDialogOpen] = React.useState(false);
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
   const [selectedRow, setSelectedRow] = React.useState(null);
-  const [rows, setRows] = React.useState(initialRows);
+  const [rows, setRows] = React.useState([]);
+  const [assuranceData, setAssuranceData] = React.useState({
+    id: 0,
+    numeroContrat: "",
+    company: "",
+    typeCouverture: "",
+    montant: "",
+    dateDebut: "",
+    dateExpiration: "",
+    primeAnnuelle: "",
+    numCarteVerte: "",
+    active: "",
+  });
+  const [carburantData, setCarburantData] = React.useState({
+    id: 0,
+    dateRemplissage: "",
+    quantiteLitres: "",
+    prixParLitre: "",
+    kilometrageActuel: "",
+    typeCarburant: "",
+  });
 
+  // Charger les données au montage du composant
+  useEffect(() => {
+    fetchCamions();
+    fetchAssurances();
+  }, []);
+
+  // Fonction pour récupérer les données du backend
+  const fetchCamions = async () => {
+    try {
+      const response = await camionService.getAll();
+      setRows(response.data);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des camions:", error);
+    }
+  };
+  const fetchAssurances = async () => {
+    try {
+      const response = await assuranceService.getAll();
+      setAssuranceData(response.data);
+      console.log("Assurance Data:", response.data);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des assurances:", error);
+    }
+  };
+
+  const fetchCarburants = async () => {
+    try {
+      const response = await carburantService.getAll();
+      setCarburantData(response.data);
+      console.log("Carburant Data:", response.data);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des carburants:", error);
+    }
+  };
   // Ouvrir le dialogue pour ajouter une cabine
   const handleOpenCabineDialog = () => setCabineDialogOpen(true);
 
@@ -67,23 +106,60 @@ export default function Cabine() {
     setEditDialogOpen(true);
   };
 
-  const handleDelete = (id) => {
-    setRows(rows.filter((row) => row.id !== id));
-    console.log("Supprimer :", id);
+  const handleDelete = async (immatriculation) => {
+    try {
+      await camionService.delete(immatriculation);
+      setRows(rows.filter((row) => row.immatriculation !== immatriculation));
+      console.log("Camion supprimé avec succès");
+    } catch (error) {
+      console.error("Erreur lors de la suppression du camion:", error);
+    }
   };
 
-  const handleSave = (updatedCabine) => {
-    setRows(rows.map((row) => (row.id === updatedCabine.id ? updatedCabine : row)));
-    setEditDialogOpen(false);
+  const handleSave = async (updatedCabine) => {
+    try {
+      await camionService.update(updatedCabine.immatriculation, updatedCabine);
+      setRows(
+        rows.map((row) =>
+          row.immatriculation === updatedCabine.immatriculation
+            ? updatedCabine
+            : row
+        )
+      );
+      setEditDialogOpen(false);
+      console.log("Camion mis à jour avec succès");
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du camion:", error);
+    }
   };
 
-  // Définir les colonnes à l'intérieur du composant pour accéder aux fonctions
+  const handleCreate = async (newCabine) => {
+    try {
+      const response = await camionService.create(newCabine);
+      setRows([...rows, response.data]);
+      setCabineDialogOpen(false);
+      console.log("Camion créé avec succès");
+    } catch (error) {
+      console.error("Erreur lors de la création du camion:", error);
+    }
+  };
+
+  // Définir les colonnes
   const columns = [
-    { field: "id", headerName: "ID", width: 90 },
-    { field: "immatriculation", headerName: "Immatriculation", flex: 1 },
+    { field: "immatriculation", headerName: "ID", width: 90 },
     { field: "typeCabine", headerName: "Type de Cabine", flex: 1 },
-    { field: "poidsMax", headerName: "Poids Max (kg)", flex: 1, type: "number" },
-    { field: "consommation", headerName: "Consommation (L/100km)", flex: 1, type: "number" },
+    {
+      field: "poidsMax",
+      headerName: "Poids Max (kg)",
+      flex: 1,
+      type: "number",
+    },
+    {
+      field: "consommation",
+      headerName: "Consommation (L/100km)",
+      flex: 1,
+      type: "number",
+    },
     {
       field: "actions",
       headerName: "Actions",
@@ -99,7 +175,10 @@ export default function Cabine() {
           <IconButton color="secondary" onClick={() => handleEdit(params.row)}>
             <EditIcon />
           </IconButton>
-          <IconButton color="error" onClick={() => handleDelete(params.row.id)}>
+          <IconButton
+            color="error"
+            onClick={() => handleDelete(params.row.immatriculation)}
+          >
             <DeleteIcon />
           </IconButton>
         </div>
@@ -120,6 +199,7 @@ export default function Cabine() {
         <CabineDialog
           open={cabineDialogOpen}
           onClose={handleCloseCabineDialog}
+          onCreate={handleCreate}
         />
       )}
 
@@ -146,6 +226,7 @@ export default function Cabine() {
       <DataGrid
         rows={rows}
         columns={columns}
+        getRowId={(row) => row.immatriculation}
         initialState={{
           pagination: {
             paginationModel: {

@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogActions,
@@ -15,7 +15,6 @@ import AdressDialog from "./AdressDialog";
 import physiqueService from "../../../service/partenaire/physiqueService";
 import typePartenaireService from "../../../service/partenaire/typePartenaireService";
 
-
 export default function PhysiqueDialog({ open, onClose }) {
   const [openAdress, setOpenAdress] = useState(false);
   const [nom, setNom] = useState("");
@@ -24,8 +23,8 @@ export default function PhysiqueDialog({ open, onClose }) {
   const [telephone, setTelephone] = useState("");
   const [cni, setCni] = useState("");
   const [selectedType, setSelectedType] = useState("");
-  const [adresses, setAdresses] = useState([]); 
-  const [types,setTypes] = useState([]);
+  const [adresses, setAdresses] = useState([]);
+  const [types, setTypes] = useState([]);
 
   // Function to handle adding a new adress
   const handleAddAdress = (newAdresse) => {
@@ -33,15 +32,17 @@ export default function PhysiqueDialog({ open, onClose }) {
     setOpenAdress(false); // Close the adress dialog
   };
 
-    // Fetch types when the dialog opens
-    useEffect(() => {
-      if (open) {
-        typePartenaireService
-          .getAllByNoms()
-          .then((response) => setTypes(response.data))
-          .catch((error) => console.error("Erreur lors du chargement des types:", error));
-      }
-    }, [open]);
+  // Fetch types when the dialog opens
+  useEffect(() => {
+    if (open) {
+      typePartenaireService
+        .getAllByNoms()
+        .then((response) => setTypes(response.data))
+        .catch((error) =>
+          console.error("Erreur lors du chargement des types:", error)
+        );
+    }
+  }, [open]);
 
   // Function to handle form submission
   const handleSubmit = async () => {
@@ -52,9 +53,9 @@ export default function PhysiqueDialog({ open, onClose }) {
       telephone,
       cni,
       typePartenaire: selectedType,
-      adresses, 
+      adresses,
     };
-
+    console.log("New Physique:", newPhysique);
     physiqueService
       .create(newPhysique)
       .then(() => {
@@ -69,10 +70,11 @@ export default function PhysiqueDialog({ open, onClose }) {
         setAdresses([]); // Reset adresses
       })
       .catch((error) => {
-        console.error("Erreur lors de la création du partenaire physique:", error);
+        console.error(
+          "Erreur lors de la création du partenaire physique:",
+          error
+        );
       });
-
-      
   };
 
   return (
@@ -138,7 +140,8 @@ export default function PhysiqueDialog({ open, onClose }) {
           {adresses.map((adresse, index) => (
             <div key={index} style={{ marginBottom: "10px" }}>
               <p>
-                <strong>Adresse {index + 1}:</strong> {adresse.rue}, {adresse.ville}, {adresse.codePostal}, {adresse.pays}
+                <strong>Adresse {index + 1}:</strong> {adresse.rue},{" "}
+                {adresse.ville}, {adresse.codePostal}, {adresse.pays}
               </p>
             </div>
           ))}

@@ -15,34 +15,98 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
+import camionService from "../../../../service/camion/camionService";
+import assuranceService from "../../../../service/camion/assuranceService";
+import carteGriseService from "../../../../service/camion/carteGriseService"; // Import carteGriseService
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
 export default function CabineDialog({ open, onClose }) {
-  const [openCarburant, setOpenCarburant] = React.useState(false);
-  const [openAssurance, setOpenAssurance] = React.useState(false);
-  const [openEntretien, setOpenEntretien] = React.useState(false);
+  // Initialize states
+  const [assuranceData, setAssuranceData] = React.useState([]); // Array of assurances
+  const [carteGriseData, setCarteGriseData] = React.useState([]); // Array of carteGrise
 
   const [cabineData, setCabineData] = React.useState({
     immatriculation: "",
     typeCabine: "",
     poidsMax: "",
     consommation: "",
-    carburant: "", // Add carburant field
-    assurance: "", // Add assurance field
-    entretien: "", // Add entretien field
+    assurance: "", // Initialize with a valid value
+    carteGrise: "", // Initialize with a valid value
   });
 
+  // Fetch data on component mount
+  React.useEffect(() => {
+    fetchAssurances();
+    fetchCarteGrise();
+  }, []);
+
+  // Fetch assurances from the backend
+  const fetchAssurances = async () => {
+    try {
+      const response = await assuranceService.getAll();
+      const data = Array.isArray(response.data)
+        ? response.data
+        : [response.data];
+      setAssuranceData(data);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des assurances:", error);
+    }
+  };
+
+  // Fetch carteGrise from the backend
+  const fetchCarteGrise = async () => {
+    try {
+      const response = await carteGriseService.getAll();
+      const data = Array.isArray(response.data)
+        ? response.data
+        : [response.data];
+      setCarteGriseData(data);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des cartes grises:", error);
+    }
+  };
+
+  // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setCabineData({ ...cabineData, [name]: value });
   };
 
-  const handleSubmit = () => {
-    console.log("Cabine Data:", cabineData);
-    onClose();
+  // Handle form submission
+  const handleSubmit = async () => {
+    // Prepare the data to match the backend's expected structure
+    const payload = {
+      immatriculation: cabineData.immatriculation,
+      typeCabine: cabineData.typeCabine,
+      poidsMax: Number(cabineData.poidsMax), // Convert to number
+      consommation: Number(cabineData.consommation), // Convert to number
+      assurance: cabineData.assurance, // This should already be an object
+      carteGrise: cabineData.carteGrise, // This should already be an object
+    };
+
+    console.log("Payload:", payload);
+
+    try {
+      const response = await camionService.create(payload);
+      console.log("Camion créé avec succès:", response.data);
+
+      // Reset form data
+      setCabineData({
+        immatriculation: "",
+        typeCabine: "",
+        poidsMax: "",
+        consommation: "",
+        assurance: "",
+        carteGrise: "",
+      });
+
+      onClose(); // Close the dialog
+    } catch (error) {
+      console.error("Erreur lors de la création de la cabine:", error);
+    }
   };
 
   return (
@@ -73,6 +137,7 @@ export default function CabineDialog({ open, onClose }) {
       </AppBar>
 
       <Box sx={{ p: 3 }}>
+        {/* Immatriculation Field */}
         <TextField
           fullWidth
           label="Immatriculation"
@@ -81,6 +146,8 @@ export default function CabineDialog({ open, onClose }) {
           onChange={handleInputChange}
           margin="normal"
         />
+
+        {/* Type de Cabine Field */}
         <TextField
           fullWidth
           label="Type de Cabine"
@@ -89,6 +156,8 @@ export default function CabineDialog({ open, onClose }) {
           onChange={handleInputChange}
           margin="normal"
         />
+
+        {/* Poids Max Field */}
         <TextField
           fullWidth
           label="Poids Max"
@@ -97,6 +166,8 @@ export default function CabineDialog({ open, onClose }) {
           onChange={handleInputChange}
           margin="normal"
         />
+
+        {/* Consommation Field */}
         <TextField
           fullWidth
           label="Consommation"
@@ -106,51 +177,39 @@ export default function CabineDialog({ open, onClose }) {
           margin="normal"
         />
 
-        {/* Carburant Select */}
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Carburant</InputLabel>
-          <Select
-            value={cabineData.carburant} // Link to cabineData.carburant
-            onChange={(e) =>
-              setCabineData({ ...cabineData, carburant: e.target.value })
-            }
-            label="Carburant"
-          >
-            <MenuItem value="Essence">Essence</MenuItem>
-            <MenuItem value="Diesel">Diesel</MenuItem>
-            <MenuItem value="Electrique">Electrique</MenuItem>
-          </Select>
-        </FormControl>
-
         {/* Assurance Select */}
         <FormControl fullWidth margin="normal">
           <InputLabel>Assurance</InputLabel>
           <Select
-            value={cabineData.assurance} // Link to cabineData.assurance
+            value={cabineData.assurance || ""} // Fallback to empty string if undefined
             onChange={(e) =>
               setCabineData({ ...cabineData, assurance: e.target.value })
             }
             label="Assurance"
           >
-            <MenuItem value="Active">Active</MenuItem>
-            <MenuItem value="Expirée">Expirée</MenuItem>
-            <MenuItem value="En attente">En attente</MenuItem>
+            {assuranceData.map((assurance) => (
+              <MenuItem key={assurance.numeroContrat} value={assurance}>
+                {`${assurance.company} | ${assurance.numeroContrat} | ${assurance.montant} | ${assurance.dateExpiration}`}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
 
-        {/* Entretien Select */}
+        {/* Carte Grise Select */}
         <FormControl fullWidth margin="normal">
-          <InputLabel>Entretien</InputLabel>
+          <InputLabel>Carte Grise</InputLabel>
           <Select
-            value={cabineData.entretien} // Link to cabineData.entretien
+            value={cabineData.carteGrise || ""} // Fallback to empty string if undefined
             onChange={(e) =>
-              setCabineData({ ...cabineData, entretien: e.target.value })
+              setCabineData({ ...cabineData, carteGrise: e.target.value })
             }
-            label="Entretien"
+            label="Carte Grise"
           >
-            <MenuItem value="A jour">A jour</MenuItem>
-            <MenuItem value="En retard">En retard</MenuItem>
-            <MenuItem value="Planifié">Planifié</MenuItem>
+            {carteGriseData.map((carteGrise) => (
+              <MenuItem key={carteGrise.id} value={carteGrise}>
+                {`${carteGrise.marque} | ${carteGrise.genre} | ${carteGrise.numeroSerie} | ${carteGrise.dateMiseEnCirculation}`}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
       </Box>

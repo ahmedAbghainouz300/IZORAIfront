@@ -17,7 +17,8 @@ const carburantService = {
   delete: (id) => axiosClient.delete(`/api/carburants/${id}`),
 
   // Récupérer les carburants associés à un camion
-  getByCamion: (immatriculationCamion) => axiosClient.get(`/api/carburants/camion/${immatriculationCamion}`),
+  getByCamion: (immatriculationCamion) =>
+    axiosClient.get(`/api/carburants/camion/${immatriculationCamion}`),
 
   // Récupérer les carburants dans un intervalle de dates
   getByDateRange: (debut, fin) =>
@@ -27,7 +28,9 @@ const carburantService = {
 
   // Récupérer la consommation moyenne d'un camion
   getConsommationMoyenneByCamion: (immatriculationCamion) =>
-    axiosClient.get(`/api/carburants/consommation-moyenne/${immatriculationCamion}`),
+    axiosClient.get(
+      `/api/carburants/consommation-moyenne/${immatriculationCamion}`
+    ),
 
   // Récupérer le coût total de carburant d'un camion
   getCoutTotalCarburant: (immatriculationCamion) =>

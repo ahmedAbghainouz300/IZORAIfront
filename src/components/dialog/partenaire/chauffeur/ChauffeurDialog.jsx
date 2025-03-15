@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, Grid } from "@mui/material";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  Button,
+  Grid,
+} from "@mui/material";
 import chauffeurService from "../../../../service/partenaire/chaufeurService"; // Assurez-vous que le chemin est correct
 import AdressDialog from "../AdressDialog";
 
@@ -15,7 +23,6 @@ export default function ChauffeurDialog({ open, onClose }) {
     dateRecrutement: "",
     disponibilite: "",
     adresses: [], // Tableau pour stocker les adresses
-
   });
 
   const handleChange = (e) => {
@@ -34,10 +41,13 @@ export default function ChauffeurDialog({ open, onClose }) {
 
   const handleSubmit = () => {
     // Créer un nouveau chauffeur
-    chauffeurService.create(formData)
+    console.log("Chauffeur Data:", formData);
+    chauffeurService
+      .create(formData)
       .then(() => {
         onClose(); // Fermer le dialogue après la création
-        setFormData({ // Réinitialiser le formulaire
+        setFormData({
+          // Réinitialiser le formulaire
           nom: "",
           prenom: "",
           CNI: "",
@@ -136,14 +146,14 @@ export default function ChauffeurDialog({ open, onClose }) {
           </Grid>
         </Grid>
 
-        
         {/* Section pour afficher les adresses */}
         <div style={{ marginTop: "20px" }}>
           <h4>Adresses</h4>
           {formData.adresses.map((adresse, index) => (
             <div key={index} style={{ marginBottom: "10px" }}>
-              <p> 
-                <strong>Adresse {index + 1}:</strong> {adresse.rue}, {adresse.ville}, {adresse.codePostal}, {adresse.pays}
+              <p>
+                <strong>Adresse {index + 1}:</strong> {adresse.rue},{" "}
+                {adresse.ville}, {adresse.codePostal}, {adresse.pays}
               </p>
             </div>
           ))}
@@ -156,12 +166,20 @@ export default function ChauffeurDialog({ open, onClose }) {
         <Button onClick={handleSubmit} color="primary">
           Ajouter
         </Button>
-        <Button color="primary" onClick={() => setOpenAdress(true)} sx={{ mr: 2 }}>
+        <Button
+          color="primary"
+          onClick={() => setOpenAdress(true)}
+          sx={{ mr: 2 }}
+        >
           Ajouter une Adresse
         </Button>
       </DialogActions>
 
-      <AdressDialog open={openAdress} onClose={() => setOpenAdress(false)} onSave={handleAddAdress} />
+      <AdressDialog
+        open={openAdress}
+        onClose={() => setOpenAdress(false)}
+        onSave={handleAddAdress}
+      />
     </Dialog>
   );
 }
