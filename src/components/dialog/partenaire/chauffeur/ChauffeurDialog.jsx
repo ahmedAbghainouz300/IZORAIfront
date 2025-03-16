@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, Grid } from "@mui/material";
+import { InputLabel,Select,MenuItem,Dialog,
+          FormControl, DialogActions, DialogContent,
+          DialogTitle, TextField, Button, Grid } from "@mui/material";
 import chauffeurService from "../../../../service/partenaire/chaufeurService"; // Assurez-vous que le chemin est correct
 import AdressDialog from "../AdressDialog";
 
@@ -13,10 +15,19 @@ export default function ChauffeurDialog({ open, onClose }) {
     telephone: "",
     cnss: "",
     dateRecrutement: "",
-    disponibilite: "",
+    disponibilite: false, // Valeur par défaut
     adresses: [], // Tableau pour stocker les adresses
-
   });
+
+ 
+
+  const handleChangeDisponible = (event) => {
+    const { name, value } = event.target;
+    setFormData({
+      ...formData,
+      [name]: value === "true", // Convertir la chaîne en booléen
+    });
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -126,14 +137,19 @@ export default function ChauffeurDialog({ open, onClose }) {
             />
           </Grid>
           <Grid item xs={6}>
-            <TextField
+          <FormControl fullWidth>
+            <InputLabel>Disponibilité</InputLabel>
+            <Select
               label="Disponibilité"
               name="disponibilite"
-              fullWidth
-              value={formData.disponibilite}
-              onChange={handleChange}
-            />
-          </Grid>
+              value={formData.disponibilite.toString()} // Convertir le booléen en chaîne
+              onChange={handleChangeDisponible}
+            >
+              <MenuItem value="true">Disponible</MenuItem>
+              <MenuItem value="false">Non disponible</MenuItem>
+            </Select>
+          </FormControl>
+    </Grid>
         </Grid>
 
         
