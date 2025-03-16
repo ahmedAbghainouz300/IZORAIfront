@@ -1,21 +1,43 @@
-import React, { useState } from "react";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
+import React, { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+} from "@mui/material";
 
-export default function EditAssuranceDialog({ open, onClose, assurance, onSave }) {
-  const [formData, setFormData] = useState(assurance);
+export default function EditAssuranceDialog({
+  open,
+  onClose,
+  assurance,
+  onSave,
+}) {
+  const [formData, setFormData] = useState(assurance || {});
 
+  // Initialize formData when the dialog opens
+  useEffect(() => {
+    if (open) {
+      console.log("Form Data Initialized:", assurance); // Debugging line
+      setFormData(assurance || {});
+    }
+  }, [open, assurance]);
+
+  // Handle changes in form fields
   const handleChange = (e) => {
     const { name, value } = e.target;
+    console.log("Field Changed:", name, value); // Debugging line
     setFormData({ ...formData, [name]: value });
   };
 
+  // Handle form submission
   const handleSubmit = () => {
-    onSave(formData);
+    const payload = {
+      ...formData,
+    };
+    console.log("Payload before save:", payload); // Debugging line
+    onSave(payload);
     onClose();
   };
 
@@ -26,15 +48,16 @@ export default function EditAssuranceDialog({ open, onClose, assurance, onSave }
         <TextField
           name="numeroContrat"
           label="Numéro de Contrat"
-          value={formData.numeroContrat}
+          value={formData.numeroContrat || ""}
           onChange={handleChange}
           fullWidth
           margin="normal"
+          type="number"
         />
         <TextField
           name="company"
           label="Compagnie"
-          value={formData.company}
+          value={formData.company || ""}
           onChange={handleChange}
           fullWidth
           margin="normal"
@@ -42,7 +65,7 @@ export default function EditAssuranceDialog({ open, onClose, assurance, onSave }
         <TextField
           name="typeCouverture"
           label="Type de Couverture"
-          value={formData.typeCouverture}
+          value={formData.typeCouverture || ""}
           onChange={handleChange}
           fullWidth
           margin="normal"
@@ -50,7 +73,7 @@ export default function EditAssuranceDialog({ open, onClose, assurance, onSave }
         <TextField
           name="montant"
           label="Montant"
-          value={formData.montant}
+          value={formData.montant || ""}
           onChange={handleChange}
           fullWidth
           margin="normal"
@@ -59,7 +82,7 @@ export default function EditAssuranceDialog({ open, onClose, assurance, onSave }
         <TextField
           name="dateDebut"
           label="Date de Début"
-          value={formData.dateDebut}
+          value={formData.dateDebut || ""}
           onChange={handleChange}
           fullWidth
           margin="normal"
@@ -69,7 +92,7 @@ export default function EditAssuranceDialog({ open, onClose, assurance, onSave }
         <TextField
           name="dateExpiration"
           label="Date d'Expiration"
-          value={formData.dateExpiration}
+          value={formData.dateExpiration || ""}
           onChange={handleChange}
           fullWidth
           margin="normal"
@@ -79,7 +102,7 @@ export default function EditAssuranceDialog({ open, onClose, assurance, onSave }
         <TextField
           name="primeAnnuelle"
           label="Prime Annuelle"
-          value={formData.primeAnnuelle}
+          value={formData.primeAnnuelle || ""}
           onChange={handleChange}
           fullWidth
           margin="normal"
@@ -88,7 +111,7 @@ export default function EditAssuranceDialog({ open, onClose, assurance, onSave }
         <TextField
           name="numCarteVerte"
           label="Numéro Carte Verte"
-          value={formData.numCarteVerte}
+          value={formData.numCarteVerte || ""}
           onChange={handleChange}
           fullWidth
           margin="normal"

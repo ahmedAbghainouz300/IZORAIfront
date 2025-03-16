@@ -11,6 +11,7 @@ import {
 } from "@ant-design/icons";
 import { Button, Layout, Menu } from "antd";
 import allRoutes from "../routes/AllRoutes";
+import "../styles/nav.css";
 const { Header, Sider, Content } = Layout;
 
 const NavComponent = (children) => {
@@ -20,6 +21,9 @@ const NavComponent = (children) => {
   return (
     <Layout style={{ margin: "0px" }}>
       <Sider trigger={null} collapsible collapsed={collapsed}>
+        <h2 className="title" style={{ color: "white" }}>
+          IZORAI
+        </h2>
         <div className="demo-logo-vertical" />
         <Menu
           theme="dark"
@@ -93,6 +97,16 @@ const NavComponent = (children) => {
         />
       </Sider>
       <Layout>
+        {/* <Header
+          style={{
+            padding: 0,
+            background: "white",
+            display: "flex",
+            justifyContent: "space-evenly",
+          }}
+        >
+          <h2>IZORAI</h2>
+        </Header> */}
         <Content
           style={{
             minHeight: 280,

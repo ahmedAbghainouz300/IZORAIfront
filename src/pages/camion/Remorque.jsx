@@ -13,7 +13,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import RemorqueDialog from "../../components/dialog/Camion/remorque/RemorqueDialog";
 import ViewRemorqueDialog from "../../components/dialog/Camion/remorque/ViewRemorqueDialog";
 import EditRemorqueDialog from "../../components/dialog/Camion/remorque/EditRemorqueDialog";
-import remorqueService from "../../service/camion/remorqueService"; // Import du service
+import remorqueService from "../../service/camion/remorqueService"; // Import the service
 
 // Custom Toolbar with only the CSV/Excel Export Button
 function CustomToolbar() {
@@ -31,77 +31,99 @@ export default function Remorque() {
   const [selectedRow, setSelectedRow] = React.useState(null);
   const [rows, setRows] = React.useState([]);
 
-  // Charger les données au montage du composant
+  // Load data when the component mounts
   React.useEffect(() => {
     fetchRemorques();
   }, []);
 
-  // Récupérer toutes les remorques depuis le backend
+  // Fetch all remorques from the backend
   const fetchRemorques = async () => {
     try {
       const response = await remorqueService.getAll();
       setRows(response.data);
     } catch (error) {
-      console.error("Erreur lors de la récupération des remorques :", error);
+      console.error("Error fetching remorques:", error);
     }
   };
 
-  // Ouvrir le dialogue pour ajouter une remorque
+  // Open the dialog to add a remorque
   const handleOpenRemorqueDialog = () => setRemorqueDialogOpen(true);
 
-  // Fermer le dialogue pour ajouter une remorque
+  // Close the dialog to add a remorque
   const handleCloseRemorqueDialog = () => setRemorqueDialogOpen(false);
 
-  // Gérer les actions
+  // Handle view action
   const handleView = (row) => {
     setSelectedRow(row);
     setViewDialogOpen(true);
   };
 
+  // Handle edit action
   const handleEdit = (row) => {
     setSelectedRow(row);
     setEditDialogOpen(true);
   };
 
-  const handleDelete = async (id) => {
+  // Handle delete action
+  const handleDelete = async (idRemorque) => {
     try {
-      await remorqueService.delete(id);
-      setRows(rows.filter((row) => row.id !== id));
-      console.log("Remorque supprimée :", id);
+      await remorqueService.delete(idRemorque);
+      setRows(rows.filter((row) => row.idRemorque !== idRemorque));
+      console.log("Remorque deleted:", idRemorque);
     } catch (error) {
-      console.error("Erreur lors de la suppression de la remorque :", error);
+      console.error("Error deleting remorque:", error);
     }
   };
 
+  // Handle save action (update)
   const handleSave = async (updatedRemorque) => {
     try {
-      await remorqueService.update(updatedRemorque.immatriculation, updatedRemorque);
-      setRows(rows.map((row) => (row.id === updatedRemorque.id ? updatedRemorque : row)));
+      await remorqueService.update(updatedRemorque.idRemorque, updatedRemorque);
+      setRows(
+        rows.map((row) =>
+          row.idRemorque === updatedRemorque.idRemorque ? updatedRemorque : row
+        )
+      );
       setEditDialogOpen(false);
     } catch (error) {
-      console.error("Erreur lors de la mise à jour de la remorque :", error);
+      console.error("Error updating remorque:", error);
     }
   };
 
-  // Ajouter une nouvelle remorque
+  // Handle create action (add new remorque)
   const handleCreate = async (newRemorque) => {
     try {
       const response = await remorqueService.create(newRemorque);
       setRows([...rows, response.data]);
       setRemorqueDialogOpen(false);
     } catch (error) {
-      console.error("Erreur lors de l'ajout de la remorque :", error);
+      console.error("Error adding remorque:", error);
     }
   };
 
-  // Définir les colonnes à l'intérieur du composant pour accéder aux fonctions
+  // Define columns for the DataGrid
   const columns = [
-    { field: "id", headerName: "ID", width: 90 },
-    { field: "immatriculation", headerName: "Immatriculation", flex: 1 },
+    { field: "idRemorque", headerName: "ID", width: 90 },
     { field: "typeRemorque", headerName: "Type de Remorque", flex: 1 },
-    { field: "volumesStockage", headerName: "Volume de Stockage (m³)", flex: 1, type: "number" },
-    { field: "poidsVide", headerName: "Poids à Vide (kg)", flex: 1, type: "number" },
-    { field: "poidsChargeMax", headerName: "Poids Charge Max (kg)", flex: 1, type: "number" },
+    {
+      field: "volumesStockage",
+      headerName: "Volume de Stockage (m³)",
+      flex: 1,
+      type: "number",
+    },
+    {
+      field: "poidsVide",
+      headerName: "Poids à Vide (kg)",
+      flex: 1,
+      type: "number",
+    },
+    {
+      field: "poidsChargeMax",
+      headerName: "Poids Charge Max (kg)",
+      flex: 1,
+      type: "number",
+    },
+    { field: "disponible", headerName: "Disponible", flex: 1, type: "boolean" },
     {
       field: "actions",
       headerName: "Actions",
@@ -117,7 +139,10 @@ export default function Remorque() {
           <IconButton color="secondary" onClick={() => handleEdit(params.row)}>
             <EditIcon />
           </IconButton>
-          <IconButton color="error" onClick={() => handleDelete(params.row.id)}>
+          <IconButton
+            color="error"
+            onClick={() => handleDelete(params.row.idRemorque)}
+          >
             <DeleteIcon />
           </IconButton>
         </div>
@@ -133,7 +158,7 @@ export default function Remorque() {
         </button>
       </div>
 
-      {/* Dialogue pour ajouter une remorque */}
+      {/* Dialog to add a new remorque */}
       {remorqueDialogOpen && (
         <RemorqueDialog
           open={remorqueDialogOpen}
@@ -142,7 +167,7 @@ export default function Remorque() {
         />
       )}
 
-      {/* Dialogue pour voir les détails d'une remorque */}
+      {/* Dialog to view remorque details */}
       {viewDialogOpen && (
         <ViewRemorqueDialog
           open={viewDialogOpen}
@@ -151,7 +176,7 @@ export default function Remorque() {
         />
       )}
 
-      {/* Dialogue pour modifier une remorque */}
+      {/* Dialog to edit a remorque */}
       {editDialogOpen && (
         <EditRemorqueDialog
           open={editDialogOpen}
@@ -161,11 +186,11 @@ export default function Remorque() {
         />
       )}
 
-      {/* Tableau */}
+      {/* DataGrid to display remorques */}
       <DataGrid
         rows={rows}
         columns={columns}
-        getRowId={(row) => row.idRemorque} // Utiliser idRemorque comme id
+        getRowId={(row) => row.idRemorque} // Use idRemorque as the row ID
         initialState={{
           pagination: {
             paginationModel: {

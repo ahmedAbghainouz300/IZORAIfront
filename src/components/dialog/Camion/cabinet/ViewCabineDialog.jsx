@@ -12,9 +12,6 @@ export default function ViewCabineDialog({ open, onClose, cabine }) {
       <DialogTitle>Détails de la Cabine</DialogTitle>
       <DialogContent>
         <Typography variant="body1">
-          <strong>ID :</strong> {cabine.id}
-        </Typography>
-        <Typography variant="body1">
           <strong>Immatriculation :</strong> {cabine.immatriculation}
         </Typography>
         <Typography variant="body1">
