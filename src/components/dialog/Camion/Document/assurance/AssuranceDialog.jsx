@@ -11,14 +11,14 @@ import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 
-export default function AssuranceDialog({ open, onClose }) {
+export default function AssuranceDialog({ open, onClose, onSave }) {
   const [assuranceData, setAssuranceData] = React.useState({
-    numContrat: "",
+    numeroContrat: "",
     company: "",
-    numCouverture: "",
+    typeCouverture: "",
     montant: "",
     dateDebut: null,
-    dateFin: null,
+    dateExpiration: null,
     primeAnnuelle: "",
     numCarteVerte: "",
     statutCarteVerte: "",
@@ -34,36 +34,11 @@ export default function AssuranceDialog({ open, onClose }) {
   };
 
   const handleSubmit = async () => {
-    try {
-      const payload = {
-        ...assuranceData,
-        dateDebut: assuranceData.dateDebut
-          ? assuranceData.dateDebut.toISOString()
-          : null,
-        dateFin: assuranceData.dateFin
-          ? assuranceData.dateFin.toISOString()
-          : null,
-      };
-
-      const response = await fetch("/api/assurances", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to add assurance");
-      }
-
-      const newAssurance = await response.json();
-      console.log("Assurance added successfully:", newAssurance);
-      onClose();
-    } catch (error) {
-      console.error("Error adding assurance:", error);
-      alert("Failed to add assurance. Please try again.");
-    }
+    const payload = {
+      ...assuranceData,
+    };
+    console.log(payload);
+    onSave(payload);
   };
 
   return (
@@ -74,8 +49,8 @@ export default function AssuranceDialog({ open, onClose }) {
           <TextField
             fullWidth
             label="Numero de contrat"
-            name="numContrat"
-            value={assuranceData.numContrat}
+            name="numeroContrat"
+            value={assuranceData.numeroContrat}
             onChange={handleInputChange}
             margin="normal"
           />
@@ -90,8 +65,8 @@ export default function AssuranceDialog({ open, onClose }) {
           <TextField
             fullWidth
             label="Type de couverture"
-            name="numCouverture"
-            value={assuranceData.numCouverture}
+            name="typeCouverture"
+            value={assuranceData.typeCouverture}
             onChange={handleInputChange}
             margin="normal"
           />
@@ -113,8 +88,8 @@ export default function AssuranceDialog({ open, onClose }) {
           />
           <MobileDatePicker
             label="Date expiration"
-            value={assuranceData.dateFin}
-            onChange={handleDateChange("dateFin")}
+            value={assuranceData.dateExpiration}
+            onChange={handleDateChange("dateExpiration")}
             renderInput={(params) => (
               <TextField {...params} fullWidth margin="normal" />
             )}
