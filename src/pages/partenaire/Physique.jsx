@@ -7,13 +7,13 @@ import {
   GridToolbarContainer,
   GridToolbarExport,
 } from "@mui/x-data-grid";
-import PhysiqueDialog from "../../components/dialog/partenaire/PhysiqueDialogue";
+import PhysiqueDialog from "../../components/dialog/partenaire/physique/PhysiqueDialogue";
 import physiqueService from "../../service/partenaire/physiqueService";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import ViewPhysiqueDialog from "../../components/dialog/partenaire/ViewPhysiqueDialog"; // Dialogue pour voir les détails
-import EditPhysiqueDialog from "../../components/dialog/partenaire/EditPhysiqueDialog"; // Dialogue pour modifier
+import ViewPhysiqueDialog from "../../components/dialog/partenaire/physique/ViewPhysiqueDialog"; // Dialogue pour voir les détails
+import EditPhysiqueDialog from "../../components/dialog/partenaire/physique/EditPhysiqueDialog"; // Dialogue pour modifier
 
 function CustomToolbar() {
   return (

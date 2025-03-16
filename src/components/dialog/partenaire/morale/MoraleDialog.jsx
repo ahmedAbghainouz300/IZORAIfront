@@ -19,26 +19,8 @@ export default function MoraleDialog({ open, onClose }) {
   const [formeJuridique, setFormeJuridique] = useState("");
   const [adresses, setAdresses] = useState([]); // État pour les adresses
   const [types,setTypes] = useState([]);
-
-
-  const handleSubmit = () => {
-    const newMorale = {
-      nom,
-      ice,
-      numeroRC,
-      abreviation,
-      formeJuridique,
-      adresses,
-    };
-
-    useEffect(() => {
-      if (open) {
-        typePartenaireService
-          .getAllByNoms()
-          .then((response) => setTypes(response.data))
-          .catch((error) => console.error("Erreur lors du chargement des types:", error));
-      }
-    }, [open]);
+  const [selectedType, setSelectedType] = useState("");
+  const [typePartenaire, setTypePartenaire] = useState("");
 
 
     const handleAddAdress = (newAdresse) => {
@@ -46,22 +28,45 @@ export default function MoraleDialog({ open, onClose }) {
       setOpenAdress(false); // Fermer le dialogue d'ajout d'adresse
     };
   
+    const handleSubmit = () => {
+      const newMorale = {
+        nom,
+        ice,
+        numeroRC,
+        abreviation,
+        formeJuridique,
+        typePartenaire: typePartenaire, // Ajoutez le type de partenaire
+        adresses,
+      };
 
-     moraleService.add(newMorale)
-       .then((response) => {
-         console.log("Partenaire moral ajouté:", response);
-         setNom("");
-         setIce("");
-         setNumeroRC("");
-         setAbreviation("");
-         setFormeJuridique("");
-         setAdresses([]);
-         onClose();
-       })
-       .catch((error) => {
-         console.error("Erreur lors de l'ajout du partenaire moral:", error);
-       });
-  };
+
+      typePartenaireService.getByNom(selectedType).then((response)=>setTypePartenaire(response.data))
+    
+      moraleService
+        .add(newMorale)
+        .then((response) => {
+          console.log("Partenaire moral ajouté:", response);
+          setNom("");
+          setIce("");
+          setNumeroRC("");
+          setAbreviation("");
+          setFormeJuridique("");
+          setSelectedType(""); // Réinitialiser le type sélectionné
+          setAdresses([]);
+          onClose();
+        })
+        .catch((error) => {
+          console.error("Erreur lors de l'ajout du partenaire moral:", error);
+        });
+    };
+  useEffect(() => {
+    if (open) {
+      typePartenaireService
+        .getAllByNoms()
+        .then((response) => setTypes(response.data))
+        .catch((error) => console.error("Erreur lors du chargement des types:", error));
+    }
+  }, [open]);
 
   return (
     <Dialog open={open} onClose={onClose}>
@@ -103,22 +108,22 @@ export default function MoraleDialog({ open, onClose }) {
           onChange={(e) => setFormeJuridique(e.target.value)}
         />
         <FormControl fullWidth margin="normal">
-          <InputLabel>Type Partenaire</InputLabel>
-          <Select
-            value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value)}
-          >
-            {types.length === 0 ? (
-              <MenuItem disabled>Aucun type disponible</MenuItem>
-            ) : (
-              types.map((type) => (
-                <MenuItem key={type.id} value={type.nom}>
-                  {type.nom}
-                </MenuItem>
-              ))
-            )}
-          </Select>
-         </FormControl>
+        <InputLabel>Type Partenaire</InputLabel>
+        <Select
+          value={selectedType}
+          onChange={(e) => setSelectedType(e.target.value)}
+        >
+          {types.length === 0 ? (
+            <MenuItem disabled>Aucun type disponible</MenuItem>
+          ) : (
+            types.map((type) => (
+              <MenuItem key={type.idTypePartenaire} value={type.libelle}>
+                {type.libelle}
+              </MenuItem>
+            ))
+          )}
+        </Select>
+      </FormControl>
 
 
         {/* Section pour afficher les adresses */}
@@ -143,7 +148,10 @@ export default function MoraleDialog({ open, onClose }) {
           Ajouter une Adresse
         </Button>
       </DialogActions>
-      <AdressDialog open={openAdress} onClose={() => setOpenAdress(false)} />
+      <AdressDialog open={openAdress} 
+                    onClose={() => setOpenAdress(false)} 
+                    onSave={handleAddAdress} // Pass the function to handle saving adresses
+              />
     </Dialog>
   );
 }

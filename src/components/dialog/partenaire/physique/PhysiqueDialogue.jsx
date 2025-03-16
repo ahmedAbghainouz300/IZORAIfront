@@ -11,9 +11,9 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
-import AdressDialog from "./AdressDialog";
-import physiqueService from "../../../service/partenaire/physiqueService";
-import typePartenaireService from "../../../service/partenaire/typePartenaireService";
+import AdressDialog from "../AdressDialog";
+import physiqueService from "../../../../service/partenaire/physiqueService";
+import typePartenaireService from "../../../../service/partenaire/typePartenaireService";
 
 
 export default function PhysiqueDialog({ open, onClose }) {
@@ -26,6 +26,8 @@ export default function PhysiqueDialog({ open, onClose }) {
   const [selectedType, setSelectedType] = useState("");
   const [adresses, setAdresses] = useState([]); 
   const [types,setTypes] = useState([]);
+  const [typePartenaire, setTypePartenaire] = useState("");
+  
 
   // Function to handle adding a new adress
   const handleAddAdress = (newAdresse) => {
@@ -38,7 +40,10 @@ export default function PhysiqueDialog({ open, onClose }) {
       if (open) {
         typePartenaireService
           .getAllByNoms()
-          .then((response) => setTypes(response.data))
+          .then((response) => {
+            console.log("Types de partenaires récupérés:", response.data); // Ajoutez ce log
+            setTypes(response.data);
+          })
           .catch((error) => console.error("Erreur lors du chargement des types:", error));
       }
     }, [open]);
@@ -51,9 +56,12 @@ export default function PhysiqueDialog({ open, onClose }) {
       email,
       telephone,
       cni,
-      typePartenaire: selectedType,
+      typePartenaire: typePartenaire,
       adresses, 
     };
+
+          typePartenaireService.getByNom(selectedType).then((response)=>setTypePartenaire(response.data))
+    
 
     physiqueService
       .create(newPhysique)
@@ -115,23 +123,23 @@ export default function PhysiqueDialog({ open, onClose }) {
           onChange={(e) => setCni(e.target.value)}
         />
 
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Type Partenaire</InputLabel>
-          <Select
-            value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value)}
-          >
-            {types.length === 0 ? (
-              <MenuItem disabled>Aucun type disponible</MenuItem>
-            ) : (
-              types.map((type) => (
-                <MenuItem key={type.id} value={type.nom}>
-                  {type.nom}
-                </MenuItem>
-              ))
-            )}
-          </Select>
-        </FormControl>
+      <FormControl fullWidth margin="normal">
+        <InputLabel>Type Partenaire</InputLabel>
+        <Select
+          value={selectedType}
+          onChange={(e) => setSelectedType(e.target.value)}
+        >
+          {types.length === 0 ? (
+            <MenuItem disabled>Aucun type disponible</MenuItem>
+          ) : (
+            types.map((type) => (
+              <MenuItem key={type.idTypePartenaire} value={type.libelle}>
+                {type.libelle}
+              </MenuItem>
+            ))
+          )}
+        </Select>
+      </FormControl>
         {/* Section to display adresses */}
         <div style={{ marginTop: "20px" }}>
           <h4>Adresses</h4>
