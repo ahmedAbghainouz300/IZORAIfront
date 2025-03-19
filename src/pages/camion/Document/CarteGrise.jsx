@@ -11,10 +11,7 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import AssuranceDialog from "../../../components/dialog/Camion/Document/assurance/AssuranceDialog";
-import ViewAssuranceDialog from "../../../components/dialog/Camion/Document/assurance/ViewAssuranceDialog";
-import EditAssuranceDialog from "../../../components/dialog/Camion/Document/assurance/EditAssuranceDialog";
-import assuranceService from "../../../service/camion/assuranceService";
+import carteGriseService from "../../../service/camion/carteGriseService";
 import "../../../styles/DataGrid.css";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
@@ -23,6 +20,9 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import CarteGriseDialog from "../../../components/dialog/Camion/Document/carteGrise/carteGriseDialog";
+import ViewCarteGriseDialog from "../../../components/dialog/Camion/Document/carteGrise/viewCarteGriseDialog";
+import EditCarteGriseDialog from "../../../components/dialog/Camion/Document/carteGrise/editCarteGriseDialog";
 
 // Custom Toolbar with only the CSV/Excel Export Button
 function CustomToolbar() {
@@ -33,42 +33,46 @@ function CustomToolbar() {
   );
 }
 
-export default function Assurance() {
-  const [assuranceDialogOpen, setAssuranceDialogOpen] = React.useState(false);
+export default function CarteGrise() {
+  const [carteGriseDialogOpen, setCarteGriseDialogOpen] = React.useState(false);
   const [viewDialogOpen, setViewDialogOpen] = React.useState(false);
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
   const [selectedRow, setSelectedRow] = React.useState(null);
   const [rows, setRows] = React.useState([]);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [isFailedAssurancesFetch, setIsFailedAssurancesFetch] = useState(false);
-  const [isFailedAssuranceDelete, setIsFailedAssuranceDelete] = useState(false);
-  const [isFailedAssuranceUpdate, setIsFailedAssuranceUpdate] = useState(false);
-  const [isFailedAssuranceCreate, setIsFailedAssuranceCreate] = useState(false);
+  const [isFailedCarteGrisesFetch, setIsFailedCarteGrisesFetch] =
+    useState(false);
+  const [isFailedCarteGriseDelete, setIsFailedCarteGriseDelete] =
+    useState(false);
+  const [isFailedCarteGriseUpdate, setIsFailedCarteGriseUpdate] =
+    useState(false);
+  const [isFailedCarteGriseCreate, setIsFailedCarteGriseCreate] =
+    useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [assuranceToDelete, setAssuranceToDelete] = useState(null);
+  const [carteGriseToDelete, setCarteGriseToDelete] = useState(null);
 
   // Load data when the component mounts
   useEffect(() => {
-    fetchAssurances();
+    fetchCarteGrises();
   }, []);
 
-  // Fetch assurances from the backend
-  const fetchAssurances = async () => {
+  // Fetch carteGrises from the backend
+  const fetchCarteGrises = async () => {
     try {
-      const response = await assuranceService.getAll();
+      const response = await carteGriseService.getAll();
       setRows(response.data);
-      console.log("Assurances récupérées avec succès");
+      console.log("Carte Grises récupérées avec succès");
     } catch (error) {
-      console.error("Erreur lors de la récupération des assurances:", error);
-      setIsFailedAssurancesFetch(true);
+      console.error("Erreur lors de la récupération des cartes grises:", error);
+      setIsFailedCarteGrisesFetch(true);
     }
   };
 
-  // Open the dialog to add a new assurance
-  const handleOpenAssuranceDialog = () => setAssuranceDialogOpen(true);
+  // Open the dialog to add a new carteGrise
+  const handleOpenCarteGriseDialog = () => setCarteGriseDialogOpen(true);
 
-  // Close the dialog to add a new assurance
-  const handleCloseAssuranceDialog = () => setAssuranceDialogOpen(false);
+  // Close the dialog to add a new carteGrise
+  const handleCloseCarteGriseDialog = () => setCarteGriseDialogOpen(false);
 
   // Handle view action
   const handleView = (row) => {
@@ -84,22 +88,22 @@ export default function Assurance() {
 
   // Open the delete confirmation dialog
   const handleDeleteClick = (id) => {
-    setAssuranceToDelete(id);
+    setCarteGriseToDelete(id);
     setDeleteDialogOpen(true);
   };
 
   // Handle the actual deletion
   const handleDelete = async () => {
     try {
-      await assuranceService.delete(assuranceToDelete);
-      setRows(rows.filter((row) => row.id !== assuranceToDelete));
-      console.log("Assurance supprimée avec succès");
+      await carteGriseService.delete(carteGriseToDelete);
+      setRows(rows.filter((row) => row.id !== carteGriseToDelete));
+      console.log("Carte Grise supprimée avec succès");
       setIsSuccess(true);
       setDeleteDialogOpen(false);
-      fetchAssurances(); // Refresh the data
+      fetchCarteGrises(); // Refresh the data
     } catch (error) {
-      console.error("Erreur lors de la suppression de l'assurance:", error);
-      setIsFailedAssuranceDelete(true);
+      console.error("Erreur lors de la suppression de la carte grise:", error);
+      setIsFailedCarteGriseDelete(true);
       setDeleteDialogOpen(false);
     }
   };
@@ -107,44 +111,40 @@ export default function Assurance() {
   // Close the delete confirmation dialog
   const handleCloseDeleteDialog = () => {
     setDeleteDialogOpen(false);
-    setAssuranceToDelete(null);
+    setCarteGriseToDelete(null);
   };
 
-  // Handle save action for updated assurance
-  const handleSave = async (updatedAssurance) => {
+  // Handle save action for updated carteGrise
+  const handleSave = async (updatedCarteGrise) => {
     try {
-      await assuranceService.update(
-        updatedAssurance.numeroContrat,
-        updatedAssurance
-      );
+      await carteGriseService.update(updatedCarteGrise.id, updatedCarteGrise);
       setRows(
         rows.map((row) =>
-          row.numeroContrat === updatedAssurance.numeroContrat
-            ? updatedAssurance
-            : row
+          row.id === updatedCarteGrise.id ? updatedCarteGrise : row
         )
       );
       setEditDialogOpen(false);
       setIsSuccess(true);
-      fetchAssurances();
-      console.log("Assurance mise à jour avec succès");
+      fetchCarteGrises();
+      console.log("Carte Grise mise à jour avec succès");
     } catch (error) {
-      console.error("Erreur lors de la mise à jour de l'assurance:", error);
-      setIsFailedAssuranceUpdate(true);
+      console.error("Erreur lors de la mise à jour de la carte grise:", error);
+      setIsFailedCarteGriseUpdate(true);
     }
   };
 
-  // Handle create action for new assurance
-  const handleCreate = async (newAssurance) => {
+  // Handle create action for new carteGrise
+  const handleCreate = async (newCarteGrise) => {
     try {
-      const response = await assuranceService.create(newAssurance);
+      console.log(newCarteGrise);
+      const response = await carteGriseService.create(newCarteGrise);
       setRows([...rows, response.data]);
-      setAssuranceDialogOpen(false);
+      setCarteGriseDialogOpen(false);
       setIsSuccess(true);
-      console.log("Assurance créée avec succès");
+      console.log("Carte Grise créée avec succès");
     } catch (error) {
-      console.error("Erreur lors de la création de l'assurance:", error);
-      setIsFailedAssuranceCreate(true);
+      console.error("Erreur lors de la création de la carte grise:", error);
+      setIsFailedCarteGriseCreate(true);
     }
   };
 
@@ -157,48 +157,67 @@ export default function Assurance() {
   };
 
   // Close the error messages
-  const handleCloseFailedAssurancesFetch = (event, reason) => {
+  const handleCloseFailedCarteGrisesFetch = (event, reason) => {
     if (reason === "clickaway") {
       return;
     }
-    setIsFailedAssurancesFetch(false);
+    setIsFailedCarteGrisesFetch(false);
   };
 
-  const handleCloseFailedAssuranceDelete = (event, reason) => {
+  const handleCloseFailedCarteGriseDelete = (event, reason) => {
     if (reason === "clickaway") {
       return;
     }
-    setIsFailedAssuranceDelete(false);
+    setIsFailedCarteGriseDelete(false);
   };
 
-  const handleCloseFailedAssuranceUpdate = (event, reason) => {
+  const handleCloseFailedCarteGriseUpdate = (event, reason) => {
     if (reason === "clickaway") {
       return;
     }
-    setIsFailedAssuranceUpdate(false);
+    setIsFailedCarteGriseUpdate(false);
   };
 
-  const handleCloseFailedAssuranceCreate = (event, reason) => {
+  const handleCloseFailedCarteGriseCreate = (event, reason) => {
     if (reason === "clickaway") {
       return;
     }
-    setIsFailedAssuranceCreate(false);
+    setIsFailedCarteGriseCreate(false);
   };
 
   // Define columns for the DataGrid
   const columns = [
-    { field: "company", headerName: "Compagnie", flex: 1 },
-    { field: "typeCouverture", headerName: "Type de Couverture", flex: 1 },
-    { field: "montant", headerName: "Montant", flex: 1, type: "number" },
-    { field: "dateDebut", headerName: "Date de Début", flex: 1 },
-    { field: "dateExpiration", headerName: "Date d'Expiration", flex: 1 },
+    { field: "marque", headerName: "Marque", flex: 1 },
+    { field: "genre", headerName: "Genre", flex: 1 },
+    { field: "numeroSerie", headerName: "Numéro de Série", flex: 1 },
+    { field: "couleur", headerName: "Couleur", flex: 1 },
     {
-      field: "primeAnnuelle",
-      headerName: "Prime Annuelle",
+      field: "nombrePlace",
+      headerName: "Nombre de Places",
       flex: 1,
       type: "number",
     },
-    { field: "numCarteVerte", headerName: "Numéro Carte Verte", flex: 1 },
+    { field: "puissanceFiscale", headerName: "Puissance Fiscale", flex: 1 },
+    { field: "energie", headerName: "Énergie", flex: 1 },
+    { field: "proprietaire", headerName: "Propriétaire", flex: 1 },
+    {
+      field: "poidsVide",
+      headerName: "Poids à Vide (kg)",
+      flex: 1,
+      type: "number",
+    },
+    {
+      field: "poidsAutorise",
+      headerName: "Poids Autorisé (kg)",
+      flex: 1,
+      type: "number",
+    },
+    {
+      field: "dateMiseEnCirculation",
+      headerName: "Date de Mise en Circulation",
+      flex: 1,
+    },
+    { field: "dateDelivrance", headerName: "Date de Délivrance", flex: 1 },
     {
       field: "actions",
       headerName: "Actions",
@@ -228,44 +247,44 @@ export default function Assurance() {
   return (
     <Box>
       <div className="buttons">
-        <button className="blue-button" onClick={handleOpenAssuranceDialog}>
-          <p>Nouvelle assurance</p>
+        <button className="blue-button" onClick={handleOpenCarteGriseDialog}>
+          <p>Nouvelle Carte Grise</p>
         </button>
       </div>
 
-      {/* Dialog to add a new assurance */}
-      {assuranceDialogOpen && (
-        <AssuranceDialog
-          open={assuranceDialogOpen}
-          onClose={handleCloseAssuranceDialog}
+      {/* Dialog to add a new carteGrise */}
+      {carteGriseDialogOpen && (
+        <CarteGriseDialog
+          open={carteGriseDialogOpen}
+          onClose={handleCloseCarteGriseDialog}
           onSave={handleCreate}
         />
       )}
 
-      {/* Dialog to view assurance details */}
+      {/* Dialog to view carteGrise details */}
       {viewDialogOpen && (
-        <ViewAssuranceDialog
+        <ViewCarteGriseDialog
           open={viewDialogOpen}
           onClose={() => setViewDialogOpen(false)}
-          assurance={selectedRow}
+          carteGrise={selectedRow}
         />
       )}
 
-      {/* Dialog to edit an assurance */}
+      {/* Dialog to edit a carteGrise */}
       {editDialogOpen && (
-        <EditAssuranceDialog
+        <EditCarteGriseDialog
           open={editDialogOpen}
           onClose={() => setEditDialogOpen(false)}
-          assurance={selectedRow}
+          carteGrise={selectedRow}
           onSave={handleSave}
         />
       )}
 
-      {/* DataGrid to display assurances */}
+      {/* DataGrid to display carteGrises */}
       <DataGrid
         rows={rows}
         columns={columns}
-        getRowId={(row) => row.numeroContrat}
+        getRowId={(row) => row.id}
         initialState={{
           pagination: {
             paginationModel: {
@@ -298,7 +317,7 @@ export default function Assurance() {
         <DialogTitle id="delete-dialog-title">Confirm Deletion</DialogTitle>
         <DialogContent>
           <DialogContentText id="delete-dialog-description">
-            Are you sure you want to delete this assurance? This action cannot
+            Are you sure you want to delete this carte grise? This action cannot
             be undone.
           </DialogContentText>
         </DialogContent>
@@ -330,59 +349,59 @@ export default function Assurance() {
 
       {/* Error Snackbars */}
       <Snackbar
-        open={isFailedAssurancesFetch}
+        open={isFailedCarteGrisesFetch}
         autoHideDuration={3000}
-        onClose={handleCloseFailedAssurancesFetch}
+        onClose={handleCloseFailedCarteGrisesFetch}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <MuiAlert
-          onClose={handleCloseFailedAssurancesFetch}
+          onClose={handleCloseFailedCarteGrisesFetch}
           severity="error"
           sx={{ width: "100%" }}
         >
-          Failed to fetch assurances!
+          Failed to fetch carte grises!
         </MuiAlert>
       </Snackbar>
       <Snackbar
-        open={isFailedAssuranceDelete}
+        open={isFailedCarteGriseDelete}
         autoHideDuration={3000}
-        onClose={handleCloseFailedAssuranceDelete}
+        onClose={handleCloseFailedCarteGriseDelete}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <MuiAlert
-          onClose={handleCloseFailedAssuranceDelete}
+          onClose={handleCloseFailedCarteGriseDelete}
           severity="error"
           sx={{ width: "100%" }}
         >
-          Failed to delete assurance!
+          Failed to delete carte grise!
         </MuiAlert>
       </Snackbar>
       <Snackbar
-        open={isFailedAssuranceUpdate}
+        open={isFailedCarteGriseUpdate}
         autoHideDuration={3000}
-        onClose={handleCloseFailedAssuranceUpdate}
+        onClose={handleCloseFailedCarteGriseUpdate}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <MuiAlert
-          onClose={handleCloseFailedAssuranceUpdate}
+          onClose={handleCloseFailedCarteGriseUpdate}
           severity="error"
           sx={{ width: "100%" }}
         >
-          Failed to update assurance! Verify the entered data.
+          Failed to update carte grise! Verify the entered data.
         </MuiAlert>
       </Snackbar>
       <Snackbar
-        open={isFailedAssuranceCreate}
+        open={isFailedCarteGriseCreate}
         autoHideDuration={3000}
-        onClose={handleCloseFailedAssuranceCreate}
+        onClose={handleCloseFailedCarteGriseCreate}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <MuiAlert
-          onClose={handleCloseFailedAssuranceCreate}
+          onClose={handleCloseFailedCarteGriseCreate}
           severity="error"
           sx={{ width: "100%" }}
         >
-          Failed to create assurance! Verify the entered data.
+          Failed to create carte grise! Verify the entered data.
         </MuiAlert>
       </Snackbar>
     </Box>

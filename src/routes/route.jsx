@@ -16,6 +16,7 @@ import Document from "../pages/camion/Document/Document";
 import Assurance from "../pages/camion/Document/Assurance";
 import Entretient from "../pages/camion/Document/Entretient";
 import Carburant from "../pages/camion/Document/Carburant";
+import CarteGrise from "../pages/camion/Document/CarteGrise";
 
 function AppRoutes() {
   return (
@@ -55,6 +56,10 @@ function AppRoutes() {
             element={<Entretient />}
           />
           <Route path={allRoutes.document.carburant} element={<Carburant />} />
+          <Route
+            path={allRoutes.document.carteGrise}
+            element={<CarteGrise />}
+          />
         </Route>
       </Route>
     </Routes>

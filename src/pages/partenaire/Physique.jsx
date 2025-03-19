@@ -14,6 +14,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import ViewPhysiqueDialog from "../../components/dialog/partenaire/ViewPhysiqueDialog"; // Dialogue pour voir les détails
 import EditPhysiqueDialog from "../../components/dialog/partenaire/EditPhysiqueDialog"; // Dialogue pour modifier
+import "../../styles/DataGrid.css";
 
 function CustomToolbar() {
   return (
@@ -52,7 +53,13 @@ export default function Physique() {
 
   const handleSave = (updatedPartenaire) => {
     // Mettre à jour les données dans l'état
-    setRows(rows.map((row) => (row.idPartenaire === updatedPartenaire.idPartenaire ? updatedPartenaire : row)));
+    setRows(
+      rows.map((row) =>
+        row.idPartenaire === updatedPartenaire.idPartenaire
+          ? updatedPartenaire
+          : row
+      )
+    );
     setEditDialogOpen(false);
   };
 
@@ -62,7 +69,9 @@ export default function Physique() {
       .then(() => {
         setRows(rows.filter((row) => row.idPartenaire !== idPartenaire));
       })
-      .catch((error) => console.error("Erreur lors de la suppression :", error));
+      .catch((error) =>
+        console.error("Erreur lors de la suppression :", error)
+      );
   };
 
   // Définir les colonnes à l'intérieur du composant pour accéder aux fonctions
@@ -88,7 +97,10 @@ export default function Physique() {
           <IconButton color="secondary" onClick={() => handleEdit(params.row)}>
             <EditIcon />
           </IconButton>
-          <IconButton color="error" onClick={() => handleDelete(params.row.idPartenaire)}>
+          <IconButton
+            color="error"
+            onClick={() => handleDelete(params.row.idPartenaire)}
+          >
             <DeleteIcon />
           </IconButton>
         </div>
@@ -100,12 +112,14 @@ export default function Physique() {
     <div>
       <h1>Gestion des Partenaires Physiques :</h1>
 
-      <Box sx={{ height: 500, width: "100%" }}>
+      <Box>
         <Button variant="contained" onClick={handleOpenDialog} sx={{ mb: 2 }}>
           Ajouter un Partenaire Physique
         </Button>
 
-        {dialogOpen && <PhysiqueDialog open={dialogOpen} onClose={handleCloseDialog} />}
+        {dialogOpen && (
+          <PhysiqueDialog open={dialogOpen} onClose={handleCloseDialog} />
+        )}
 
         <DataGrid
           rows={rows}

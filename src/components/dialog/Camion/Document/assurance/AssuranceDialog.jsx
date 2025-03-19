@@ -78,22 +78,25 @@ export default function AssuranceDialog({ open, onClose, onSave }) {
             onChange={handleInputChange}
             margin="normal"
           />
-          <MobileDatePicker
-            label="Date debut"
-            value={assuranceData.dateDebut}
-            onChange={handleDateChange("dateDebut")}
-            renderInput={(params) => (
-              <TextField {...params} fullWidth margin="normal" />
-            )}
-          />
-          <MobileDatePicker
-            label="Date expiration"
-            value={assuranceData.dateExpiration}
-            onChange={handleDateChange("dateExpiration")}
-            renderInput={(params) => (
-              <TextField {...params} fullWidth margin="normal" />
-            )}
-          />
+
+          <div style={{ display: "flex", justifyContent: "space-around" }}>
+            <MobileDatePicker
+              label="Date debut"
+              value={assuranceData.dateDebut}
+              onChange={handleDateChange("dateDebut")}
+              renderInput={(params) => (
+                <TextField {...params} fullWidth margin="normal" />
+              )}
+            />
+            <MobileDatePicker
+              label="Date expiration"
+              value={assuranceData.dateExpiration}
+              onChange={handleDateChange("dateExpiration")}
+              renderInput={(params) => (
+                <TextField {...params} fullWidth margin="normal" />
+              )}
+            />
+          </div>
           <TextField
             fullWidth
             label="Prime annuelle"
@@ -102,6 +105,7 @@ export default function AssuranceDialog({ open, onClose, onSave }) {
             onChange={handleInputChange}
             margin="normal"
           />
+
           <TextField
             fullWidth
             label="numero de la carte verte"

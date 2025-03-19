@@ -14,7 +14,7 @@ import CabineDialog from "../../components/dialog/Camion/cabinet/CabineDialog";
 import ViewCabineDialog from "../../components/dialog/Camion/cabinet/ViewCabineDialog";
 import EditCabineDialog from "../../components/dialog/Camion/cabinet/EditCabineDialog";
 import camionService from "../../service/camion/camionService";
-import "../../styles/cabine.css";
+import "../../styles/DataGrid.css";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import Dialog from "@mui/material/Dialog"; // Import Dialog
@@ -130,6 +130,7 @@ export default function Cabine() {
 
   const handleCreate = async (newCabine) => {
     try {
+      console.log(newCabine);
       const response = await camionService.create(newCabine);
       setRows([...rows, response.data]);
       setCabineDialogOpen(false);
@@ -186,7 +187,14 @@ export default function Cabine() {
   // Define columns
   const columns = [
     { field: "immatriculation", headerName: "ID", width: 90 },
-    { field: "typeCabine", headerName: "Type de Cabine", flex: 1 },
+    {
+      field: "typeCamion",
+      headerName: "Type de Cabine",
+      flex: 1,
+      valueGetter: (params) => {
+        return params ? params.type : "N/A";
+      },
+    },
     {
       field: "poidsMax",
       headerName: "Poids Max (kg)",
@@ -226,7 +234,7 @@ export default function Cabine() {
   ];
 
   return (
-    <Box sx={{ height: 500, width: "100%" }}>
+    <Box>
       <div className="buttons">
         <button className="blue-button" onClick={handleOpenCabineDialog}>
           <p>Nouvelle Cabine</p>
@@ -274,7 +282,7 @@ export default function Cabine() {
             },
           },
         }}
-        pageSizeOptions={[5]}
+        pageSizeOptions={[5, 10, 20]}
         checkboxSelection
         disableRowSelectionOnClick
         slots={{ toolbar: CustomToolbar }}

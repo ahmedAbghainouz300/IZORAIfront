@@ -5,13 +5,27 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
+import TypeRemorqueSelect from "../../../select/TypeRemorqueSelect"; // Import the TypeRemorqueSelect component
+import { FormControl } from "@mui/material";
 
-export default function EditRemorqueDialog({ open, onClose, remorque, onSave }) {
+export default function EditRemorqueDialog({
+  open,
+  onClose,
+  remorque,
+  onSave,
+}) {
   const [formData, setFormData] = useState(remorque);
+  const [isTypeRemorqueModalOpen, setIsTypeRemorqueModalOpen] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  // Handler for selecting a typeRemorque
+  const handleSelectTypeRemorque = (typeRemorque) => {
+    setFormData({ ...formData, typeRemorque });
+    setIsTypeRemorqueModalOpen(false);
   };
 
   const handleSubmit = () => {
@@ -23,22 +37,30 @@ export default function EditRemorqueDialog({ open, onClose, remorque, onSave }) 
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>Modifier la Remorque</DialogTitle>
       <DialogContent>
-        <TextField
-          name="immatriculation"
-          label="Immatriculation"
-          value={formData.immatriculation}
-          onChange={handleChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          name="typeRemorque"
-          label="Type de Remorque"
-          value={formData.typeRemorque}
-          onChange={handleChange}
-          fullWidth
-          margin="normal"
-        />
+        {/* Replace the TextField for Type de Remorque with TypeRemorqueSelect */}
+        <FormControl fullWidth margin="normal">
+          <TextField
+            value={
+              formData.typeRemorque
+                ? formData.typeRemorque.type // Assuming `typeRemorque` has a `type` property
+                : ""
+            }
+            InputProps={{
+              readOnly: true,
+            }}
+            onClick={() => setIsTypeRemorqueModalOpen(true)}
+            fullWidth
+            label="Type de Remorque"
+          />
+          <Button
+            variant="outlined"
+            onClick={() => setIsTypeRemorqueModalOpen(true)}
+            style={{ marginTop: "8px" }}
+          >
+            Sélectionner un Type de Remorque
+          </Button>
+        </FormControl>
+
         <TextField
           name="volumesStockage"
           label="Volume de Stockage (m³)"
@@ -73,6 +95,13 @@ export default function EditRemorqueDialog({ open, onClose, remorque, onSave }) 
           Enregistrer
         </Button>
       </DialogActions>
+
+      {/* TypeRemorqueSelect Modal */}
+      <TypeRemorqueSelect
+        open={isTypeRemorqueModalOpen}
+        onClose={() => setIsTypeRemorqueModalOpen(false)}
+        onSelect={handleSelectTypeRemorque} // Pass the handler for selection
+      />
     </Dialog>
   );
 }

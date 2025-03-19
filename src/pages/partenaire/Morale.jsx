@@ -2,7 +2,11 @@ import React, { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
-import { DataGrid, GridToolbarContainer, GridToolbarExport } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridToolbarContainer,
+  GridToolbarExport,
+} from "@mui/x-data-grid";
 import MoraleDialog from "../../components/dialog/partenaire/morale/MoraleDialog";
 import moraleService from "../../service/partenaire/moraleService";
 import EditIcon from "@mui/icons-material/Edit";
@@ -10,6 +14,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import ViewMoraleDialog from "../../components/dialog/partenaire/morale/ViewMoraleDialog";
 import EditMoraleDialog from "../../components/dialog/partenaire/morale/EditMoraleDialog";
+import "../../styles/DataGrid.css";
 
 function CustomToolbar() {
   return (
@@ -48,7 +53,13 @@ export default function Morale() {
 
   const handleSave = (updatedPartenaire) => {
     // Mettre à jour les données dans l'état
-    setRows(rows.map((row) => (row.idPartenaire === updatedPartenaire.idPartenaire ? updatedPartenaire : row)));
+    setRows(
+      rows.map((row) =>
+        row.idPartenaire === updatedPartenaire.idPartenaire
+          ? updatedPartenaire
+          : row
+      )
+    );
     setEditDialogOpen(false);
   };
 
@@ -58,7 +69,9 @@ export default function Morale() {
       .then(() => {
         setRows(rows.filter((row) => row.idPartenaire !== idPartenaire));
       })
-      .catch((error) => console.error("Erreur lors de la suppression :", error));
+      .catch((error) =>
+        console.error("Erreur lors de la suppression :", error)
+      );
   };
 
   // Définir les colonnes à l'intérieur du composant pour accéder aux fonctions
@@ -67,8 +80,18 @@ export default function Morale() {
     { field: "nom", headerName: "Nom", flex: 1, editable: true },
     { field: "ice", headerName: "ICE", flex: 1, editable: true },
     { field: "numeroRC", headerName: "Numéro RC", flex: 1, editable: true },
-    { field: "abreviation", headerName: "Abreviation", flex: 1, editable: true },
-    { field: "formeJuridique", headerName: "Forme Juridique", flex: 1, editable: true },
+    {
+      field: "abreviation",
+      headerName: "Abreviation",
+      flex: 1,
+      editable: true,
+    },
+    {
+      field: "formeJuridique",
+      headerName: "Forme Juridique",
+      flex: 1,
+      editable: true,
+    },
     {
       field: "actions",
       headerName: "Actions",
@@ -84,7 +107,10 @@ export default function Morale() {
           <IconButton color="secondary" onClick={() => handleEdit(params.row)}>
             <EditIcon />
           </IconButton>
-          <IconButton color="error" onClick={() => handleDelete(params.row.idPartenaire)}>
+          <IconButton
+            color="error"
+            onClick={() => handleDelete(params.row.idPartenaire)}
+          >
             <DeleteIcon />
           </IconButton>
         </div>
@@ -96,12 +122,14 @@ export default function Morale() {
     <div>
       <h1>Gestion des Partenaires Moraux :</h1>
 
-      <Box sx={{ height: 500, width: "100%" }}>
+      <Box>
         <Button variant="contained" onClick={handleOpenDialog} sx={{ mb: 2 }}>
           Ajouter un Partenaire Moral
         </Button>
 
-        {dialogOpen && <MoraleDialog open={dialogOpen} onClose={handleCloseDialog} />}
+        {dialogOpen && (
+          <MoraleDialog open={dialogOpen} onClose={handleCloseDialog} />
+        )}
 
         <DataGrid
           rows={rows}

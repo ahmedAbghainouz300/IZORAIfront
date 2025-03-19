@@ -1,17 +1,33 @@
 import React, { useState } from "react";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  FormControl,
+} from "@mui/material";
+import CamionSelect from "../../../../select/CamionSelect"; // Import the CamionSelect component
 
-export default function EditEntretienDialog({ open, onClose, entretien, onSave }) {
+export default function EditEntretienDialog({
+  open,
+  onClose,
+  entretien,
+  onSave,
+}) {
   const [formData, setFormData] = useState(entretien);
+  const [isCamionModalOpen, setIsCamionModalOpen] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  // Handler for selecting a camion
+  const handleSelectCamion = (camion) => {
+    setFormData({ ...formData, camion });
+    setIsCamionModalOpen(false);
   };
 
   const handleSubmit = () => {
@@ -68,14 +84,30 @@ export default function EditEntretienDialog({ open, onClose, entretien, onSave }
           type="date"
           InputLabelProps={{ shrink: true }}
         />
-        <TextField
-          name="imatriculationCamion"
-          label="Immatriculation Camion"
-          value={formData.imatriculationCamion}
-          onChange={handleChange}
-          fullWidth
-          margin="normal"
-        />
+
+        {/* Camion Selection Field */}
+        <FormControl fullWidth margin="normal">
+          <TextField
+            value={
+              formData.camion
+                ? "Immatriculation : " + formData.camion.immatriculation // Display the selected camion's immatriculation
+                : ""
+            }
+            InputProps={{
+              readOnly: true,
+            }}
+            onClick={() => setIsCamionModalOpen(true)}
+            fullWidth
+            label="Camion"
+          />
+          <Button
+            variant="outlined"
+            onClick={() => setIsCamionModalOpen(true)}
+            style={{ marginTop: "8px" }}
+          >
+            Sélectionner un Camion
+          </Button>
+        </FormControl>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Annuler</Button>
@@ -83,6 +115,13 @@ export default function EditEntretienDialog({ open, onClose, entretien, onSave }
           Enregistrer
         </Button>
       </DialogActions>
+
+      {/* Camion Selection Modal */}
+      <CamionSelect
+        open={isCamionModalOpen}
+        onClose={() => setIsCamionModalOpen(false)}
+        onSelect={handleSelectCamion} // Pass the handler for selection
+      />
     </Dialog>
   );
 }

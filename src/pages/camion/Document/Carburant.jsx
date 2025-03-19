@@ -1,7 +1,6 @@
 import * as React from "react";
-import { useEffect, useState } from "react"; // Importez useEffect et useState
+import { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import {
   DataGrid,
@@ -14,18 +13,16 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import CarburantDialog from "../../../components/dialog/Camion/Document/carburant/CarburantDialog";
 import ViewCarburantDialog from "../../../components/dialog/Camion/Document/carburant/ViewCarburantDialog";
 import EditCarburantDialog from "../../../components/dialog/Camion/Document/carburant/EditCarburantDialog";
-import carburantService from "../../../service/camion/carburantService"; // Importez le service
-import "../../../styles/cabine.css";
-
-// Enum pour TypeCarburant
-const TypeCarburant = {
-  DIESEL: "DIESEL",
-  ESSENCE: "ESSENCE",
-  ELECTRIQUE: "ELECTRIQUE",
-  HYBRIDE: "HYBRIDE",
-};
-
-
+import carburantService from "../../../service/camion/carburantService";
+import "../../../styles/DataGrid.css";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
+import Button from "@mui/material/Button";
 
 // Custom Toolbar with only the CSV/Excel Export Button
 function CustomToolbar() {
@@ -37,34 +34,43 @@ function CustomToolbar() {
 }
 
 export default function Carburant() {
-  const [carburantDialogOpen, setCarburantDialogOpen] = React.useState(false);
-  const [viewDialogOpen, setViewDialogOpen] = React.useState(false);
-  const [editDialogOpen, setEditDialogOpen] = React.useState(false);
-  const [selectedRow, setSelectedRow] = React.useState(null);
-  const [rows, setRows] = React.useState([]);
+  const [carburantDialogOpen, setCarburantDialogOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [rows, setRows] = useState([]);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isFailedCarburantsFetch, setIsFailedCarburantsFetch] = useState(false);
+  const [isFailedCarburantDelete, setIsFailedCarburantDelete] = useState(false);
+  const [isFailedCarburantUpdate, setIsFailedCarburantUpdate] = useState(false);
+  const [isFailedCarburantCreate, setIsFailedCarburantCreate] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [carburantToDelete, setCarburantToDelete] = useState(null);
 
-  // Charger les données au montage du composant
+  // Load data when the component mounts
   useEffect(() => {
     fetchCarburants();
   }, []);
 
-  // Fonction pour récupérer les données du backend
+  // Fetch carburants from the backend
   const fetchCarburants = async () => {
     try {
       const response = await carburantService.getAll();
       setRows(response.data);
+      console.log("Carburants récupérés avec succès");
     } catch (error) {
-      console.error("Erreur lors de la récupération des données de carburant:", error);
+      console.error("Erreur lors de la récupération des carburants:", error);
+      setIsFailedCarburantsFetch(true);
     }
   };
 
-  // Ouvrir le dialogue pour ajouter un carburant
+  // Open the dialog to add a carburant
   const handleOpenCarburantDialog = () => setCarburantDialogOpen(true);
 
-  // Fermer le dialogue pour ajouter un carburant
+  // Close the dialog to add a carburant
   const handleCloseCarburantDialog = () => setCarburantDialogOpen(false);
 
-  // Gérer les actions
+  // Handle actions
   const handleView = (row) => {
     setSelectedRow(row);
     setViewDialogOpen(true);
@@ -75,24 +81,45 @@ export default function Carburant() {
     setEditDialogOpen(true);
   };
 
-  const handleDelete = async (id) => {
+  // Open the delete confirmation dialog
+  const handleDeleteClick = (id) => {
+    setCarburantToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  // Handle the actual deletion
+  const handleDelete = async () => {
     try {
-      await carburantService.delete(id);
-      setRows(rows.filter((row) => row.id !== id));
-      console.log("Entrée de carburant supprimée avec succès");
+      await carburantService.delete(carburantToDelete);
+      setRows(rows.filter((row) => row.id !== carburantToDelete));
+      setIsSuccess(true);
+      setDeleteDialogOpen(false);
     } catch (error) {
-      console.error("Erreur lors de la suppression de l'entrée de carburant:", error);
+      console.error("Erreur lors de la suppression du carburant:", error);
+      setIsFailedCarburantDelete(true);
+      setDeleteDialogOpen(false);
     }
+  };
+
+  // Close the delete confirmation dialog
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setCarburantToDelete(null);
   };
 
   const handleSave = async (updatedCarburant) => {
     try {
       await carburantService.update(updatedCarburant.id, updatedCarburant);
-      setRows(rows.map((row) => (row.id === updatedCarburant.id ? updatedCarburant : row)));
+      setRows(
+        rows.map((row) =>
+          row.id === updatedCarburant.id ? updatedCarburant : row
+        )
+      );
       setEditDialogOpen(false);
-      console.log("Entrée de carburant mise à jour avec succès");
+      setIsSuccess(true);
     } catch (error) {
-      console.error("Erreur lors de la mise à jour de l'entrée de carburant:", error);
+      console.error("Erreur lors de la mise à jour du carburant:", error);
+      setIsFailedCarburantUpdate(true);
     }
   };
 
@@ -101,20 +128,80 @@ export default function Carburant() {
       const response = await carburantService.create(newCarburant);
       setRows([...rows, response.data]);
       setCarburantDialogOpen(false);
-      console.log("Entrée de carburant créée avec succès");
+      setIsSuccess(true);
     } catch (error) {
-      console.error("Erreur lors de la création de l'entrée de carburant:", error);
+      console.error("Erreur lors de la création du carburant:", error);
+      setIsFailedCarburantCreate(true);
     }
   };
 
-  // Définir les colonnes
+  // Close success message
+  const handleCloseSuccess = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setIsSuccess(false);
+  };
+
+  // Close error messages
+  const handleCloseFailedCarburantsFetch = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setIsFailedCarburantsFetch(false);
+  };
+
+  const handleCloseFailedCarburantDelete = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setIsFailedCarburantDelete(false);
+  };
+
+  const handleCloseFailedCarburantUpdate = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setIsFailedCarburantUpdate(false);
+  };
+
+  const handleCloseFailedCarburantCreate = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setIsFailedCarburantCreate(false);
+  };
+
+  // Define columns
   const columns = [
     { field: "id", headerName: "ID", width: 90 },
-    { field: "dateRemplissage", headerName: "Date de Remplissage", flex: 1 },
-    { field: "quantity", headerName: "Quantité (L)", flex: 1, type: "number" },
-    { field: "prixParLitre", headerName: "Prix par Litre (€)", flex: 1, type: "number" },
-    { field: "kilometrageActuel", headerName: "Kilométrage Actuel", flex: 1, type: "number" },
-    { field: "typeCarburant", headerName: "Type de Carburant", flex: 1 },
+    { field: "dateRemplissage", headerName: "Date de Remplissage", flex: 1.2 },
+    {
+      field: "quantity",
+      headerName: "Quantité (L)",
+      flex: 0.8,
+      type: "number",
+    },
+    {
+      field: "prixParLitre",
+      headerName: "Prix par Litre (€)",
+      flex: 1,
+      type: "number",
+    },
+    {
+      field: "kilometrageActuel",
+      headerName: "Kilométrage Actuel",
+      flex: 1,
+      type: "number",
+    },
+    {
+      field: "typeCarburant",
+      headerName: "Type de Carburant",
+      flex: 1,
+      valueGetter: (params) => {
+        return params ? params.type : "N/A";
+      },
+    },
     {
       field: "actions",
       headerName: "Actions",
@@ -130,7 +217,10 @@ export default function Carburant() {
           <IconButton color="secondary" onClick={() => handleEdit(params.row)}>
             <EditIcon />
           </IconButton>
-          <IconButton color="error" onClick={() => handleDelete(params.row.id)}>
+          <IconButton
+            color="error"
+            onClick={() => handleDeleteClick(params.row.id)}
+          >
             <DeleteIcon />
           </IconButton>
         </div>
@@ -139,14 +229,14 @@ export default function Carburant() {
   ];
 
   return (
-    <Box sx={{ height: 500, width: "100%" }}>
+    <Box>
       <div className="buttons">
         <button className="blue-button" onClick={handleOpenCarburantDialog}>
           <p>Nouveau Carburant</p>
         </button>
       </div>
 
-      {/* Dialogue pour ajouter un carburant */}
+      {/* Dialog to add a carburant */}
       {carburantDialogOpen && (
         <CarburantDialog
           open={carburantDialogOpen}
@@ -155,7 +245,7 @@ export default function Carburant() {
         />
       )}
 
-      {/* Dialogue pour voir les détails d'un carburant */}
+      {/* Dialog to view carburant details */}
       {viewDialogOpen && (
         <ViewCarburantDialog
           open={viewDialogOpen}
@@ -164,7 +254,7 @@ export default function Carburant() {
         />
       )}
 
-      {/* Dialogue pour modifier un carburant */}
+      {/* Dialog to edit a carburant */}
       {editDialogOpen && (
         <EditCarburantDialog
           open={editDialogOpen}
@@ -174,7 +264,7 @@ export default function Carburant() {
         />
       )}
 
-      {/* Tableau */}
+      {/* DataGrid */}
       <DataGrid
         rows={rows}
         columns={columns}
@@ -186,7 +276,7 @@ export default function Carburant() {
             },
           },
         }}
-        pageSizeOptions={[5]}
+        pageSizeOptions={[5, 10, 20]}
         checkboxSelection
         disableRowSelectionOnClick
         slots={{ toolbar: CustomToolbar }}
@@ -199,6 +289,104 @@ export default function Carburant() {
           },
         }}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Are you sure you want to delete this carburant? This action cannot
+            be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDelete} color="error" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={isSuccess}
+        autoHideDuration={3000}
+        onClose={handleCloseSuccess}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <MuiAlert
+          onClose={handleCloseSuccess}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          Operation successful!
+        </MuiAlert>
+      </Snackbar>
+
+      {/* Error Snackbars */}
+      <Snackbar
+        open={isFailedCarburantsFetch}
+        autoHideDuration={3000}
+        onClose={handleCloseFailedCarburantsFetch}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <MuiAlert
+          onClose={handleCloseFailedCarburantsFetch}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          Failed to fetch carburants!
+        </MuiAlert>
+      </Snackbar>
+      <Snackbar
+        open={isFailedCarburantDelete}
+        autoHideDuration={3000}
+        onClose={handleCloseFailedCarburantDelete}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <MuiAlert
+          onClose={handleCloseFailedCarburantDelete}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          Failed to delete carburant!
+        </MuiAlert>
+      </Snackbar>
+      <Snackbar
+        open={isFailedCarburantUpdate}
+        autoHideDuration={3000}
+        onClose={handleCloseFailedCarburantUpdate}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <MuiAlert
+          onClose={handleCloseFailedCarburantUpdate}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          Failed to update carburant! Verify the entered data.
+        </MuiAlert>
+      </Snackbar>
+      <Snackbar
+        open={isFailedCarburantCreate}
+        autoHideDuration={3000}
+        onClose={handleCloseFailedCarburantCreate}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <MuiAlert
+          onClose={handleCloseFailedCarburantCreate}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          Failed to create carburant! Verify the entered data.
+        </MuiAlert>
+      </Snackbar>
     </Box>
   );
 }

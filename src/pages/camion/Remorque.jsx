@@ -14,6 +14,7 @@ import RemorqueDialog from "../../components/dialog/Camion/remorque/RemorqueDial
 import ViewRemorqueDialog from "../../components/dialog/Camion/remorque/ViewRemorqueDialog";
 import EditRemorqueDialog from "../../components/dialog/Camion/remorque/EditRemorqueDialog";
 import remorqueService from "../../service/camion/remorqueService"; // Import the service
+import "../../styles/DataGrid.css";
 
 // Custom Toolbar with only the CSV/Excel Export Button
 function CustomToolbar() {
@@ -41,6 +42,7 @@ export default function Remorque() {
     try {
       const response = await remorqueService.getAll();
       setRows(response.data);
+      console.log(response.data);
     } catch (error) {
       console.error("Error fetching remorques:", error);
     }
@@ -66,10 +68,11 @@ export default function Remorque() {
 
   // Handle delete action
   const handleDelete = async (idRemorque) => {
+    console.log("Deleting remorque with ID:", idRemorque); // Debugging log
     try {
       await remorqueService.delete(idRemorque);
-      setRows(rows.filter((row) => row.idRemorque !== idRemorque));
       console.log("Remorque deleted:", idRemorque);
+      fetchRemorques(); // Refresh the data after deletion
     } catch (error) {
       console.error("Error deleting remorque:", error);
     }
@@ -93,6 +96,7 @@ export default function Remorque() {
   // Handle create action (add new remorque)
   const handleCreate = async (newRemorque) => {
     try {
+      console.log(newRemorque);
       const response = await remorqueService.create(newRemorque);
       setRows([...rows, response.data]);
       setRemorqueDialogOpen(false);
@@ -104,7 +108,14 @@ export default function Remorque() {
   // Define columns for the DataGrid
   const columns = [
     { field: "idRemorque", headerName: "ID", width: 90 },
-    { field: "typeRemorque", headerName: "Type de Remorque", flex: 1 },
+    {
+      field: "typeRemorque",
+      headerName: "Type de Remorque",
+      flex: 1,
+      valueGetter: (params) => {
+        return params ? params.type : "N/A";
+      },
+    },
     {
       field: "volumesStockage",
       headerName: "Volume de Stockage (m³)",
@@ -141,7 +152,7 @@ export default function Remorque() {
           </IconButton>
           <IconButton
             color="error"
-            onClick={() => handleDelete(params.row.idRemorque)}
+            onClick={() => handleDelete(params.row.idRemorque)} // Pass idRemorque correctly
           >
             <DeleteIcon />
           </IconButton>
@@ -151,7 +162,7 @@ export default function Remorque() {
   ];
 
   return (
-    <Box sx={{ height: 500, width: "100%" }}>
+    <Box>
       <div className="buttons">
         <button className="blue-button" onClick={handleOpenRemorqueDialog}>
           <p>Nouvelle Remorque</p>
@@ -198,7 +209,7 @@ export default function Remorque() {
             },
           },
         }}
-        pageSizeOptions={[5]}
+        pageSizeOptions={[5, 10, 20]}
         checkboxSelection
         disableRowSelectionOnClick
         slots={{ toolbar: CustomToolbar }}

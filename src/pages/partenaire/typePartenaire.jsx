@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import { DataGrid, GridToolbarContainer, GridToolbarExport } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridToolbarContainer,
+  GridToolbarExport,
+} from "@mui/x-data-grid";
 import TypePartenaireDialog from "../../components/dialog/partenaire/typepartenaire/TypePartenaireDialog.jsx"; // Créez le dialogue pour ajouter un type de partenaire
 import typePartenaireService from "../../service/partenaire/typePartenaireService"; // Import du service
 import VoirTypePartenaireDialog from "../../components/dialog/partenaire/typepartenaire/VoirTypePartenaireDialog.jsx"; // Créez le dialogue pour voir un type de partenaire
 import ModifierTypePartenaireDialog from "../../components/dialog/partenaire/typepartenaire/ModifierTypePartenaireDialog.jsx"; // Créez le dialogue pour modifier un type de partenaire
-
+import "../../styles/DataGrid.css";
 
 const columns = (handleVoir, handleModifier, handleDelete) => [
   { field: "idTypePartenaire", headerName: "ID", width: 90 },
@@ -70,13 +74,15 @@ export default function TypePartenaire() {
   }, []);
 
   const fetchTypePartenaires = () => {
-    typePartenaireService.getAll()
+    typePartenaireService
+      .getAll()
       .then((response) => setRows(response.data))
       .catch((error) => console.error("Erreur:", error));
   };
 
   const handleDelete = (id) => {
-    typePartenaireService.delete(id)
+    typePartenaireService
+      .delete(id)
       .then(() => {
         setRows(rows.filter((row) => row.idTypePartenaire !== id));
       })
@@ -97,14 +103,36 @@ export default function TypePartenaire() {
     <div>
       <h1>Gestion des Types de Partenaires :</h1>
 
-      <Box sx={{ height: 500, width: "100%" }}>
-        <Button variant="contained" onClick={() => setDialogOpen(true)} sx={{ mb: 2 }}>
+      <Box>
+        <Button
+          variant="contained"
+          onClick={() => setDialogOpen(true)}
+          sx={{ mb: 2 }}
+        >
           Ajouter un Type de Partenaire
         </Button>
 
-        {dialogOpen && <TypePartenaireDialog open={dialogOpen} onClose={() => setDialogOpen(false)} />}
-        {voirDialogOpen && <VoirTypePartenaireDialog open={voirDialogOpen} onClose={() => setVoirDialogOpen(false)} typePartenaire={selectedTypePartenaire} />}
-        {modifierDialogOpen && <ModifierTypePartenaireDialog open={modifierDialogOpen} onClose={() => setModifierDialogOpen(false)} typePartenaire={selectedTypePartenaire} onUpdate={fetchTypePartenaires} />}
+        {dialogOpen && (
+          <TypePartenaireDialog
+            open={dialogOpen}
+            onClose={() => setDialogOpen(false)}
+          />
+        )}
+        {voirDialogOpen && (
+          <VoirTypePartenaireDialog
+            open={voirDialogOpen}
+            onClose={() => setVoirDialogOpen(false)}
+            typePartenaire={selectedTypePartenaire}
+          />
+        )}
+        {modifierDialogOpen && (
+          <ModifierTypePartenaireDialog
+            open={modifierDialogOpen}
+            onClose={() => setModifierDialogOpen(false)}
+            typePartenaire={selectedTypePartenaire}
+            onUpdate={fetchTypePartenaires}
+          />
+        )}
 
         <DataGrid
           rows={rows}

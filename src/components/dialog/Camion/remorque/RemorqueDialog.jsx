@@ -6,39 +6,42 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import Slide from "@mui/material/Slide";
-import {
-  Button,
-  TextField,
-  Box,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-} from "@mui/material";
+import { Button, TextField, Box, FormControl } from "@mui/material";
+import TypeRemorqueSelect from "../../../select/TypeRemorqueSelect"; // Import the TypeRemorqueSelect component
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export default function RemorqueDialog({ open, onClose }) {
+export default function RemorqueDialog({ open, onClose, onCreate }) {
   const [remorqueData, setRemorqueData] = React.useState({
-    typeRemorque: "",
-    volumeStockage: "",
-    poidsMax: "",
-    poidsVide: "",
-    consommation: "",
-    carburant: "", // Add carburant field
-    assurance: "", // Add assurance field
-    entretien: "", // Add entretien field
+    idRemorque: 0,
+    typeRemorque: null, // Change to an object
+    volumeStockage: 0,
+    poidsChargeMax: 0,
+    poidsVide: 0,
+    disponible: true,
   });
+
+  const [isTypeRemorqueModalOpen, setIsTypeRemorqueModalOpen] =
+    React.useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setRemorqueData({ ...remorqueData, [name]: value });
   };
 
+  // Handler for selecting a typeRemorque
+  const handleSelectTypeRemorque = (typeRemorque) => {
+    setRemorqueData({ ...remorqueData, typeRemorque });
+    setIsTypeRemorqueModalOpen(false);
+  };
+
   const handleSubmit = () => {
-    console.log("Remorque Data:", remorqueData);
+    const payload = {
+      ...remorqueData,
+    };
+    onCreate(payload);
     onClose();
   };
 
@@ -69,14 +72,30 @@ export default function RemorqueDialog({ open, onClose }) {
       </AppBar>
 
       <Box sx={{ p: 3 }}>
-        <TextField
-          fullWidth
-          label="Type de Remorque"
-          name="typeRemorque"
-          value={remorqueData.typeRemorque}
-          onChange={handleInputChange}
-          margin="normal"
-        />
+        {/* Replace the TextField for Type de Remorque with TypeRemorqueSelect */}
+        <FormControl fullWidth margin="normal">
+          <TextField
+            value={
+              remorqueData.typeRemorque
+                ? remorqueData.typeRemorque.type // Assuming `typeRemorque` has a `type` property
+                : ""
+            }
+            InputProps={{
+              readOnly: true,
+            }}
+            onClick={() => setIsTypeRemorqueModalOpen(true)}
+            fullWidth
+            label="Type de Remorque"
+          />
+          <Button
+            variant="outlined"
+            onClick={() => setIsTypeRemorqueModalOpen(true)}
+            style={{ marginTop: "8px" }}
+          >
+            Sélectionner un Type de Remorque
+          </Button>
+        </FormControl>
+
         <TextField
           fullWidth
           label="Volume de stockage"
@@ -84,14 +103,16 @@ export default function RemorqueDialog({ open, onClose }) {
           value={remorqueData.volumeStockage}
           onChange={handleInputChange}
           margin="normal"
+          type="number"
         />
         <TextField
           fullWidth
           label="Poids Max"
-          name="poidsMax"
-          value={remorqueData.poidsMax}
+          name="poidsChargeMax"
+          value={remorqueData.poidsChargeMax}
           onChange={handleInputChange}
           margin="normal"
+          type="number"
         />
         <TextField
           fullWidth
@@ -100,64 +121,16 @@ export default function RemorqueDialog({ open, onClose }) {
           value={remorqueData.poidsVide}
           onChange={handleInputChange}
           margin="normal"
+          type="number"
         />
-        <TextField
-          fullWidth
-          label="Consommation"
-          name="consommation"
-          value={remorqueData.consommation}
-          onChange={handleInputChange}
-          margin="normal"
-        />
-
-        {/* Carburant Select */}
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Carburant</InputLabel>
-          <Select
-            value={remorqueData.carburant} // Link to remorqueData.carburant
-            onChange={(e) =>
-              setRemorqueData({ ...remorqueData, carburant: e.target.value })
-            }
-            label="Carburant"
-          >
-            <MenuItem value="Essence">Essence</MenuItem>
-            <MenuItem value="Diesel">Diesel</MenuItem>
-            <MenuItem value="Electrique">Electrique</MenuItem>
-          </Select>
-        </FormControl>
-
-        {/* Assurance Select */}
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Assurance</InputLabel>
-          <Select
-            value={remorqueData.assurance} // Link to remorqueData.assurance
-            onChange={(e) =>
-              setRemorqueData({ ...remorqueData, assurance: e.target.value })
-            }
-            label="Assurance"
-          >
-            <MenuItem value="Active">Active</MenuItem>
-            <MenuItem value="Expirée">Expirée</MenuItem>
-            <MenuItem value="En attente">En attente</MenuItem>
-          </Select>
-        </FormControl>
-
-        {/* Entretien Select */}
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Entretien</InputLabel>
-          <Select
-            value={remorqueData.entretien} // Link to remorqueData.entretien
-            onChange={(e) =>
-              setRemorqueData({ ...remorqueData, entretien: e.target.value })
-            }
-            label="Entretien"
-          >
-            <MenuItem value="A jour">A jour</MenuItem>
-            <MenuItem value="En retard">En retard</MenuItem>
-            <MenuItem value="Planifié">Planifié</MenuItem>
-          </Select>
-        </FormControl>
       </Box>
+
+      {/* TypeRemorqueSelect Modal */}
+      <TypeRemorqueSelect
+        open={isTypeRemorqueModalOpen}
+        onClose={() => setIsTypeRemorqueModalOpen(false)}
+        onSelect={handleSelectTypeRemorque} // Pass the handler for selection
+      />
     </Dialog>
   );
 }

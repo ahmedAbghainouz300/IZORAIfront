@@ -89,6 +89,10 @@ const NavComponent = (children) => {
                       key: allRoutes.document.carburant,
                       label: "Carburant",
                     },
+                    {
+                      key: allRoutes.document.carteGrise,
+                      label: "Carte Grise",
+                    },
                   ],
                 },
               ],
@@ -108,10 +112,12 @@ const NavComponent = (children) => {
           <h2>IZORAI</h2>
         </Header> */}
         <Content
+          className="nav-content"
           style={{
-            minHeight: 280,
             display: "flex",
             flexDirection: "column",
+            minHeight: "100vh",
+            height: "max-content",
           }}
         >
           <Button

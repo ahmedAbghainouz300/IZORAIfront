@@ -6,40 +6,47 @@ import {
   DialogActions,
   TextField,
   Button,
-  Select,
-  MenuItem,
-  InputLabel,
   FormControl,
+  InputLabel,
 } from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker"; // Use DatePicker instead of MobileDatePicker
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
-export default function EntretienDialog({ open, onClose }) {
+import CamionSelect from "../../../../select/CamionSelect";
+
+export default function EntretienDialog({ open, onClose, onCreate }) {
   const [entretienData, setEntretienData] = React.useState({
     dateEntretien: null,
     typeEntretien: "",
     description: "",
     cout: "",
-    prochainEntretien: null,
+    dateProchainEntretien: null,
     statut: "",
-    camion: "", // Added camion field
+    camion: null, // Change to an object
   });
+
+  const [isCamionModalOpen, setIsCamionModalOpen] = React.useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEntretienData({ ...entretienData, [name]: value });
   };
 
-  const handleCamionChange = (event) => {
-    setEntretienData({ ...entretienData, camion: event.target.value });
-  };
-
   const handleDateChange = (name) => (newValue) => {
     setEntretienData({ ...entretienData, [name]: newValue });
   };
 
+  // Handler for selecting a camion
+  const handleSelectCamion = (camion) => {
+    setEntretienData({ ...entretienData, camion });
+    setIsCamionModalOpen(false);
+  };
+
   const handleSubmit = () => {
-    console.log("Entretien Data:", entretienData);
+    const payload = {
+      ...entretienData,
+    };
+    onCreate(payload);
     onClose();
   };
 
@@ -83,8 +90,8 @@ export default function EntretienDialog({ open, onClose }) {
           />
           <DatePicker
             label="Prochain Entretien"
-            value={entretienData.prochainEntretien}
-            onChange={handleDateChange("prochainEntretien")}
+            value={entretienData.dateProchainEntretien}
+            onChange={handleDateChange("dateProchainEntretien")}
             renderInput={(params) => (
               <TextField {...params} fullWidth margin="normal" />
             )}
@@ -99,18 +106,28 @@ export default function EntretienDialog({ open, onClose }) {
             margin="normal"
           />
 
-          {/* New Camion Selection Field */}
+          {/* Camion Selection Field */}
           <FormControl fullWidth margin="normal">
-            <InputLabel>Camion</InputLabel>
-            <Select
-              value={entretienData.camion}
-              onChange={handleCamionChange}
-              name="camion"
+            <TextField
+              value={
+                entretienData.camion
+                  ? "immatriculation : " + entretienData.camion.immatriculation // Assuming `camion` has a `type` property
+                  : ""
+              }
+              InputProps={{
+                readOnly: true,
+              }}
+              onClick={() => setIsCamionModalOpen(true)}
+              fullWidth
+              label="Camion"
+            />
+            <Button
+              variant="outlined"
+              onClick={() => setIsCamionModalOpen(true)}
+              style={{ marginTop: "8px" }}
             >
-              <MenuItem value="Camion 1">Camion 1</MenuItem>
-              <MenuItem value="Camion 2">Camion 2</MenuItem>
-              <MenuItem value="Camion 3">Camion 3</MenuItem>
-            </Select>
+              Sélectionner un Camion
+            </Button>
           </FormControl>
         </DialogContent>
         <DialogActions>
@@ -118,6 +135,13 @@ export default function EntretienDialog({ open, onClose }) {
           <Button onClick={handleSubmit}>Enregistrer</Button>
         </DialogActions>
       </Dialog>
+
+      {/* Camion Selection Modal */}
+      <CamionSelect
+        open={isCamionModalOpen}
+        onClose={() => setIsCamionModalOpen(false)}
+        onSelect={handleSelectCamion} // Pass the handler for selection
+      />
     </LocalizationProvider>
   );
 }

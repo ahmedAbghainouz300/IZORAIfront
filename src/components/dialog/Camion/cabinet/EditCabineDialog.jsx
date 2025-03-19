@@ -7,68 +7,27 @@ import {
   TextField,
   Button,
   FormControl,
-  InputLabel,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
   CircularProgress,
   Snackbar,
   Alert,
 } from "@mui/material";
-import assuranceService from "../../../../service/camion/assuranceService";
-import carteGriseService from "../../../../service/camion/carteGriseService";
-import camionService from "../../../../service/camion/camionService";
-import Success from "../../../results/success";
+import AssuranceSelect from "../../../select/AssuranceSelect";
+import CarteGriseSelect from "../../../select/CarteGriseSelect";
+import TypeCabineSelect from "../../../select/TypeCabineSelect";
 
 export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
   const [formData, setFormData] = useState(cabine);
-  const [assuranceData, setAssuranceData] = useState([]);
-  const [carteGriseData, setCarteGriseData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isAssuranceModalOpen, setIsAssuranceModalOpen] = useState(false);
   const [isCarteGriseModalOpen, setIsCarteGriseModalOpen] = useState(false);
-  const [assuranceFilter, setAssuranceFilter] = useState(""); // Filter for assurance table
-  const [carteGriseFilter, setCarteGriseFilter] = useState(""); // Filter for carte grise table
+  const [isTypeCamionModalOpen, setIsTypeCamionModalOpen] = useState(false); // State for TypeCamion modal
 
   useEffect(() => {
     if (open) {
       setFormData(cabine);
-      fetchData();
     }
   }, [open, cabine]);
-
-  const fetchData = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      // Fetch assurances
-      const assuranceResponse = await assuranceService.getAll();
-      const assurances = Array.isArray(assuranceResponse.data)
-        ? assuranceResponse.data
-        : [assuranceResponse.data];
-      setAssuranceData(assurances);
-
-      // Fetch cartes grises
-      const carteGriseResponse = await carteGriseService.getAll();
-      const cartesGrises = Array.isArray(carteGriseResponse.data)
-        ? carteGriseResponse.data
-        : [carteGriseResponse.data];
-      setCarteGriseData(cartesGrises);
-    } catch (err) {
-      console.error("Erreur lors de la récupération des données:", err);
-      setError(
-        "Erreur lors de la récupération des données. Veuillez réessayer."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -85,61 +44,33 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
     setIsCarteGriseModalOpen(false); // Close the modal after selection
   };
 
+  // Handler for selecting a TypeCamion
+  const handleSelectTypeCamion = (typeCamion) => {
+    setFormData({ ...formData, typeCamion });
+    setIsTypeCamionModalOpen(false); // Close the modal after selection
+  };
+
   const handleSubmit = async () => {
-    // Prepare the data to match the backend's expected structure
     const payload = {
       immatriculation: formData.immatriculation,
-      typeCabine: formData.typeCabine,
-      poidsMax: Number(formData.poidsMax), // Convert to number
-      consommation: Number(formData.consommation), // Convert to number
-      assurance: formData.assurance, // This should already be an object
-      carteGrise: formData.carteGrise, // This should already be an object
+      typeCamion: formData.typeCamion, // Updated to use typeCamion
+      poidsMax: Number(formData.poidsMax),
+      consommation: Number(formData.consommation),
+      assurance: formData.assurance,
+      carteGrise: formData.carteGrise,
     };
+
     setFormData({
       immatriculation: "",
-      typeCabine: "",
+      typeCamion: null, // Reset to null
       poidsMax: 0,
       consommation: 0,
       assurance: null,
       carteGrise: null,
     });
     onSave(payload);
-
     onClose();
   };
-
-  // Filter assurances based on the input string
-  const filteredAssurances = assuranceData.filter((assurance) => {
-    const searchString = assuranceFilter.toLowerCase();
-
-    // Convert numeroContrat to a string and then to lowercase
-    const numeroContratString =
-      assurance.numeroContrat !== null && assurance.numeroContrat !== undefined
-        ? assurance.numeroContrat.toString().toLowerCase()
-        : "";
-
-    return (
-      (assurance.company?.toLowerCase() || "").includes(searchString) ||
-      numeroContratString.includes(searchString) ||
-      (assurance.montant?.toString().toLowerCase() || "").includes(
-        searchString
-      ) ||
-      (assurance.dateExpiration?.toLowerCase() || "").includes(searchString)
-    );
-  });
-
-  // Filter cartes grises based on the input string
-  const filteredCarteGrises = carteGriseData.filter((carteGrise) => {
-    const searchString = carteGriseFilter.toLowerCase();
-    return (
-      (carteGrise.marque?.toLowerCase() || "").includes(searchString) ||
-      (carteGrise.genre?.toLowerCase() || "").includes(searchString) ||
-      (carteGrise.numeroSerie?.toLowerCase() || "").includes(searchString) ||
-      (carteGrise.dateMiseEnCirculation?.toLowerCase() || "").includes(
-        searchString
-      )
-    );
-  });
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -149,7 +80,7 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
           <div
             style={{
               display: "flex",
-              justifyContent: "center",
+              justifyContent: "space-between",
               alignItems: "center",
               height: "200px",
             }}
@@ -168,15 +99,29 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
               margin="normal"
             />
 
-            {/* Type de Cabine Field */}
-            <TextField
-              name="typeCabine"
-              label="Type de Cabine"
-              value={formData.typeCabine || ""}
-              onChange={handleChange}
-              fullWidth
-              margin="normal"
-            />
+            {/* Type de Camion Field */}
+            <FormControl fullWidth margin="normal">
+              <TextField
+                value={
+                  formData.typeCamion
+                    ? formData.typeCamion.type // Assuming `typeCamion` has a `type` property
+                    : ""
+                }
+                InputProps={{
+                  readOnly: true, // Make the field read-only
+                }}
+                onClick={() => setIsTypeCamionModalOpen(true)} // Open the modal on click
+                fullWidth
+                label="Type de Camion"
+              />
+              <Button
+                variant="outlined"
+                onClick={() => setIsTypeCamionModalOpen(true)}
+                style={{ marginTop: "8px" }}
+              >
+                Sélectionner un Type de Camion
+              </Button>
+            </FormControl>
 
             {/* Poids Max Field */}
             <TextField
@@ -213,6 +158,7 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
                 }}
                 onClick={() => setIsAssuranceModalOpen(true)} // Open the modal on click
                 fullWidth
+                label="Assurance"
               />
               <Button
                 variant="outlined"
@@ -222,63 +168,6 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
                 Sélectionner une Assurance
               </Button>
             </FormControl>
-
-            {/* Assurance Selection Modal */}
-            <Dialog
-              open={isAssuranceModalOpen}
-              onClose={() => setIsAssuranceModalOpen(false)}
-              maxWidth="md"
-              fullWidth
-            >
-              <DialogTitle>Sélectionner une Assurance</DialogTitle>
-              <DialogContent>
-                {/* Filter Input for Assurance Table */}
-                <TextField
-                  fullWidth
-                  label="Rechercher"
-                  value={assuranceFilter}
-                  onChange={(e) => setAssuranceFilter(e.target.value)}
-                  margin="normal"
-                />
-                <TableContainer component={Paper}>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Company</TableCell>
-                        <TableCell>Numéro de Contrat</TableCell>
-                        <TableCell>Montant</TableCell>
-                        <TableCell>Date d'Expiration</TableCell>
-                        <TableCell>Action</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {filteredAssurances.map((assurance) => (
-                        <TableRow key={assurance.numeroContrat}>
-                          <TableCell>{assurance.company}</TableCell>
-                          <TableCell>{assurance.numeroContrat}</TableCell>
-                          <TableCell>{assurance.montant}</TableCell>
-                          <TableCell>{assurance.dateExpiration}</TableCell>
-                          <TableCell>
-                            <Button
-                              variant="contained"
-                              color="primary"
-                              onClick={() => handleSelectAssurance(assurance)}
-                            >
-                              Sélectionner
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={() => setIsAssuranceModalOpen(false)}>
-                  Fermer
-                </Button>
-              </DialogActions>
-            </Dialog>
 
             {/* Carte Grise Field */}
             <FormControl fullWidth margin="normal">
@@ -293,6 +182,7 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
                 }}
                 onClick={() => setIsCarteGriseModalOpen(true)} // Open the modal on click
                 fullWidth
+                label="Carte Grise"
               />
               <Button
                 variant="outlined"
@@ -303,64 +193,26 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
               </Button>
             </FormControl>
 
+            {/* Assurance Selection Modal */}
+            <AssuranceSelect
+              open={isAssuranceModalOpen}
+              onClose={() => setIsAssuranceModalOpen(false)}
+              onSelectAssurance={handleSelectAssurance}
+            />
+
             {/* Carte Grise Selection Modal */}
-            <Dialog
+            <CarteGriseSelect
               open={isCarteGriseModalOpen}
               onClose={() => setIsCarteGriseModalOpen(false)}
-              maxWidth="md"
-              fullWidth
-            >
-              <DialogTitle>Sélectionner une Carte Grise</DialogTitle>
-              <DialogContent>
-                {/* Filter Input for Carte Grise Table */}
-                <TextField
-                  fullWidth
-                  label="Rechercher"
-                  value={carteGriseFilter}
-                  onChange={(e) => setCarteGriseFilter(e.target.value)}
-                  margin="normal"
-                />
-                <TableContainer component={Paper}>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Marque</TableCell>
-                        <TableCell>Genre</TableCell>
-                        <TableCell>Numéro de Série</TableCell>
-                        <TableCell>Date de Mise en Circulation</TableCell>
-                        <TableCell>Action</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {filteredCarteGrises.map((carteGrise) => (
-                        <TableRow key={carteGrise.id}>
-                          <TableCell>{carteGrise.marque}</TableCell>
-                          <TableCell>{carteGrise.genre}</TableCell>
-                          <TableCell>{carteGrise.numeroSerie}</TableCell>
-                          <TableCell>
-                            {carteGrise.dateMiseEnCirculation}
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              variant="contained"
-                              color="primary"
-                              onClick={() => handleSelectCarteGrise(carteGrise)}
-                            >
-                              Sélectionner
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={() => setIsCarteGriseModalOpen(false)}>
-                  Fermer
-                </Button>
-              </DialogActions>
-            </Dialog>
+              onSelectCarteGrise={handleSelectCarteGrise}
+            />
+
+            {/* TypeCamion Selection Modal */}
+            <TypeCabineSelect
+              open={isTypeCamionModalOpen}
+              onClose={() => setIsTypeCamionModalOpen(false)}
+              onSelect={handleSelectTypeCamion} // Pass the handler for selection
+            />
           </>
         )}
       </DialogContent>

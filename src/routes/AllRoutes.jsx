@@ -28,6 +28,7 @@ const AllRoutes = {
     assurance: "/document/assurance",
     entretient: "/document/entretient",
     carburant: "/document/carburant",
+    carteGrise: "/document/carteGrise",
   },
 };
 

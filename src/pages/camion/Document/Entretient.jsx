@@ -15,8 +15,7 @@ import EntretienDialog from "../../../components/dialog/Camion/Document/entretie
 import ViewEntretienDialog from "../../../components/dialog/Camion/Document/entretien/ViewEntretienDialog";
 import EditEntretienDialog from "../../../components/dialog/Camion/Document/entretien/EditEntretienDialog";
 import entretienService from "../../../service/camion/entretienService"; // Importez le service
-import "../../../styles/cabine.css";
-
+import "../../../styles/DataGrid.css";
 
 function CustomToolbar() {
   return (
@@ -78,7 +77,11 @@ export default function Entretien() {
   const handleSave = async (updatedEntretien) => {
     try {
       await entretienService.update(updatedEntretien.id, updatedEntretien);
-      setRows(rows.map((row) => (row.id === updatedEntretien.id ? updatedEntretien : row)));
+      setRows(
+        rows.map((row) =>
+          row.id === updatedEntretien.id ? updatedEntretien : row
+        )
+      );
       setEditDialogOpen(false);
       console.log("Entretien mis à jour avec succès");
     } catch (error) {
@@ -96,7 +99,6 @@ export default function Entretien() {
       console.error("Erreur lors de la création de l'entretien:", error);
     }
   };
-
   // Définir les colonnes
   const columns = [
     { field: "id", headerName: "ID", width: 90 },
@@ -104,8 +106,19 @@ export default function Entretien() {
     { field: "typeEntretien", headerName: "Type d'Entretien", flex: 1 },
     { field: "description", headerName: "Description", flex: 1 },
     { field: "cout", headerName: "Coût (€)", flex: 1, type: "number" },
-    { field: "dateProchainEntretien", headerName: "Date Prochain Entretien", flex: 1 },
-    { field: "imatriculationCamion", headerName: "Immatriculation Camion", flex: 1 },
+    {
+      field: "dateProchainEntretien",
+      headerName: "Date Prochain Entretien",
+      flex: 1,
+    },
+    {
+      field: "camion",
+      headerName: "Immatriculation Camion",
+      valueGetter: (params) => {
+        return params ? params.immatriculation : "N/A";
+      },
+      flex: 1,
+    },
     {
       field: "actions",
       headerName: "Actions",
@@ -130,7 +143,7 @@ export default function Entretien() {
   ];
 
   return (
-    <Box sx={{ height: 500, width: "100%" }}>
+    <Box>
       <div className="buttons">
         <button className="blue-button" onClick={handleOpenEntretienDialog}>
           <p>Nouvel Entretien</p>
@@ -176,7 +189,7 @@ export default function Entretien() {
             },
           },
         }}
-        pageSizeOptions={[5]}
+        pageSizeOptions={[5, 10, 20]}
         checkboxSelection
         disableRowSelectionOnClick
         slots={{ toolbar: CustomToolbar }}

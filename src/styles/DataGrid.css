@@ -69,3 +69,16 @@
   .blue-button:active:after {
     background: teal;
   }
+
+
+  .MuiDataGrid-root{
+    margin-right: 20px;
+    margin-left: 20px;
+  }
+
+  .MuiDataGrid-columnHeader{
+    background: rgb(204, 255, 255);
+  }
+  .MuiDataGrid-cell{
+    background: rgb(231, 255, 255);
+  }
