@@ -10,168 +10,188 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Snackbar,
 } from "@mui/material";
 import AdressDialog from "../AdressDialog";
 import physiqueService from "../../../../service/partenaire/physiqueService";
 import typePartenaireService from "../../../../service/partenaire/typePartenaireService";
+import TypePartenaireTable from "../typepartenaire/typePartenaieTable";
 
-import AdressDialog from "./AdressDialog";
-import physiqueService from "../../../service/partenaire/physiqueService";
-import typePartenaireService from "../../../service/partenaire/typePartenaireService";
-
-export default function PhysiqueDialog({ open, onClose }) {
+export default function PhysiqueDialog({ open, onClose,onAdd }) {
   const [openAdress, setOpenAdress] = useState(false);
-  const [nom, setNom] = useState("");
-  const [prenom, setPrenom] = useState("");
-  const [email, setEmail] = useState("");
-  const [telephone, setTelephone] = useState("");
-  const [cni, setCni] = useState("");
-  const [selectedType, setSelectedType] = useState("");
-  const [adresses, setAdresses] = useState([]);
-  const [types, setTypes] = useState([]);
-  const [typePartenaire, setTypePartenaire] = useState("");
-  
+  const [isTypePartenaireModalOpen, setIsTypePartenaireModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  // Function to handle adding a new adress
-  const handleAddAdress = (newAdresse) => {
-    setAdresses((prevAdresses) => [...prevAdresses, newAdresse]); // Add the new adress to the list
-    setOpenAdress(false); // Close the adress dialog
+  // Centralized form state
+  const [formData, setFormData] = useState({
+    nom: "",
+    prenom: "",
+    email: "",
+    telephone: "",
+    cni: "",
+    typePartenaireId: null,
+    adresses: [],
+  });
+
+
+  // Handle input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
-    // Fetch types when the dialog opens
-    useEffect(() => {
-      if (open) {
-        typePartenaireService
-          .getAllByNoms()
-          .then((response) => {
-            console.log("Types de partenaires récupérés:", response.data); // Ajoutez ce log
-            setTypes(response.data);
-          })
-          .catch((error) => console.error("Erreur lors du chargement des types:", error));
-      }
-    }, [open]);
+  // Add a new address
+  const handleAddAdress = (newAdresse) => {
+    setFormData((prev) => ({
+      ...prev,
+      adresses: [...prev.adresses, newAdresse],
+    }));
+    setOpenAdress(false);
+  };
 
-  // Function to handle form submission
+  // Validate form
+  const validateForm = () => {
+    const { nom, prenom, email, telephone, cni, typePartenaireId } = formData;
+
+    if (!nom || !prenom || !email || !telephone || !cni || !typePartenaireId) {
+      setErrorMessage("Veuillez remplir tous les champs obligatoires.");
+      return false;
+    }
+
+    if (isNaN(telephone) || isNaN(cni)) {
+      setErrorMessage("Téléphone et CNI doivent être des nombres.");
+      return false;
+    }
+
+    return true;
+  };
+
+  // Handle form submission
   const handleSubmit = async () => {
+    if (!validateForm()) return;
+
     const newPhysique = {
-      nom,
-      prenom,
-      email,
-      telephone,
-      cni,
-      typePartenaire: typePartenaire,
-      adresses, 
+      nom: formData.nom,
+      prenom: formData.prenom,
+      email: formData.email,
+      telephone: Number(formData.telephone),
+      cni: Number(formData.cni),
+      typePartenaireId: formData.typePartenaireId,
+      adresses: formData.adresses,
     };
 
-          typePartenaireService.getByNom(selectedType).then((response)=>setTypePartenaire(response.data))
-    
+    try {
+      await physiqueService.create(newPhysique);
+      resetForm();
+      onAdd();
+      onClose();
+    } catch (error) {
+      console.error("Erreur lors de la création du partenaire physique:", error);
+      setErrorMessage("Une erreur est survenue lors de l'ajout du partenaire physique.");
+    }
+  };
 
-    physiqueService
-      .create(newPhysique)
-      .then(() => {
-        onClose(); // Close the dialog
-        // Reset all fields
-        setNom("");
-        setPrenom("");
-        setEmail("");
-        setTelephone("");
-        setCni("");
-        setSelectedType("");
-        setAdresses([]); // Reset adresses
-      })
-      .catch((error) => {
-        console.error(
-          "Erreur lors de la création du partenaire physique:",
-          error
-        );
-      });
+  // Reset form
+  const resetForm = () => {
+    setFormData({
+      nom: "",
+      prenom: "",
+      email: "",
+      telephone: "",
+      cni: "",
+      typePartenaireId: null,
+      adresses: [],
+    });
+    setErrorMessage("");
+  };
+
+  
+  // Handle selection of a type partenaire
+  const handleSelectIdTypePartenaire = (selectedId) => {
+    setFormData((prev) => ({
+      ...prev,
+      typePartenaireId: selectedId,
+    }));
+    setIsTypePartenaireModalOpen(false); // Close the modal after selection
   };
 
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Ajouter un Partenaire Physique</DialogTitle>
-      <DialogContent>
-        <TextField
-          label="Nom"
-          fullWidth
-          margin="normal"
-          value={nom}
-          onChange={(e) => setNom(e.target.value)}
-        />
-        <TextField
-          label="Prénom"
-          fullWidth
-          margin="normal"
-          value={prenom}
-          onChange={(e) => setPrenom(e.target.value)}
-        />
-        <TextField
-          label="Email"
-          fullWidth
-          margin="normal"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <TextField
-          label="Téléphone"
-          fullWidth
-          margin="normal"
-          value={telephone}
-          onChange={(e) => setTelephone(e.target.value)}
-        />
-        <TextField
-          label="CNI"
-          fullWidth
-          margin="normal"
-          value={cni}
-          onChange={(e) => setCni(e.target.value)}
-        />
+    <>
+      <Dialog open={open} onClose={onClose}>
+        <DialogTitle>Ajouter un Partenaire Physique</DialogTitle>
+        <DialogContent>
+          {/* Nom */}
+          <TextField label="Nom" fullWidth margin="normal" name="nom" value={formData.nom} onChange={handleInputChange}/>
+          {/* Prénom */}
+          <TextField label="Prénom" fullWidth margin="normal" name="prenom" value={formData.prenom} onChange={handleInputChange}/>
+          {/* Email */}
+          <TextField label="Email" fullWidth margin="normal" name="email" value={formData.email} onChange={handleInputChange}/>
+          {/* Téléphone */}
+          <TextField label="Téléphone" fullWidth margin="normal" name="telephone" value={formData.telephone} onChange={handleInputChange}/>
 
-      <FormControl fullWidth margin="normal">
-        <InputLabel>Type Partenaire</InputLabel>
-        <Select
-          value={selectedType}
-          onChange={(e) => setSelectedType(e.target.value)}
-        >
-          {types.length === 0 ? (
-            <MenuItem disabled>Aucun type disponible</MenuItem>
-          ) : (
-            types.map((type) => (
-              <MenuItem key={type.idTypePartenaire} value={type.libelle}>
-                {type.libelle}
-              </MenuItem>
-            ))
-          )}
-        </Select>
-      </FormControl>
-        {/* Section to display adresses */}
-        <div style={{ marginTop: "20px" }}>
-          <h4>Adresses</h4>
-          {adresses.map((adresse, index) => (
-            <div key={index} style={{ marginBottom: "10px" }}>
-              <p>
-                <strong>Adresse {index + 1}:</strong> {adresse.rue},{" "}
-                {adresse.ville}, {adresse.codePostal}, {adresse.pays}
-              </p>
-            </div>
-          ))}
-        </div>
-      </DialogContent>
+          {/* CNI */}
+          <TextField label="CNI" fullWidth margin="normal" name="cni" value={formData.cni} onChange={handleInputChange}/>
 
-      <DialogActions>
-        <Button onClick={onClose}>Annuler</Button>
-        <Button onClick={handleSubmit} color="primary">
-          Ajouter
-        </Button>
-        <Button onClick={() => setOpenAdress(true)}>Ajouter une Adresse</Button>
-      </DialogActions>
+          {/* Type Partenaire */}
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Type Partenaire</InputLabel>
+           
+            <Button
+              variant="outlined"
+              onClick={() => setIsTypePartenaireModalOpen(true)}
+              style={{ marginTop: "8px" }}
+            >
+              Sélectionner un Type Partenaire
+            </Button>
+          </FormControl>
 
-      {/* AdressDialog for adding new adresses */}
+          {/* Adresses */}
+          <div style={{ marginTop: "20px" }}>
+            <h4>Adresses</h4>
+            {formData.adresses.length > 0 ? (
+              <ul>
+                {formData.adresses.map((adresse, index) => (
+                  <li key={index}>
+                    {adresse.rue}, {adresse.ville}, {adresse.codePostal}, {adresse.pays}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>Aucune adresse ajoutée.</p>
+            )}
+          </div>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={onClose}>Annuler</Button>
+          <Button onClick={handleSubmit} color="primary">
+            Ajouter
+          </Button>
+          <Button onClick={() => setOpenAdress(true)}>Ajouter une Adresse</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* AdressDialog */}
       <AdressDialog
         open={openAdress}
         onClose={() => setOpenAdress(false)}
-        onSave={handleAddAdress} // Pass the function to handle saving adresses
+        onSave={handleAddAdress}
       />
-    </Dialog>
+
+      {/* TypePartenaireTable Modal */}
+      <TypePartenaireTable
+        open={isTypePartenaireModalOpen}
+        onClose={() => setIsTypePartenaireModalOpen(false)}
+        onSelectIdTypePartenaire={handleSelectIdTypePartenaire}
+      />
+
+      {/* Snackbar for Error Messages */}
+      <Snackbar
+        open={!!errorMessage}
+        autoHideDuration={6000}
+        onClose={() => setErrorMessage("")}
+        message={errorMessage}
+      />
+    </>
   );
 }

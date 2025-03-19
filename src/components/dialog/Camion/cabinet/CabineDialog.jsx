@@ -23,10 +23,8 @@ import {
   TableRow,
   Paper,
 } from "@mui/material";
-import camionService from "../../../../service/camion/camionService";
 import assuranceService from "../../../../service/camion/assuranceService";
 import carteGriseService from "../../../../service/camion/carteGriseService";
-import Success from "../../../results/success";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -130,7 +128,7 @@ export default function CabineDialog({ open, onClose, onSave }) {
 
     return (
       (assurance.company?.toLowerCase() || "").includes(searchString) ||
-      assurance.numeroContrat.toString().toLowerCase().includes(searchString) ||
+      String(assurance.numeroContrat).toLowerCase().includes(searchString) ||
       (assurance.montant?.toString().toLowerCase() || "").includes(
         searchString
       ) ||
@@ -141,11 +139,12 @@ export default function CabineDialog({ open, onClose, onSave }) {
   // Filter cartes grises based on the input string
   const filteredCarteGrises = carteGriseData.filter((carteGrise) => {
     const searchString = carteGriseFilter.toLowerCase();
+
     return (
-      carteGrise.marque?.toLowerCase().includes(searchString) ||
-      carteGrise.genre?.toLowerCase().includes(searchString) ||
-      carteGrise.numeroSerie?.toLowerCase().includes(searchString) ||
-      carteGrise.dateMiseEnCirculation?.toLowerCase().includes(searchString)
+      (carteGrise.marque?.toLowerCase() || "").includes(searchString) ||
+      (carteGrise.genre?.toLowerCase() || "").includes(searchString) ||
+      (String(carteGrise.numeroSerie)?.toLowerCase().includes(searchString)) || 
+      (carteGrise.dateMiseEnCirculation?.toLowerCase() || "").includes(searchString)
     );
   });
 

@@ -31,11 +31,15 @@ export default function Physique() {
   const [rows, setRows] = useState([]);
 
   useEffect(() => {
+    fetchAllPhysiques();
+  }, []);
+
+  const fetchAllPhysiques = () => {
     physiqueService
       .getAll()
       .then((response) => setRows(response.data))
       .catch((error) => console.error("Erreur:", error));
-  }, []);
+    }
 
   const handleOpenDialog = () => setDialogOpen(true);
   const handleCloseDialog = () => setDialogOpen(false);
@@ -47,14 +51,21 @@ export default function Physique() {
 
   const handleEdit = (partenaire) => {
     setSelectedPartenaire(partenaire);
+
     setEditDialogOpen(true);
+    fetchAllPhysiques();
+
   };
 
-  const handleSave = (updatedPartenaire) => {
+  const handleSave = () => {
     // Mettre à jour les données dans l'état
-    setRows(rows.map((row) => (row.idPartenaire === updatedPartenaire.idPartenaire ? updatedPartenaire : row)));
+    fetchAllPhysiques();
     setEditDialogOpen(false);
   };
+  const handleAdd = () => {
+    fetchAllPhysiques();
+    setDialogOpen(false);
+  }
 
   const handleDelete = (idPartenaire) => {
     physiqueService
@@ -72,7 +83,7 @@ export default function Physique() {
     { field: "prenom", headerName: "Prénom", flex: 1, editable: true },
     { field: "email", headerName: "Email", flex: 1, editable: true },
     { field: "telephone", headerName: "Téléphone", flex: 1, editable: true },
-    { field: "CNI", headerName: "CNI", flex: 1, editable: true },
+    { field: "cni", headerName: "CNI", flex: 1, editable: true },
     {
       field: "actions",
       headerName: "Actions",
@@ -105,7 +116,8 @@ export default function Physique() {
           Ajouter un Partenaire Physique
         </Button>
 
-        {dialogOpen && <PhysiqueDialog open={dialogOpen} onClose={handleCloseDialog} />}
+        {dialogOpen && <PhysiqueDialog open={dialogOpen} onClose={handleCloseDialog} onAdd={handleAdd}
+ />}
 
         <DataGrid
           rows={rows}
