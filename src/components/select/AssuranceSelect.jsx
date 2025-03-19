@@ -14,73 +14,74 @@ import {
   Paper,
   Button,
 } from "@mui/material";
-import carteGriseService from "../../service/camion/carteGriseService";
+import assuranceService from "../../service/camion/assuranceService";
 
-export default function CarteGriseSelect({
-  open,
-  onClose,
-  onSelectCarteGrise,
-}) {
-  const [carteGriseData, setCarteGriseData] = useState([]);
-  const [carteGriseFilter, setCarteGriseFilter] = useState("");
+export default function AssuranceSelect({ open, onClose, onSelectAssurance }) {
+  const [assuranceData, setAssuranceData] = useState([]);
+  const [assuranceFilter, setAssuranceFilter] = useState("");
 
   useEffect(() => {
-    fetchCartesGrises();
+    fetchAssurances();
   }, []);
 
-  const fetchCartesGrises = async () => {
+  const fetchAssurances = async () => {
     try {
-      const response = await carteGriseService.getAll();
+      const response = await assuranceService.getAll();
       const data = Array.isArray(response.data)
         ? response.data
         : [response.data];
-      setCarteGriseData(data);
+      setAssuranceData(data);
     } catch (error) {
-      console.error("Erreur lors de la récupération des cartes grises:", error);
+      console.error("Erreur lors de la récupération des assurances:", error);
     }
   };
 
-  const filteredCartesGrises = carteGriseData.filter((carte) => {
-    const searchString = carteGriseFilter.toLowerCase();
+  const filteredAssurances = assuranceData.filter((assurance) => {
+    const searchString = assuranceFilter.toLowerCase();
     return (
-      (carte.marque?.toLowerCase() || "").includes(searchString) ||
-      (carte.genre?.toLowerCase() || "").includes(searchString) ||
-      carte.numeroSerie?.toString().toLowerCase().includes(searchString)
+      (assurance.company?.toLowerCase() || "").includes(searchString) ||
+      assurance.numeroContrat.toString().toLowerCase().includes(searchString) ||
+      (assurance.montant?.toString().toLowerCase() || "").includes(
+        searchString
+      ) ||
+      (assurance.dateExpiration?.toLowerCase() || "").includes(searchString)
     );
   });
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Sélectionner une Carte Grise</DialogTitle>
+      <DialogTitle>Sélectionner une Assurance</DialogTitle>
       <DialogContent>
         <TextField
           fullWidth
           label="Rechercher"
-          value={carteGriseFilter}
-          onChange={(e) => setCarteGriseFilter(e.target.value)}
+          value={assuranceFilter}
+          onChange={(e) => setAssuranceFilter(e.target.value)}
           margin="normal"
         />
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Marque</TableCell>
-                <TableCell>Genre</TableCell>
-                <TableCell>Numéro de Série</TableCell>
+                <TableCell>Company</TableCell>
+                <TableCell>Numéro de Contrat</TableCell>
+                <TableCell>Montant</TableCell>
+                <TableCell>Date d'Expiration</TableCell>
                 <TableCell>Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredCartesGrises.map((carte) => (
-                <TableRow key={carte.id}>
-                  <TableCell>{carte.marque}</TableCell>
-                  <TableCell>{carte.genre}</TableCell>
-                  <TableCell>{carte.numeroSerie}</TableCell>
+              {filteredAssurances.map((assurance) => (
+                <TableRow key={assurance.numeroContrat}>
+                  <TableCell>{assurance.company}</TableCell>
+                  <TableCell>{assurance.numeroContrat}</TableCell>
+                  <TableCell>{assurance.montant}</TableCell>
+                  <TableCell>{assurance.dateExpiration}</TableCell>
                   <TableCell>
                     <Button
                       variant="contained"
                       color="primary"
-                      onClick={() => onSelectCarteGrise(carte)}
+                      onClick={() => onSelectAssurance(assurance)}
                     >
                       Sélectionner
                     </Button>
