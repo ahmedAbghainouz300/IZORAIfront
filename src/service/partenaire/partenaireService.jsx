@@ -9,6 +9,7 @@ const partenaireService = {
   
   // Supprimer un partenaire par son ID
   delete: (id) => axiosClient.delete(`/api/partenaires/${id}`),
+
 };
 
 export default partenaireService;

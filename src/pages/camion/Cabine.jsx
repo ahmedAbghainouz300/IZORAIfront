@@ -39,7 +39,6 @@ export default function Cabine() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [rows, setRows] = useState([]);
-  const [refreshFlag, setRefreshFlag] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isFailedCamionsFetch, setIsFailedCamionsFetch] = useState(false);
   const [isFailedCamionDelete, setIsFailedCamionDelete] = useState(false);
@@ -51,7 +50,7 @@ export default function Cabine() {
   // Load data when the component mounts or when refreshFlag changes
   useEffect(() => {
     fetchCamions();
-  }, [refreshFlag]);
+  });
 
   // Function to fetch data from the backend
   const fetchCamions = async () => {

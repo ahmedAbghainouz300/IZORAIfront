@@ -32,11 +32,15 @@ export default function Morale() {
   const [rows, setRows] = useState([]);
 
   useEffect(() => {
+    fetchAllMorales();
+  }, []);
+
+  const fetchAllMorales = () => {
     moraleService
       .getAll()
       .then((response) => setRows(response.data))
       .catch((error) => console.error("Erreur:", error));
-  }, []);
+  };
 
   const handleOpenDialog = () => setDialogOpen(true);
   const handleCloseDialog = () => setDialogOpen(false);
@@ -47,19 +51,14 @@ export default function Morale() {
   };
 
   const handleEdit = (partenaire) => {
+    fetchAllMorales();
     setSelectedPartenaire(partenaire);
     setEditDialogOpen(true);
   };
 
-  const handleSave = (updatedPartenaire) => {
+  const handleSave = () => {
     // Mettre à jour les données dans l'état
-    setRows(
-      rows.map((row) =>
-        row.idPartenaire === updatedPartenaire.idPartenaire
-          ? updatedPartenaire
-          : row
-      )
-    );
+    fetchAllMorales();
     setEditDialogOpen(false);
   };
 
@@ -68,6 +67,7 @@ export default function Morale() {
       .delete(idPartenaire)
       .then(() => {
         setRows(rows.filter((row) => row.idPartenaire !== idPartenaire));
+        fetchAllMorales();
       })
       .catch((error) =>
         console.error("Erreur lors de la suppression :", error)

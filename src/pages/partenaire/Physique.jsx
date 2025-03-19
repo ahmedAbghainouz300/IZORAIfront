@@ -7,13 +7,13 @@ import {
   GridToolbarContainer,
   GridToolbarExport,
 } from "@mui/x-data-grid";
-import PhysiqueDialog from "../../components/dialog/partenaire/PhysiqueDialogue";
+import PhysiqueDialog from "../../components/dialog/partenaire/physique/PhysiqueDialogue";
 import physiqueService from "../../service/partenaire/physiqueService";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import ViewPhysiqueDialog from "../../components/dialog/partenaire/ViewPhysiqueDialog"; // Dialogue pour voir les détails
-import EditPhysiqueDialog from "../../components/dialog/partenaire/EditPhysiqueDialog"; // Dialogue pour modifier
+import ViewPhysiqueDialog from "../../components/dialog/partenaire/physique/ViewPhysiqueDialog"; // Dialogue pour voir les détails
+import EditPhysiqueDialog from "../../components/dialog/partenaire/physique/EditPhysiqueDialog"; // Dialogue pour modifier
 import "../../styles/DataGrid.css";
 
 function CustomToolbar() {
@@ -32,11 +32,15 @@ export default function Physique() {
   const [rows, setRows] = useState([]);
 
   useEffect(() => {
+    fetchAllPhysiques();
+  }, []);
+
+  const fetchAllPhysiques = () => {
     physiqueService
       .getAll()
       .then((response) => setRows(response.data))
       .catch((error) => console.error("Erreur:", error));
-  }, []);
+  };
 
   const handleOpenDialog = () => setDialogOpen(true);
   const handleCloseDialog = () => setDialogOpen(false);
@@ -48,19 +52,19 @@ export default function Physique() {
 
   const handleEdit = (partenaire) => {
     setSelectedPartenaire(partenaire);
+
     setEditDialogOpen(true);
+    fetchAllPhysiques();
   };
 
-  const handleSave = (updatedPartenaire) => {
+  const handleSave = () => {
     // Mettre à jour les données dans l'état
-    setRows(
-      rows.map((row) =>
-        row.idPartenaire === updatedPartenaire.idPartenaire
-          ? updatedPartenaire
-          : row
-      )
-    );
+    fetchAllPhysiques();
     setEditDialogOpen(false);
+  };
+  const handleAdd = () => {
+    fetchAllPhysiques();
+    setDialogOpen(false);
   };
 
   const handleDelete = (idPartenaire) => {
@@ -81,7 +85,7 @@ export default function Physique() {
     { field: "prenom", headerName: "Prénom", flex: 1, editable: true },
     { field: "email", headerName: "Email", flex: 1, editable: true },
     { field: "telephone", headerName: "Téléphone", flex: 1, editable: true },
-    { field: "CNI", headerName: "CNI", flex: 1, editable: true },
+    { field: "cni", headerName: "CNI", flex: 1, editable: true },
     {
       field: "actions",
       headerName: "Actions",
@@ -118,7 +122,11 @@ export default function Physique() {
         </Button>
 
         {dialogOpen && (
-          <PhysiqueDialog open={dialogOpen} onClose={handleCloseDialog} />
+          <PhysiqueDialog
+            open={dialogOpen}
+            onClose={handleCloseDialog}
+            onAdd={handleAdd}
+          />
         )}
 
         <DataGrid
