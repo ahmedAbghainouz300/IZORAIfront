@@ -191,7 +191,7 @@ export default function PhysiqueDialog({ open, onClose,onAdd }) {
       {/* AdressDialog */}
       <AdressDialog
         open={openAdress}
-        onClose={() => setOpenAdress(false)}
+        onClose={() => setOpenAdress(false)}  
         onSave={handleAddAdress}
       />
 

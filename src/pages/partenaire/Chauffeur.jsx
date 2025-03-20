@@ -14,6 +14,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { IconButton } from "@mui/material";
+import "../../styles/DataGrid.css";
 
 const columns = (handleDelete, handleVoir, handleModifier) => [
   { field: "idPartenaire", headerName: "ID", width: 90 },
