@@ -38,7 +38,10 @@ export default function Morale() {
   const fetchAllMorales = () => {
     moraleService
       .getAll()
-      .then((response) => setRows(response.data))
+      .then((response) => {setRows(response.data)
+        console.log(rows);
+        console.log(response.data);
+      })
       .catch((error) => console.error("Erreur:", error));
   };
 
@@ -66,13 +69,14 @@ export default function Morale() {
     moraleService
       .delete(idPartenaire)
       .then(() => {
-        setRows(rows.filter((row) => row.idPartenaire !== idPartenaire));
+        // Mettre à jour les données en appelant fetchAllMorales, pas besoin de filtrer les lignes
         fetchAllMorales();
       })
       .catch((error) =>
         console.error("Erreur lors de la suppression :", error)
       );
   };
+  
 
   // Définir les colonnes à l'intérieur du composant pour accéder aux fonctions
   const columns = [
@@ -80,18 +84,21 @@ export default function Morale() {
     { field: "nom", headerName: "Nom", flex: 1, editable: true },
     { field: "ice", headerName: "ICE", flex: 1, editable: true },
     { field: "numeroRC", headerName: "Numéro RC", flex: 1, editable: true },
+    { field: "abreviation", headerName: "Abreviation", flex: 1, editable: true,},
+    { field: "formeJuridique", headerName: "Forme Juridique", flex: 1, editable: true,},
     {
-      field: "abreviation",
-      headerName: "Abreviation",
+      field: "typePartenaire",
+      headerName: "Libellé",
       flex: 1,
-      editable: true,
-    },
-    {
-      field: "formeJuridique",
-      headerName: "Forme Juridique",
-      flex: 1,
-      editable: true,
-    },
+      valueGetter: (params) => {
+        //console.log("params.row:", params.row);  // Affiche la ligne complète
+        const typePartenaire = params?.row?.typePartenaire || null;
+        console.log("Type partenaire:", typePartenaire);  // Affiche la valeur de typePartenaire
+        return typePartenaire && typePartenaire.libelle ? typePartenaire.libelle : "Non défini";
+      },
+      editable: false,
+    }
+    ,
     {
       field: "actions",
       headerName: "Actions",
@@ -107,10 +114,7 @@ export default function Morale() {
           <IconButton color="secondary" onClick={() => handleEdit(params.row)}>
             <EditIcon />
           </IconButton>
-          <IconButton
-            color="error"
-            onClick={() => handleDelete(params.row.idPartenaire)}
-          >
+          <IconButton color="error" onClick={() => handleDelete(params.row.idPartenaire)}>
             <DeleteIcon />
           </IconButton>
         </div>
@@ -131,29 +135,30 @@ export default function Morale() {
           <MoraleDialog open={dialogOpen} onClose={handleCloseDialog} />
         )}
 
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          getRowId={(row) => row.idPartenaire}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 5,
-              },
+      <DataGrid
+        rows={rows}
+        columns={columns}
+        getRowId={(row) => row.idPartenaire}
+        initialState={{
+          pagination: {
+            paginationModel: {
+              pageSize: 5,
             },
-          }}
-          pageSizeOptions={[5, 10, 20]}
-          checkboxSelection
-          disableRowSelectionOnClick
-          slots={{ toolbar: CustomToolbar }}
-          sx={{
-            "@media print": {
-              ".MuiDataGrid-toolbarContainer": {
-                display: "none",
-              },
+          },
+        }}
+        pageSizeOptions={[5, 10, 20]}
+        checkboxSelection
+        disableRowSelectionOnClick
+        slots={{ toolbar: CustomToolbar }}
+        sx={{
+          "@media print": {
+            ".MuiDataGrid-toolbarContainer": {
+              display: "none",
             },
-          }}
-        />
+          },
+        }}
+      />
+
       </Box>
 
       {/* Dialogue pour Voir les Détails */}

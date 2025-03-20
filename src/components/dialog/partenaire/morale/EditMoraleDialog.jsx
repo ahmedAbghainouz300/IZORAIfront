@@ -16,6 +16,7 @@ import TypePartenaireTable from "../typepartenaire/typePartenaieTable";
 
 
 export default function EditMoraleDialog({ open, onClose, partenaire, onSave }) {
+  const [formData, setFormData] = useState(partenaire);
   const [adresses, setAdresses] = useState([]);
   const [isAdressModalOpen, setIsAdressModalOpen] = useState(false);
   const [isAddAddressOpen, setIsAddAddressOpen] = useState(false);
@@ -23,9 +24,17 @@ export default function EditMoraleDialog({ open, onClose, partenaire, onSave }) 
   const [isViewAddressOpen, setIsViewAddressOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [isTypePartenaireModalOpen, setIsTypePartenaireModalOpen] = useState(false);
+  const [selectedTypePartenaire, setSelectedTypePartenaire] = useState(partenaire?.typePartenaire || null);
+  // Gestion de la sélection du type partenaire
+
+const handleSelectTypePartenaire = (selectedType) => {
+  setSelectedTypePartenaire(selectedType); // Mise à jour de l'état local
+  setFormData({ ...formData, typePartenaire: selectedType }); // Mise à jour du formData
+  setIsTypePartenaireModalOpen(false);
+};
+
   
 
-  const [formData, setFormData] = useState(partenaire);
   const handleSelectIdTypePartenaire = (selectedId) => {
     setFormData((prev) => ({
       ...prev,
@@ -55,7 +64,7 @@ export default function EditMoraleDialog({ open, onClose, partenaire, onSave }) 
   const handleSubmitEdit = async () => {
     try {
       await moraleService.update(partenaire.idPartenaire, formData);
-      onSave(); // Optionnel: Appeler une fonction de rappel pour informer le composant parent de la mise à jour réussie
+      onSave(); 
       onClose();
       alert("Partenaire mis à jour avec succès !");
     } catch (error) {
@@ -104,18 +113,16 @@ export default function EditMoraleDialog({ open, onClose, partenaire, onSave }) 
         <TextField name="numeroRC" label="Numéro RC" value={formData.numeroRC} onChange={handleChange} fullWidth margin="normal" />
         <TextField name="abreviation" label="Abréviation" value={formData.abreviation} onChange={handleChange} fullWidth margin="normal" />
         <TextField name="formeJuridique" label="Forme Juridique" value={formData.formeJuridique} onChange={handleChange} fullWidth margin="normal" />
-         {/* Type Partenaire */}
-         <FormControl fullWidth margin="normal">
-            <InputLabel>Type Partenaire</InputLabel>
-           
-            <Button
-              variant="outlined"
-              onClick={() => setIsTypePartenaireModalOpen(true)}
-              style={{ marginTop: "8px" }}
-            >
-              Sélectionner un Type Partenaire
-            </Button>
-          </FormControl>
+        <FormControl fullWidth margin="normal">
+          <TextField
+            label="Type Partenaire"
+            value={selectedTypePartenaire?.libelle || partenaire?.typePartenaire?.libelle || ""}
+            fullWidth margin="normal" InputProps={{   readOnly: true,  }}
+          />
+          <Button variant="outlined"  onClick={() => setIsTypePartenaireModalOpen(true)}  style={{ marginTop: "8px" }}>
+            Modifier le Type Partenaire
+          </Button>
+        </FormControl>
         <Button variant="outlined" onClick={() => setIsAdressModalOpen(true)} style={{ marginTop: "16px", marginBottom: "16px" }}>
           Afficher Adresse
         </Button>
@@ -142,8 +149,11 @@ export default function EditMoraleDialog({ open, onClose, partenaire, onSave }) 
             <TypePartenaireTable
               open={isTypePartenaireModalOpen}
               onClose={() => setIsTypePartenaireModalOpen(false)}
-              onSelectIdTypePartenaire={handleSelectIdTypePartenaire}
-            />
+              onSelectTypePartenaire={(selectedType) => {
+                console.log("Type sélectionné :", selectedType)
+                handleSelectTypePartenaire(selectedType)}
+             }
+           />
 
       <AddAdress open={isAddAddressOpen} onClose={() => setIsAddAddressOpen(false)} onAdd={handleAddAddress} />
       <EditAdress open={isEditAddressOpen} onClose={() => setIsEditAddressOpen(false)} adresse={selectedAddress} />

@@ -16,6 +16,8 @@ import TypePartenaireTable from "../typepartenaire/typePartenaieTable";
 export default function MoraleDialog({ open, onClose }) {
   const [openAdress, setOpenAdress] = useState(false);
   const [isTypePartenaireModalOpen, setIsTypePartenaireModalOpen] = useState(false);
+  const [selectedTypePartenaire, setSelectedTypePartenaire] = useState(null);
+  
 
   // Utilisez formData pour gérer tous les champs du formulaire
   const [formData, setFormData] = useState({
@@ -24,7 +26,7 @@ export default function MoraleDialog({ open, onClose }) {
     numeroRC: "",
     abreviation: "",
     formeJuridique: "",
-    typePartenaireId: null, // ID du type de partenaire sélectionné
+    typePartenaire: {}, // ID du type de partenaire sélectionné
     adresses: [], // Liste des adresses
   });
 
@@ -45,8 +47,8 @@ export default function MoraleDialog({ open, onClose }) {
 
   // Validation du formulaire
   const validateForm = () => {
-    const { nom, ice, numeroRC, abreviation, formeJuridique, typePartenaireId } = formData;
-    if (!nom || !ice || !numeroRC || !abreviation || !formeJuridique || !typePartenaireId) {
+    const { nom, ice, numeroRC, abreviation, formeJuridique, typePartenaire } = formData;
+    if (!nom || !ice || !numeroRC || !abreviation || !formeJuridique || !typePartenaire) {
       alert("Veuillez remplir tous les champs obligatoires.");
       return false;
     }
@@ -67,7 +69,7 @@ export default function MoraleDialog({ open, onClose }) {
       numeroRC: Number(formData.numeroRC), // Convertir en nombre
       abreviation: formData.abreviation,
       formeJuridique: formData.formeJuridique,
-      typePartenaireId: formData.typePartenaireId, // Utiliser l'ID du type de partenaire
+      typePartenaire: formData.typePartenaire, // Utiliser l'ID du type de partenaire
       adresses: formData.adresses, // Liste des adresses
     };
 
@@ -92,85 +94,34 @@ export default function MoraleDialog({ open, onClose }) {
       numeroRC: "",
       abreviation: "",
       formeJuridique: "",
-      typePartenaireId: null,
+      typePartenaire: {},
       adresses: [],
     });
   };
 
   // Gestion de la sélection d'un type partenaire
-  const handleSelectIdTypePartenaire = (selectedId) => {
+  const handleSelectTypePartenaire = (selectedType) => {
     setFormData((prevData) => ({
       ...prevData,
-      typePartenaireId: selectedId, // Mettre à jour l'ID du type de partenaire sélectionné
+      typePartenaire: selectedType, 
     }));
-    setIsTypePartenaireModalOpen(false); // Fermer le modal après sélection
+    setSelectedTypePartenaire(selectedType); 
+    setIsTypePartenaireModalOpen(false);
   };
+  
 
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>Ajouter un Partenaire Moral</DialogTitle>
       <DialogContent>
-        {/* Champ Nom */}
-        <TextField
-          label="Nom"
-          fullWidth
-          margin="normal"
-          name="nom"
-          value={formData.nom}
-          onChange={handleInputChange}
-        />
+        <TextField label="Nom" fullWidth margin="normal" name="nom" value={formData.nom} onChange={handleInputChange}/>
+        <TextField label="ICE" fullWidth margin="normal" name="ice" value={formData.ice} onChange={handleInputChange}/>
+        <TextField label="Numéro RC" fullWidth margin="normal" name="numeroRC" value={formData.numeroRC} onChange={handleInputChange}/>
+        <TextField label="Abreviation" fullWidth margin="normal" name="abreviation" value={formData.abreviation} onChange={handleInputChange}/>
+        <TextField label="Forme Juridique" fullWidth margin="normal" name="formeJuridique" value={formData.formeJuridique} onChange={handleInputChange}/>
 
-        {/* Champ ICE */}
-        <TextField
-          label="ICE"
-          fullWidth
-          margin="normal"
-          name="ice"
-          value={formData.ice}
-          onChange={handleInputChange}
-        />
-
-        {/* Champ Numéro RC */}
-        <TextField
-          label="Numéro RC"
-          fullWidth
-          margin="normal"
-          name="numeroRC"
-          value={formData.numeroRC}
-          onChange={handleInputChange}
-        />
-
-        {/* Champ Abréviation */}
-        <TextField
-          label="Abreviation"
-          fullWidth
-          margin="normal"
-          name="abreviation"
-          value={formData.abreviation}
-          onChange={handleInputChange}
-        />
-
-        {/* Champ Forme Juridique */}
-        <TextField
-          label="Forme Juridique"
-          fullWidth
-          margin="normal"
-          name="formeJuridique"
-          value={formData.formeJuridique}
-          onChange={handleInputChange}
-        />
-
-        {/* Champ pour sélectionner le type de partenaire */}
+        {/* Type Partenaire */}
         <FormControl fullWidth margin="normal">
-          <InputLabel>Type Partenaire</InputLabel>
-          <TextField
-            value={formData.typePartenaireId ? "Sélectionné" : "Aucun type sélectionné"}
-            InputProps={{
-              readOnly: true,
-            }}
-            onClick={() => setIsTypePartenaireModalOpen(true)}
-            fullWidth
-          />
           <Button
             variant="outlined"
             onClick={() => setIsTypePartenaireModalOpen(true)}
@@ -178,13 +129,28 @@ export default function MoraleDialog({ open, onClose }) {
           >
             Sélectionner un Type Partenaire
           </Button>
+          {/* Affichage du libellé du type partenaire sélectionné */}
+          {selectedTypePartenaire && (
+            <TextField
+              label="Type Partenaire"
+              value={selectedTypePartenaire.libelle}
+              fullWidth
+              margin="normal"
+              InputProps={{
+                readOnly: true, // Lecture seule pour éviter la modification manuelle
+              }}
+            />
+          )}
         </FormControl>
 
         {/* Modal pour sélectionner le type de partenaire */}
         <TypePartenaireTable
           open={isTypePartenaireModalOpen}
           onClose={() => setIsTypePartenaireModalOpen(false)}
-          onSelectIdTypePartenaire={handleSelectIdTypePartenaire}
+          onSelectTypePartenaire={(selectedType) => {
+            console.log("Type sélectionné :", selectedType)
+            handleSelectTypePartenaire(selectedType)
+          }}
         />
 
         {/* Section pour afficher les adresses */}

@@ -21,6 +21,9 @@ export default function PhysiqueDialog({ open, onClose,onAdd }) {
   const [openAdress, setOpenAdress] = useState(false);
   const [isTypePartenaireModalOpen, setIsTypePartenaireModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [selectedTypePartenaire, setSelectedTypePartenaire] = useState(null);
+
+
 
   // Centralized form state
   const [formData, setFormData] = useState({
@@ -29,7 +32,7 @@ export default function PhysiqueDialog({ open, onClose,onAdd }) {
     email: "",
     telephone: "",
     cni: "",
-    typePartenaireId: null,
+    typePartenaire: {},
     adresses: [],
   });
 
@@ -51,9 +54,9 @@ export default function PhysiqueDialog({ open, onClose,onAdd }) {
 
   // Validate form
   const validateForm = () => {
-    const { nom, prenom, email, telephone, cni, typePartenaireId } = formData;
+    const { nom, prenom, email, telephone, cni, typePartenaire } = formData;
 
-    if (!nom || !prenom || !email || !telephone || !cni || !typePartenaireId) {
+    if (!nom || !prenom || !email || !telephone || !cni || !typePartenaire) {
       setErrorMessage("Veuillez remplir tous les champs obligatoires.");
       return false;
     }
@@ -76,7 +79,7 @@ export default function PhysiqueDialog({ open, onClose,onAdd }) {
       email: formData.email,
       telephone: Number(formData.telephone),
       cni: Number(formData.cni),
-      typePartenaireId: formData.typePartenaireId,
+      typePartenaire: formData.typePartenaire,
       adresses: formData.adresses,
     };
 
@@ -99,21 +102,23 @@ export default function PhysiqueDialog({ open, onClose,onAdd }) {
       email: "",
       telephone: "",
       cni: "",
-      typePartenaireId: null,
+      typePartenaire: {},
       adresses: [],
     });
     setErrorMessage("");
   };
 
   
-  // Handle selection of a type partenaire
-  const handleSelectIdTypePartenaire = (selectedId) => {
+  
+  const handleSelectTypePartenaire = (type) => {
     setFormData((prev) => ({
       ...prev,
-      typePartenaireId: selectedId,
+      typePartenaire: type,
     }));
-    setIsTypePartenaireModalOpen(false); // Close the modal after selection
+    setSelectedTypePartenaire(type); // Met à jour le type partenaire sélectionné
+    setIsTypePartenaireModalOpen(false); // Ferme le modal
   };
+  
 
   return (
     <>
@@ -134,8 +139,6 @@ export default function PhysiqueDialog({ open, onClose,onAdd }) {
 
           {/* Type Partenaire */}
           <FormControl fullWidth margin="normal">
-            <TextField label="typePartenaire" fullWidth margin="normal" name="cni" />
-           
             <Button
               variant="outlined"
               onClick={() => setIsTypePartenaireModalOpen(true)}
@@ -143,7 +146,21 @@ export default function PhysiqueDialog({ open, onClose,onAdd }) {
             >
               Sélectionner un Type Partenaire
             </Button>
+
+            {/* Affichage du libellé du type partenaire sélectionné */}
+            {selectedTypePartenaire && (
+              <TextField
+                label="Type Partenaire"
+                value={selectedTypePartenaire.libelle}
+                fullWidth
+                margin="normal"
+                InputProps={{
+                  readOnly: true, // Lecture seule pour éviter la modification manuelle
+                }}
+              />
+            )}
           </FormControl>
+
 
           {/* Adresses */}
           <div style={{ marginTop: "20px" }}>
@@ -182,8 +199,13 @@ export default function PhysiqueDialog({ open, onClose,onAdd }) {
       <TypePartenaireTable
         open={isTypePartenaireModalOpen}
         onClose={() => setIsTypePartenaireModalOpen(false)}
-        onSelectIdTypePartenaire={handleSelectIdTypePartenaire}
-      />
+        onSelectTypePartenaire={(selectedType) => {
+          console.log("Type sélectionné :", selectedType)
+          handleSelectTypePartenaire(selectedType)}
+      }
+        />
+      
+
 
       {/* Snackbar for Error Messages */}
       <Snackbar

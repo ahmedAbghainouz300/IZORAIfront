@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -13,18 +12,26 @@ import {
   TableRow,
   Paper,
   Button,
+  Typography,
 } from "@mui/material";
 import typePartenaireService from "../../../../service/partenaire/typePartenaireService";
 
-export default function TypePartenaireTable({ open, onClose, onSelectIdTypePartenaire }) {
+export default function TypePartenaireTable({ open, onClose, onSelectTypePartenaire }) {
   const [types, setTypes] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (open) {
       typePartenaireService
         .getAllByNoms()
-        .then((response) => setTypes(response.data))
-        .catch((error) => console.error("Erreur lors du chargement des types:", error));
+        .then((response) => {
+          setTypes(response.data);
+          setError(null); // Réinitialiser l'erreur en cas de succès
+        })
+        .catch((error) => {
+          console.error("Erreur lors du chargement des types:", error);
+          setError("Impossible de charger les types partenaires.");
+        });
     }
   }, [open]);
 
@@ -32,6 +39,7 @@ export default function TypePartenaireTable({ open, onClose, onSelectIdTypeParte
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>Sélectionner un Type Partenaire</DialogTitle>
       <DialogContent>
+        {error && <Typography color="error">{error}</Typography>}
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
@@ -49,9 +57,10 @@ export default function TypePartenaireTable({ open, onClose, onSelectIdTypeParte
                       variant="contained"
                       color="primary"
                       onClick={() => {
-                        onSelectIdTypePartenaire(type.idTypePartenaire);
+                        onSelectTypePartenaire(type); // Envoi de tout l'objet `type`
                         onClose();
                       }}
+                      aria-label={`Sélectionner ${type.libelle}`}
                     >
                       Sélectionner
                     </Button>

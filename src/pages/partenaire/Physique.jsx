@@ -92,7 +92,16 @@ export default function Physique() {
     { field: "email", headerName: "Email", flex: 1, editable: true },
     { field: "telephone", headerName: "Téléphone", flex: 1, editable: true },
     { field: "cni", headerName: "CNI", flex: 1, editable: true },
-    { field: "typePartenaire.libelle" , headerName:"libelle",flex:1,editable:false},
+    {
+      field: "typePartenaire",
+      headerName: "Libellé ",
+      flex: 1,
+      valueGetter: (params) => {
+        const typePartenaire = params?.row?.typePartenaire;
+        return typePartenaire && typePartenaire.libelle ? typePartenaire.libelle : "Non défini";
+      },
+      editable: false,
+    },
     {
       field: "actions",
       headerName: "Actions",
