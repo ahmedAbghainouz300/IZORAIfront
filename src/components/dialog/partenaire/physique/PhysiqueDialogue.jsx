@@ -134,7 +134,7 @@ export default function PhysiqueDialog({ open, onClose,onAdd }) {
 
           {/* Type Partenaire */}
           <FormControl fullWidth margin="normal">
-            <InputLabel>Type Partenaire</InputLabel>
+            <TextField label="typePartenaire" fullWidth margin="normal" name="cni" />
            
             <Button
               variant="outlined"

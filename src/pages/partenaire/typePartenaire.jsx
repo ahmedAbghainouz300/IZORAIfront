@@ -11,44 +11,48 @@ import typePartenaireService from "../../service/partenaire/typePartenaireServic
 import VoirTypePartenaireDialog from "../../components/dialog/partenaire/typepartenaire/VoirTypePartenaireDialog.jsx"; // Créez le dialogue pour voir un type de partenaire
 import ModifierTypePartenaireDialog from "../../components/dialog/partenaire/typepartenaire/ModifierTypePartenaireDialog.jsx"; // Créez le dialogue pour modifier un type de partenaire
 import "../../styles/DataGrid.css";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { IconButton } from "@mui/material";
 
 const columns = (handleVoir, handleModifier, handleDelete) => [
-  { field: "idTypePartenaire", headerName: "ID", width: 90 },
+  // { field: "idTypePartenaire", headerName: "ID", width: 90 },
   { field: "libelle", headerName: "Libellé", flex: 1 },
   { field: "definition", headerName: "Définition", flex: 1 },
   { field: "genre", headerName: "Genre", flex: 1 },
   {
     field: "actions",
     headerName: "Actions",
-    width: 250,
+    width: 350,
     renderCell: (params) => (
       <strong>
-        <Button
+        <IconButton
           variant="contained"
           color="primary"
           size="small"
           onClick={() => handleVoir(params.row)}
           style={{ marginRight: 8 }}
         >
-          Voir
-        </Button>
-        <Button
+          <VisibilityIcon/>
+        </IconButton>
+        <IconButton
           variant="contained"
           color="warning"
           size="small"
           onClick={() => handleModifier(params.row)}
           style={{ marginRight: 8 }}
         >
-          Modifier
-        </Button>
-        <Button
+          <EditIcon/>
+        </IconButton>
+        <IconButton
           variant="contained"
           color="secondary"
           size="small"
           onClick={() => handleDelete(params.row.idTypePartenaire)}
         >
-          Supprimer
-        </Button>
+          <DeleteIcon/>
+        </IconButton>
       </strong>
     ),
   },
@@ -76,7 +80,10 @@ export default function TypePartenaire() {
   const fetchTypePartenaires = () => {
     typePartenaireService
       .getAll()
-      .then((response) => setRows(response.data))
+      .then((response) => {
+        setRows(response.data);
+        fetchTypePartenaires();
+      })
       .catch((error) => console.error("Erreur:", error));
   };
 
@@ -85,6 +92,8 @@ export default function TypePartenaire() {
       .delete(id)
       .then(() => {
         setRows(rows.filter((row) => row.idTypePartenaire !== id));
+        fetchTypePartenaires();
+
       })
       .catch((error) => console.error("Erreur suppression:", error));
   };
@@ -96,6 +105,8 @@ export default function TypePartenaire() {
 
   const handleModifier = (typePartenaire) => {
     setSelectedTypePartenaire(typePartenaire);
+    fetchTypePartenaires();
+
     setModifierDialogOpen(true);
   };
 

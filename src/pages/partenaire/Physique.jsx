@@ -38,7 +38,10 @@ export default function Physique() {
   const fetchAllPhysiques = () => {
     physiqueService
       .getAll()
-      .then((response) => setRows(response.data))
+      .then((response) => {
+        setRows(response.data);
+        console.log(response.data);
+      })
       .catch((error) => console.error("Erreur:", error));
   };
 
@@ -57,8 +60,9 @@ export default function Physique() {
     fetchAllPhysiques();
   };
 
-  const handleSave = () => {
+  const handleSave = (Partenaire) => {
     // Mettre à jour les données dans l'état
+    setSelectedPartenaire(Partenaire)
     fetchAllPhysiques();
     setEditDialogOpen(false);
   };
@@ -72,6 +76,9 @@ export default function Physique() {
       .delete(idPartenaire)
       .then(() => {
         setRows(rows.filter((row) => row.idPartenaire !== idPartenaire));
+        console.log(rows);
+        fetchAllPhysiques();
+
       })
       .catch((error) =>
         console.error("Erreur lors de la suppression :", error)
@@ -80,12 +87,12 @@ export default function Physique() {
 
   // Définir les colonnes à l'intérieur du composant pour accéder aux fonctions
   const columns = [
-    { field: "idPartenaire", headerName: "ID", width: 90 },
     { field: "nom", headerName: "Nom", flex: 1, editable: true },
     { field: "prenom", headerName: "Prénom", flex: 1, editable: true },
     { field: "email", headerName: "Email", flex: 1, editable: true },
     { field: "telephone", headerName: "Téléphone", flex: 1, editable: true },
     { field: "cni", headerName: "CNI", flex: 1, editable: true },
+    { field: "typePartenaire.libelle" , headerName:"libelle",flex:1,editable:false},
     {
       field: "actions",
       headerName: "Actions",
