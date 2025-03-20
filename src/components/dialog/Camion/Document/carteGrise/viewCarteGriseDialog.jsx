@@ -1,53 +1,113 @@
 import React from "react";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Box,
+} from "@mui/material";
+import { Descriptions } from "antd";
 
 export default function ViewCarteGriseDialog({ open, onClose, carteGrise }) {
+  // Ensure carteGrise is defined and has default values to avoid runtime errors
+  const {
+    marque = "",
+    genre = "",
+    numeroSerie = "",
+    couleur = "",
+    nombrePlace = "",
+    puissanceFiscale = "",
+    energie = "",
+    proprietaire = "",
+    poidsVide = "",
+    poidsAutorise = "",
+    dateMiseEnCirculation = "",
+    dateDelivrance = "",
+  } = carteGrise || {};
+
+  // Convert carteGrise data to Descriptions items format
+  const items = [
+    {
+      label: "Marque",
+      children: marque,
+      span: 3,
+    },
+    {
+      label: "Genre",
+      children: genre,
+      span: 3,
+    },
+    {
+      label: "Numéro de Série",
+      children: numeroSerie,
+      span: 3,
+    },
+    {
+      label: "Couleur",
+      children: couleur,
+      span: 3,
+    },
+    {
+      label: "Nombre de Places",
+      children: nombrePlace,
+      span: 3,
+    },
+    {
+      label: "Puissance Fiscale",
+      children: puissanceFiscale,
+      span: 3,
+    },
+    {
+      label: "Énergie",
+      children: energie,
+      span: 3,
+    },
+    {
+      label: "Propriétaire",
+      children: proprietaire,
+      span: 3,
+    },
+    {
+      label: "Poids à Vide (kg)",
+      children: poidsVide,
+      span: 3,
+    },
+    {
+      label: "Poids Autorisé (kg)",
+      children: poidsAutorise,
+      span: 3,
+    },
+    {
+      label: "Date de Mise en Circulation",
+      children: dateMiseEnCirculation,
+      span: 3,
+    },
+    {
+      label: "Date de Délivrance",
+      children: dateDelivrance,
+      span: 3,
+    },
+  ];
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>Détails de la Carte Grise</DialogTitle>
       <DialogContent>
-        <Typography variant="body1">
-          <strong>Marque :</strong> {carteGrise.marque}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Genre :</strong> {carteGrise.genre}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Numéro de Série :</strong> {carteGrise.numeroSerie}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Couleur :</strong> {carteGrise.couleur}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Nombre de Places :</strong> {carteGrise.nombrePlace}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Puissance Fiscale :</strong> {carteGrise.puissanceFiscale}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Énergie :</strong> {carteGrise.energie}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Propriétaire :</strong> {carteGrise.proprietaire}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Poids à Vide (kg) :</strong> {carteGrise.poidsVide}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Poids Autorisé (kg) :</strong> {carteGrise.poidsAutorise}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Date de Mise en Circulation :</strong>{" "}
-          {carteGrise.dateMiseEnCirculation}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Date de Délivrance :</strong> {carteGrise.dateDelivrance}
-        </Typography>
+        <Box sx={{ mt: 2 }}>
+          <Descriptions
+            bordered
+            column={{
+              xs: 1,
+              sm: 2,
+              md: 3,
+              lg: 3,
+              xl: 4,
+              xxl: 4,
+            }}
+            items={items}
+          />
+        </Box>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="primary">

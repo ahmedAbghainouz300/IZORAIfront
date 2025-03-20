@@ -67,6 +67,7 @@ export default function EditCarburantDialog({
 
   // Handle camion selection
   const handleSelectCamion = (camion) => {
+    console.log(camion);
     setFormData({ ...formData, camion });
     setIsCamionModalOpen(false);
   };
@@ -116,6 +117,7 @@ export default function EditCarburantDialog({
             value={formData.quantity}
             onChange={handleChange}
             margin="normal"
+            type="number"
           />
 
           {/* Price per Liter Input */}
@@ -126,6 +128,7 @@ export default function EditCarburantDialog({
             value={formData.prixParLitre}
             onChange={handleChange}
             margin="normal"
+            type="number"
           />
 
           {/* Current Mileage Input */}
@@ -136,6 +139,7 @@ export default function EditCarburantDialog({
             value={formData.kilometrageActuel}
             onChange={handleChange}
             margin="normal"
+            type="number"
           />
 
           {/* TypeCarburant Selection Field */}
@@ -168,7 +172,7 @@ export default function EditCarburantDialog({
             <TextField
               value={
                 formData.camion
-                  ? `Immatriculation : ${formData.camion.immatriculation} | Marque : ${formData.camion.typeCabine}`
+                  ? `Immatriculation : ${formData.camion.immatriculation} | type cabine : ${formData.camion.typeCamion.type}`
                   : ""
               }
               InputProps={{ readOnly: true }}

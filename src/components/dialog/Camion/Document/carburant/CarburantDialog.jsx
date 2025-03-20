@@ -125,6 +125,7 @@ export default function CarburantDialog({ open, onClose, onCreate }) {
             value={carburantData.quantity}
             onChange={handleInputChange}
             margin="normal"
+            type="number"
           />
 
           {/* Price per Liter Input */}
@@ -135,6 +136,7 @@ export default function CarburantDialog({ open, onClose, onCreate }) {
             value={carburantData.prixParLitre}
             onChange={handleInputChange}
             margin="normal"
+            type="number"
           />
 
           {/* Current Mileage Input */}
@@ -145,6 +147,7 @@ export default function CarburantDialog({ open, onClose, onCreate }) {
             value={carburantData.kilometrageActuel}
             onChange={handleInputChange}
             margin="normal"
+            type="number"
           />
 
           {/* TypeCarburant Selection Field */}

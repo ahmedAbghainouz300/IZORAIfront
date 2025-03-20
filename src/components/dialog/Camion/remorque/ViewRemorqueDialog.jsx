@@ -1,34 +1,67 @@
 import React from "react";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Box,
+} from "@mui/material";
+import { Descriptions } from "antd";
 
 export default function ViewRemorqueDialog({ open, onClose, remorque }) {
+  // Ensure remorque is defined and has default values to avoid runtime errors
+  const {
+    idRemorque = "",
+    immatriculation = "",
+    typeRemorque = "",
+    volumeStockage = "",
+    poidsVide = "",
+    poidsChargeMax = "",
+  } = remorque || {};
+
+  // Convert remorque data to Descriptions items format
+  const items = [
+    {
+      label: "Type de Remorque",
+      children: typeRemorque.type,
+      span: 3,
+    },
+    {
+      label: "Volume de Stockage (m³)",
+      children: volumeStockage + " m³",
+      span: 3,
+    },
+    {
+      label: "Poids à Vide (kg)",
+      children: poidsVide + " Kgs",
+      span: 3,
+    },
+    {
+      label: "Poids Charge Max (kg)",
+      children: poidsChargeMax + " Kgs",
+      span: 3,
+    },
+  ];
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>Détails de la Remorque</DialogTitle>
       <DialogContent>
-        <Typography variant="body1">
-          <strong>ID :</strong> {remorque.id}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Immatriculation :</strong> {remorque.immatriculation}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Type de Remorque :</strong> {remorque.typeRemorque}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Volume de Stockage (m³) :</strong> {remorque.volumesStockage}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Poids à Vide (kg) :</strong> {remorque.poidsVide}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Poids Charge Max (kg) :</strong> {remorque.poidsChargeMax}
-        </Typography>
+        <Box sx={{ mt: 2 }}>
+          <Descriptions
+            bordered
+            column={{
+              xs: 1,
+              sm: 2,
+              md: 3,
+              lg: 3,
+              xl: 4,
+              xxl: 4,
+            }}
+            items={items}
+          />
+        </Box>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="primary">

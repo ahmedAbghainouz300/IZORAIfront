@@ -77,6 +77,7 @@ export default function AssuranceDialog({ open, onClose, onSave }) {
             value={assuranceData.montant}
             onChange={handleInputChange}
             margin="normal"
+            type="number"
           />
 
           <div style={{ display: "flex", justifyContent: "space-around" }}>
@@ -104,6 +105,7 @@ export default function AssuranceDialog({ open, onClose, onSave }) {
             value={assuranceData.primeAnnuelle}
             onChange={handleInputChange}
             margin="normal"
+            type="number"
           />
 
           <TextField

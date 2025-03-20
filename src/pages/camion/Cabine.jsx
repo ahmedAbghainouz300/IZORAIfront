@@ -185,7 +185,7 @@ export default function Cabine() {
 
   // Define columns
   const columns = [
-    { field: "immatriculation", headerName: "ID", width: 90 },
+    { field: "immatriculation", headerName: "Immatriculation", flex: 1 },
     {
       field: "typeCamion",
       headerName: "Type de Cabine",

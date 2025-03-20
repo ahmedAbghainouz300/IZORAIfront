@@ -20,9 +20,9 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import CarteGriseDialog from "../../../components/dialog/Camion/Document/carteGrise/carteGriseDialog";
 import ViewCarteGriseDialog from "../../../components/dialog/Camion/Document/carteGrise/viewCarteGriseDialog";
-import EditCarteGriseDialog from "../../../components/dialog/Camion/Document/carteGrise/editCarteGriseDialog";
+import EditCarteGriseDialog from "../../../components/dialog/Camion/Document/carteGrise/EditCarteGriseDialog";
+import CarteGriseDialog from "../../../components/dialog/Camion/Document/carteGrise/CarteGriseDialog";
 
 // Custom Toolbar with only the CSV/Excel Export Button
 function CustomToolbar() {
