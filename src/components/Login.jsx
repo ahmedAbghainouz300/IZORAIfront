@@ -1,65 +1,42 @@
-import React from "react";
+import * as React from "react";
+import { AppProvider } from "@toolpad/core/AppProvider";
+import { SignInPage } from "@toolpad/core/SignInPage";
+import { useTheme } from "@mui/material/styles";
 import "../styles/login.css";
 
-const Login = () => {
-  return (
-    <div className="login-container">
-      {" "}
-      {/* Add a container for the login page */}
-      <div className="wrapper">
-        <div className="card-switch">
-          <label className="switch">
-            <input type="checkbox" className="toggle" />
-            <span className="slider" />
-            <span className="card-side" />
-            <div className="flip-card__inner">
-              <div className="flip-card__front">
-                <div className="title">Log in</div>
-                <form className="flip-card__form" action>
-                  <input
-                    className="flip-card__input"
-                    name="email"
-                    placeholder="Email"
-                    type="email"
-                  />
-                  <input
-                    className="flip-card__input"
-                    name="password"
-                    placeholder="Password"
-                    type="password"
-                  />
-                  <button className="flip-card__btn">Let`s go!</button>
-                </form>
-              </div>
-              <div className="flip-card__back">
-                <div className="title">Sign up</div>
-                <form className="flip-card__form" action>
-                  <input
-                    className="flip-card__input"
-                    placeholder="Name"
-                    type="name"
-                  />
-                  <input
-                    className="flip-card__input"
-                    name="email"
-                    placeholder="Email"
-                    type="email"
-                  />
-                  <input
-                    className="flip-card__input"
-                    name="password"
-                    placeholder="Password"
-                    type="password"
-                  />
-                  <button className="flip-card__btn">Confirm!</button>
-                </form>
-              </div>
-            </div>
-          </label>
-        </div>
-      </div>
-    </div>
-  );
+// preview-start
+const providers = [{ id: "credentials", name: "Email and Password" }];
+// preview-end
+
+const signIn = async (provider, formData) => {
+  const promise = new Promise((resolve) => {
+    setTimeout(() => {
+      alert(
+        `Signing in with "${provider.name}" and credentials: ${formData.get("email")}, ${formData.get("password")}`
+      );
+      resolve();
+    }, 300);
+  });
+  return promise;
 };
 
-export default Login;
+export default function CredentialsSignInPage() {
+  const theme = useTheme();
+  return (
+    <div className="login-container">
+      <AppProvider theme={theme}>
+        <SignInPage
+          signIn={signIn}
+          providers={providers}
+          slotProps={{
+            emailField: { autoFocus: false },
+            form: { noValidate: true },
+          }}
+          sx={{ width: "10000px" }}
+        />
+      </AppProvider>
+    </div>
+
+    // preview-end
+  );
+}

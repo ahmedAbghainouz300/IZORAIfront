@@ -62,9 +62,9 @@ export default function EditRemorqueDialog({
         </FormControl>
 
         <TextField
-          name="volumesStockage"
+          name="volumeStockage"
           label="Volume de Stockage (m³)"
-          value={formData.volumesStockage}
+          value={formData.volumeStockage}
           onChange={handleChange}
           fullWidth
           margin="normal"

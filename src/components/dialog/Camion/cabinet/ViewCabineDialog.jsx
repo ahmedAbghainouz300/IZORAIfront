@@ -1,28 +1,65 @@
 import React from "react";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Box,
+} from "@mui/material";
+import { Descriptions } from "antd";
 
 export default function ViewCabineDialog({ open, onClose, cabine }) {
+  // Ensure cabine is defined and has default values to avoid runtime errors
+  const {
+    immatriculation = "",
+    typeCamion = "",
+    poidsMax = "",
+    consommation = "",
+  } = cabine || {};
+
+  // Convert cabine data to Descriptions items format
+  const items = [
+    {
+      label: "Immatriculation",
+      children: immatriculation,
+      span: 3,
+    },
+    {
+      label: "Type de Cabine",
+      children: typeCamion.type,
+      span: 3,
+    },
+    {
+      label: "Poids Max (kg)",
+      children: poidsMax,
+      span: 3,
+    },
+    {
+      label: "Consommation (L/100km)",
+      children: consommation,
+      span: 3,
+    },
+  ];
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>Détails de la Cabine</DialogTitle>
       <DialogContent>
-        <Typography variant="body1">
-          <strong>Immatriculation :</strong> {cabine.immatriculation}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Type de Cabine :</strong> {cabine.typeCabine}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Poids Max (kg) :</strong> {cabine.poidsMax}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Consommation (L/100km) :</strong> {cabine.consommation}
-        </Typography>
+        <Box sx={{ mt: 2 }}>
+          <Descriptions
+            bordered
+            column={{
+              xs: 1,
+              sm: 2,
+              md: 3,
+              lg: 3,
+              xl: 4,
+              xxl: 4,
+            }}
+            items={items}
+          />
+        </Box>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="primary">

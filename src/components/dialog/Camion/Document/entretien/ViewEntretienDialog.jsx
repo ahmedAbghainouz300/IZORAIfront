@@ -1,37 +1,84 @@
 import React from "react";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Box,
+} from "@mui/material";
+import { Descriptions } from "antd";
+import camionService from "../../../../../service/camion/camionService";
 
 export default function ViewEntretienDialog({ open, onClose, entretien }) {
+  // Ensure entretien is defined and has default values to avoid runtime errors
+  const {
+    id = "",
+    dateEntretien = "",
+    typeEntretien = "",
+    description = "",
+    cout = "",
+    dateProchainEntretien = "",
+    camion = "",
+  } = entretien || {};
+
+  // Convert entretien data to Descriptions items format
+  const items = [
+    {
+      label: "ID",
+      children: id,
+      span: 3,
+    },
+    {
+      label: "Date d'Entretien",
+      children: dateEntretien,
+      span: 3,
+    },
+    {
+      label: "Type d'Entretien",
+      children: typeEntretien,
+      span: 3,
+    },
+    {
+      label: "Description",
+      children: description,
+      span: 3,
+    },
+    {
+      label: "Coût (€)",
+      children: cout,
+      span: 3,
+    },
+    {
+      label: "Date Prochain Entretien",
+      children: dateProchainEntretien,
+      span: 3,
+    },
+    {
+      label: "Immatriculation Camion",
+      children: camion.immatriculation,
+      span: 3,
+    },
+  ];
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>Détails de l'Entretien</DialogTitle>
       <DialogContent>
-        <Typography variant="body1">
-          <strong>ID :</strong> {entretien.id}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Date d'Entretien :</strong> {entretien.dateEntretien}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Type d'Entretien :</strong> {entretien.typeEntretien}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Description :</strong> {entretien.description}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Coût (€) :</strong> {entretien.cout}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Date Prochain Entretien :</strong> {entretien.dateProchainEntretien}
-        </Typography>
-        <Typography variant="body1">
-          <strong>Immatriculation Camion :</strong> {entretien.imatriculationCamion}
-        </Typography>
+        <Box sx={{ mt: 2 }}>
+          <Descriptions
+            bordered
+            column={{
+              xs: 1,
+              sm: 2,
+              md: 3,
+              lg: 3,
+              xl: 4,
+              xxl: 4,
+            }}
+            items={items}
+          />
+        </Box>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="primary">
@@ -40,4 +87,4 @@ export default function ViewEntretienDialog({ open, onClose, entretien }) {
       </DialogActions>
     </Dialog>
   );
-}       
+}

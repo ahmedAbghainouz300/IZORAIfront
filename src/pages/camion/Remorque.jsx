@@ -107,7 +107,6 @@ export default function Remorque() {
 
   // Define columns for the DataGrid
   const columns = [
-    { field: "idRemorque", headerName: "ID", width: 90 },
     {
       field: "typeRemorque",
       headerName: "Type de Remorque",
@@ -117,7 +116,7 @@ export default function Remorque() {
       },
     },
     {
-      field: "volumesStockage",
+      field: "volumeStockage",
       headerName: "Volume de Stockage (m³)",
       flex: 1,
       type: "number",

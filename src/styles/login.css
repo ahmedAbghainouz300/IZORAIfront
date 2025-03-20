@@ -5,10 +5,15 @@
     align-items: center;
     min-height: 100vh;
     width: 100%; /* Full width */
-    background-image: url('../assets/background.jpg');
+    background-image: url('../assets/network.jpg');
     background-size: cover;
     background-position: center; 
     margin: 0px;
+    background-color: black;
+  }
+  .card{
+    width: 700px;
+    height: auto;
   }
   
   /* Wrapper for the login form */

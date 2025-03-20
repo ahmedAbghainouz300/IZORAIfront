@@ -101,7 +101,6 @@ export default function Entretien() {
   };
   // Définir les colonnes
   const columns = [
-    { field: "id", headerName: "ID", width: 90 },
     { field: "dateEntretien", headerName: "Date d'Entretien", flex: 1 },
     { field: "typeEntretien", headerName: "Type d'Entretien", flex: 1 },
     { field: "description", headerName: "Description", flex: 1 },
