@@ -62,7 +62,7 @@ export default function Physique() {
 
   const handleSave = (Partenaire) => {
     // Mettre à jour les données dans l'état
-    setSelectedPartenaire(Partenaire)
+    setSelectedPartenaire(Partenaire);
     fetchAllPhysiques();
     setEditDialogOpen(false);
   };
@@ -78,7 +78,6 @@ export default function Physique() {
         setRows(rows.filter((row) => row.idPartenaire !== idPartenaire));
         console.log(rows);
         fetchAllPhysiques();
-
       })
       .catch((error) =>
         console.error("Erreur lors de la suppression :", error)
@@ -97,8 +96,7 @@ export default function Physique() {
       headerName: "Libellé ",
       flex: 1,
       valueGetter: (params) => {
-        const typePartenaire = params?.row?.typePartenaire;
-        return typePartenaire && typePartenaire.libelle ? typePartenaire.libelle : "Non défini";
+        return params && params.libelle ? params.libelle : "N/A";
       },
       editable: false,
     },
