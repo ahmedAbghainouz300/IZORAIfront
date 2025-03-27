@@ -29,11 +29,12 @@ export default function ModifierChauffeurDialog({ open, onClose, chauffeur, onUp
   const [formData, setFormData] = useState({
     nom: "",
     prenom: "",
-    CNI: "",
+    cni: "",
     email: "",
     telephone: "",
     cnss: "",
     dateRecrutement: "",
+    dateExpirationPermis: "",
     disponibilite: "",
   });
 
@@ -50,10 +51,11 @@ export default function ModifierChauffeurDialog({ open, onClose, chauffeur, onUp
       setFormData({
         nom: chauffeur.nom || "",
         prenom: chauffeur.prenom || "",
-        CNI: chauffeur.CNI || "",
+        cni: chauffeur.cni || "",
         email: chauffeur.email || "",
         telephone: chauffeur.telephone || "",
         cnss: chauffeur.cnss || "",
+        dateExpirationPermis: chauffeur.dateExpirationPermis || "",
         dateRecrutement: chauffeur.dateRecrutement || "",
         disponibilite: chauffeur.disponibilite || "",
         adresse: defaultAddress
@@ -130,11 +132,12 @@ export default function ModifierChauffeurDialog({ open, onClose, chauffeur, onUp
         {/* Formulaire de modification du chauffeur */}
         <TextField margin="dense" label="Nom" name="nom" fullWidth value={formData.nom} onChange={handleChange} />
         <TextField margin="dense" label="Prénom" name="prenom" fullWidth value={formData.prenom} onChange={handleChange} />
-        <TextField margin="dense" label="CNI" name="CNI" fullWidth value={formData.CNI} onChange={handleChange} />
+        <TextField margin="dense" label="CNI" name="cni" fullWidth value={formData.cni} onChange={handleChange} />
         <TextField margin="dense" label="Email" name="email" type="email" fullWidth value={formData.email} onChange={handleChange} />
         <TextField margin="dense" label="Téléphone" name="telephone" fullWidth value={formData.telephone} onChange={handleChange} />
         <TextField margin="dense" label="CNSS" name="cnss" fullWidth value={formData.cnss} onChange={handleChange} />
         <TextField margin="dense" label="Date de Recrutement" name="dateRecrutement" type="date" fullWidth value={formData.dateRecrutement} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+        <TextField margin="dense" label="dateExpirationPermis" name="dateExpirationPermis" type="date" fullWidth value={formData.dateExpirationPermis} onChange={handleChange} InputLabelProps={{ shrink: true }} />
         <TextField margin="dense" label="Disponibilité" name="disponibilite" fullWidth value={formData.disponibilite} onChange={handleChange} />
         <Button variant="outlined" onClick={() => setIsAdressModalOpen(true)} style={{ marginTop: "16px", marginBottom: "16px" }}>
           Afficher Adresse

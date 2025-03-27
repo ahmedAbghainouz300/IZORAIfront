@@ -50,6 +50,7 @@ export default function Assurance() {
   // Load data when the component mounts
   useEffect(() => {
     fetchAssurances();
+    assuranceService.checkExpiration();
   }, []);
 
   // Fetch assurances from the backend
