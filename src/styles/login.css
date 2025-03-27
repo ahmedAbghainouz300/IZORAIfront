@@ -1,218 +1,198 @@
-/* Login container */
+/* login.css */
 .login-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    width: 100%; /* Full width */
-    background-image: url('../assets/network.jpg');
-    background-size: cover;
-    background-position: center; 
-    margin: 0px;
-    background-color: black;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #f0f4f8; /* Optional: Add a background color */
+}
+
+@keyframes animate {
+  to{
+    background-position: 200%;
   }
-  .card{
-    width: 700px;
-    height: auto;
+}
+.paragraph {
+  width: 300px;  /* Adjust width as needed */
+  height: 30px;  /* Small height to make it look like a line */
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+   /* Optional: just to visualize the div */
+}
+
+.desc {
+  position: absolute;
+  color: rgb(16, 137, 211);
+  font-family: 'Times New Roman', Times, serif;
+  font-size: large;
+  margin: 0px;
+  white-space: nowrap;
+  animation: marquee 5s linear infinite;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(-100%);
   }
   
-  /* Wrapper for the login form */
-  .wrapper {
-    --input-focus: #2d8cf0;
-    --font-color: #323232;
-    --font-color-sub: #666;
-    --bg-color: #fff;
-    --bg-color-alt: #666;
-    --main-color: #323232;
-    width: 420px; /* Adjust width as needed */
-    background: transparent;
-    color: #fff;
-    border-radius: 12px;
-    padding: 30px 40px;
+  100% {
+    transform: translateX(200%);
   }
-  /* switch card */
-  .switch {
-    transform: translateY(-200px);
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 30px;
-    width: 50px;
-    height: 20px;
-  }
+}
 
-  .card-side::before {
-    position: absolute;
-    content: 'Log in';
-    left: -120px;
-    top: 0;
-    width: 100px;
-    text-decoration: underline;
-    color: var(--bg-color);
-    font-weight: 600;
-  }
 
-  .card-side::after {
-    position: absolute;
-    content: 'Sign up';
-    left: 70px;
-    top: 0;
-    width: 100px;
-    text-decoration: none;
-    color: var(--bg-color);
-    font-weight: 600;
-  }
 
-  .toggle {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
+.header {
+  margin: 0px;
+  text-align: center;
+  font-size: 2.3rem;
+  color: rgb(16, 137, 211);
+  background-image: url('../assets/blue-pink-bomb-smoke-on-600nw-1674741157.webp');
+  background-clip: text;
+  color: transparent;
+  background-size: 200% auto;
+  animation: animate 3s linear infinite;
+  border: #0099ff;
+}
 
-  .slider {
-    box-sizing: border-box;
-    border-radius: 5px;
-    border: 2px solid var(--bg-color);
-    box-shadow: 4px 4px var(--bg-color);
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: var(--bg-colorcolor);
-    transition: 0.3s;
-  }
+.form-container {
+  max-width: 350px;
+  background: #f8f9fd;
+  height: fit-content;
+  background: linear-gradient(0deg, rgb(255, 255, 255) 0%, rgb(244, 247, 251) 100%);
+  border-radius: 40px;
+  padding: 25px 35px;
+  border: 5px solid rgb(255, 255, 255);
+  box-shadow: rgba(133, 189, 215, 0.8784313725) 0px 30px 30px -20px;
+  margin: 10px auto; /* Reduced top margin */
+}
 
-  .slider:before {
-    box-sizing: border-box;
-    position: absolute;
-    content: "";
-    height: 20px;
-    width: 20px;
-    border: 2px solid var(--main-color);
-    border-radius: 5px;
-    left: -2px;
-    bottom: 2px;
-    background-color: var(--bg-color);
-    box-shadow: 0 3px 0 var(--main-color);
-    transition: 0.3s;
-  }
+.heading {
+  text-align: center;
+  font-weight: 900;
+  font-size: 30px;
+  color: rgb(16, 137, 211);
+}
 
-  .toggle:checked + .slider {
-    background-color: var(--input-focus);
-  }
+.form {
+  margin-top: 20px;
+}
 
-  .toggle:checked + .slider:before {
-    transform: translateX(30px);
-  }
+.form .input {
+  width: 100%;
+  background: white;
+  border: none;
+  padding: 15px 20px;
+  border-radius: 20px;
+  margin-top: 15px;
+  box-shadow: #cff0ff 0px 10px 10px -5px;
+  border-inline: 2px solid transparent;
+}
 
-  .toggle:checked ~ .card-side:before {
-    text-decoration: none;
-  }
+.form .input::-moz-placeholder {
+  color: rgb(170, 170, 170);
+}
 
-  .toggle:checked ~ .card-side:after {
-    text-decoration: underline;
-  }
+.form .input::placeholder {
+  color: rgb(170, 170, 170);
+}
 
-  /* card */ 
+.form .input:focus {
+  outline: none;
+  border-inline: 2px solid #12b1d1;
+}
 
-  .flip-card__inner {
-    width: 300px;
-    height: 350px;
-    position: relative;
-    background-color: transparent;
-    perspective: 1000px;
-      /* width: 100%;
-      height: 100%; */
-    text-align: center;
-    transition: transform 0.8s;
-    transform-style: preserve-3d;
-  }
+.form .forgot-password {
+  display: block;
+  margin-top: 10px;
+  margin-left: 10px;
+}
 
-  .toggle:checked ~ .flip-card__inner {
-    transform: rotateY(180deg);
-  }
+.form .forgot-password a {
+  font-size: 11px;
+  color: #0099ff;
+  text-decoration: none;
+}
 
-  .toggle:checked ~ .flip-card__front {
-    box-shadow: none;
-  }
+.form .login-button {
+  display: block;
+  width: 100%;
+  font-weight: bold;
+  background: linear-gradient(45deg, rgb(16, 137, 211) 0%, rgb(18, 177, 209) 100%);
+  color: white;
+  padding-block: 15px;
+  margin: 20px auto;
+  border-radius: 20px;
+  box-shadow: rgba(133, 189, 215, 0.8784313725) 0px 20px 10px -15px;
+  border: none;
+  transition: all 0.2s ease-in-out;
+}
 
-  .flip-card__front, .flip-card__back {
-    padding: 20px;
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-    background: lightgrey;
-    gap: 20px;
-    border-radius: 5px;
-    border: 2px solid var(--main-color);
-    box-shadow: 4px 4px var(--main-color);
-  }
+.form .login-button:hover {
+  transform: scale(1.03);
+  box-shadow: rgba(133, 189, 215, 0.8784313725) 0px 23px 10px -20px;
+}
 
-  .flip-card__back {
-    width: 100%;
-    transform: rotateY(180deg);
-  }
+.form .login-button:active {
+  transform: scale(0.95);
+  box-shadow: rgba(133, 189, 215, 0.8784313725) 0px 15px 10px -10px;
+}
 
-  .flip-card__form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-  }
+.social-account-container {
+  margin-top: 25px;
+}
 
-  .title {
-    margin: 20px 0 20px 0;
-    font-size: 25px;
-    font-weight: 900;
-    text-align: center;
-    color: var(--main-color);
-  }
+.social-account-container .title {
+  display: block;
+  text-align: center;
+  font-size: 10px;
+  color: rgb(170, 170, 170);
+}
 
-  .flip-card__input {
-    width: 250px;
-    height: 40px;
-    border-radius: 5px;
-    border: 2px solid var(--main-color);
-    background-color: var(--bg-color);
-    box-shadow: 4px 4px var(--main-color);
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--font-color);
-    padding: 5px 10px;
-    outline: none;
-  }
+.social-account-container .social-accounts {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 5px;
+}
 
-  .flip-card__input::placeholder {
-    color: var(--font-color-sub);
-    opacity: 0.8;
-  }
+.social-account-container .social-accounts .social-button {
+  background: linear-gradient(45deg, rgb(0, 0, 0) 0%, rgb(112, 112, 112) 100%);
+  border: 5px solid white;
+  padding: 5px;
+  border-radius: 50%;
+  width: 40px;
+  aspect-ratio: 1;
+  display: grid;
+  place-content: center;
+  box-shadow: rgba(133, 189, 215, 0.8784313725) 0px 12px 10px -8px;
+  transition: all 0.2s ease-in-out;
+}
 
-  .flip-card__input:focus {
-    border: 2px solid var(--input-focus);
-  }
+.social-account-container .social-accounts .social-button .svg {
+  fill: white;
+  margin: auto;
+}
 
-  .flip-card__btn:active, .button-confirm:active {
-    box-shadow: 0px 0px var(--main-color);
-    transform: translate(3px, 3px);
-  }
+.social-account-container .social-accounts .social-button:hover {
+  transform: scale(1.2);
+}
 
-  .flip-card__btn {
-    margin: 20px 0 20px 0;
-    width: 120px;
-    height: 40px;
-    border-radius: 5px;
-    border: 2px solid var(--main-color);
-    background-color: var(--bg-color);
-    box-shadow: 4px 4px var(--main-color);
-    font-size: 17px;
-    font-weight: 600;
-    color: var(--font-color);
-    cursor: pointer;
-  }
+.social-account-container .social-accounts .social-button:active {
+  transform: scale(0.9);
+}
+
+.agreement {
+  display: block;
+  text-align: center;
+  margin-top: 15px;
+}
+
+.agreement a {
+  text-decoration: none;
+  color: #0099ff;
+  font-size: 9px;
+}

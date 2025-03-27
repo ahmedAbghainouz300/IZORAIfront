@@ -174,7 +174,6 @@ export default function Carburant() {
 
   // Define columns
   const columns = [
-    { field: "id", headerName: "ID", width: 90 },
     { field: "dateRemplissage", headerName: "Date de Remplissage", flex: 1.2 },
     {
       field: "quantity",
