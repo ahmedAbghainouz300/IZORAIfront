@@ -97,6 +97,11 @@ const NavComponent = (children) => {
                 },
               ],
             },
+            {
+              key: allRoutes.marchandise,
+              icon: <HomeOutlined />,
+              label: "Marchandise",
+            },
           ]}
         />
       </Sider>

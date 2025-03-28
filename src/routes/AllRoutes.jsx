@@ -1,5 +1,6 @@
 const AllRoutes = {
   home: "/home",
+  marchandise: "/marchandise",
   about: "/about",
   partenaire: {
     base: "/partenaire",

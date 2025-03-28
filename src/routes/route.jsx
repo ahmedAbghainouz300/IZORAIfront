@@ -17,6 +17,7 @@ import Entretient from "../pages/camion/Document/Entretient";
 import Carburant from "../pages/camion/Document/Carburant";
 import CarteGrise from "../pages/camion/Document/CarteGrise";
 import CredentialsSignInPage from "../components/Login";
+import Marchandise from "../pages/marchandise/marchandise";
 
 function AppRoutes() {
   return (
@@ -24,8 +25,9 @@ function AppRoutes() {
       <Route path="/login" element={<CredentialsSignInPage />}></Route>
       <Route path="/" element={<Layout />}>
         <Route index element={<Home />} />
-        <Route path={allRoutes.home} element={<Home />} />
 
+        <Route path={allRoutes.home} element={<Home />} />
+        <Route path="/marchandise" element={<Marchandise />} />
         {/* Partenaire Section */}
         <Route path={allRoutes.partenaire.base} element={<Partenaire />}>
           <Route
