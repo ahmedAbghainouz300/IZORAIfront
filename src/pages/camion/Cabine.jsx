@@ -50,7 +50,7 @@ export default function Cabine() {
   // Load data when the component mounts or when refreshFlag changes
   useEffect(() => {
     fetchCamions();
-  });
+  }, []); // Empty array = run only on mount
 
   // Function to fetch data from the backend
   const fetchCamions = async () => {

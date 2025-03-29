@@ -23,6 +23,7 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import { CircularProgress } from "@mui/material";
 
 // Custom Toolbar with only the CSV/Excel Export Button
 function CustomToolbar() {
@@ -40,17 +41,23 @@ export default function Assurance() {
   const [selectedRow, setSelectedRow] = React.useState(null);
   const [rows, setRows] = React.useState([]);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const [isFailedAssurancesFetch, setIsFailedAssurancesFetch] = useState(false);
   const [isFailedAssuranceDelete, setIsFailedAssuranceDelete] = useState(false);
   const [isFailedAssuranceUpdate, setIsFailedAssuranceUpdate] = useState(false);
   const [isFailedAssuranceCreate, setIsFailedAssuranceCreate] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [assuranceToDelete, setAssuranceToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Load data when the component mounts
   useEffect(() => {
-    fetchAssurances();
-    assuranceService.checkExpiration();
+    try {
+      fetchAssurances();
+      assuranceService.checkExpiration();
+    } catch (e) {
+      console.log("error fetching data " + e);
+    }
   }, []);
 
   // Fetch assurances from the backend
@@ -58,7 +65,6 @@ export default function Assurance() {
     try {
       const response = await assuranceService.getAll();
       setRows(response.data);
-      console.log("Assurances récupérées avec succès");
     } catch (error) {
       console.error("Erreur lors de la récupération des assurances:", error);
       setIsFailedAssurancesFetch(true);
@@ -91,24 +97,29 @@ export default function Assurance() {
 
   // Handle the actual deletion
   const handleDelete = async () => {
+    setIsDeleting(true);
+    console.log(assuranceToDelete);
     try {
       await assuranceService.delete(assuranceToDelete);
-      setRows(rows.filter((row) => row.id !== assuranceToDelete));
-      console.log("Assurance supprimée avec succès");
+      setSuccessMessage("Assurance supprimée avec succès");
       setIsSuccess(true);
       setDeleteDialogOpen(false);
-      fetchAssurances(); // Refresh the data
+      fetchAssurances();
     } catch (error) {
       console.error("Erreur lors de la suppression de l'assurance:", error);
       setIsFailedAssuranceDelete(true);
+    } finally {
+      setIsDeleting(false);
       setDeleteDialogOpen(false);
     }
   };
 
   // Close the delete confirmation dialog
   const handleCloseDeleteDialog = () => {
-    setDeleteDialogOpen(false);
-    setAssuranceToDelete(null);
+    if (!isDeleting) {
+      setDeleteDialogOpen(false);
+      setAssuranceToDelete(null);
+    }
   };
 
   // Handle save action for updated assurance
@@ -118,17 +129,10 @@ export default function Assurance() {
         updatedAssurance.numeroContrat,
         updatedAssurance
       );
-      setRows(
-        rows.map((row) =>
-          row.numeroContrat === updatedAssurance.numeroContrat
-            ? updatedAssurance
-            : row
-        )
-      );
-      setEditDialogOpen(false);
+      setSuccessMessage("Assurance mise à jour avec succès");
       setIsSuccess(true);
+      setEditDialogOpen(false);
       fetchAssurances();
-      console.log("Assurance mise à jour avec succès");
     } catch (error) {
       console.error("Erreur lors de la mise à jour de l'assurance:", error);
       setIsFailedAssuranceUpdate(true);
@@ -139,10 +143,10 @@ export default function Assurance() {
   const handleCreate = async (newAssurance) => {
     try {
       const response = await assuranceService.create(newAssurance);
-      setRows([...rows, response.data]);
-      setAssuranceDialogOpen(false);
+      setSuccessMessage("Assurance créée avec succès");
       setIsSuccess(true);
-      console.log("Assurance créée avec succès");
+      setAssuranceDialogOpen(false);
+      fetchAssurances();
     } catch (error) {
       console.error("Erreur lors de la création de l'assurance:", error);
       setIsFailedAssuranceCreate(true);
@@ -155,6 +159,7 @@ export default function Assurance() {
       return;
     }
     setIsSuccess(false);
+    setSuccessMessage("");
   };
 
   // Close the error messages
@@ -190,34 +195,60 @@ export default function Assurance() {
   const columns = [
     { field: "company", headerName: "Compagnie", flex: 1 },
     { field: "typeCouverture", headerName: "Type de Couverture", flex: 1 },
-    { field: "montant", headerName: "Montant", flex: 1, type: "number" },
-    { field: "dateDebut", headerName: "Date de Début", flex: 1 },
-    { field: "dateExpiration", headerName: "Date d'Expiration", flex: 1 },
+    {
+      field: "montant",
+      headerName: "Montant",
+      flex: 1,
+      type: "number",
+      valueFormatter: (params) => `${params.value} €`,
+    },
+    {
+      field: "dateDebut",
+      headerName: "Date de Début",
+      flex: 1,
+      valueFormatter: (params) => new Date(params.value).toLocaleDateString(),
+    },
+    {
+      field: "dateExpiration",
+      headerName: "Date d'Expiration",
+      flex: 1,
+      valueFormatter: (params) => new Date(params.value).toLocaleDateString(),
+    },
     {
       field: "primeAnnuelle",
       headerName: "Prime Annuelle",
       flex: 1,
       type: "number",
+      valueFormatter: (params) => `${params.value} €`,
     },
     { field: "numCarteVerte", headerName: "Numéro Carte Verte", flex: 1 },
     {
       field: "actions",
       headerName: "Actions",
-      flex: 1,
+      width: 150,
       sortable: false,
       filterable: false,
       disableColumnMenu: true,
       renderCell: (params) => (
         <div>
-          <IconButton color="primary" onClick={() => handleView(params.row)}>
+          <IconButton
+            color="primary"
+            onClick={() => handleView(params.row)}
+            aria-label="view"
+          >
             <VisibilityIcon />
           </IconButton>
-          <IconButton color="secondary" onClick={() => handleEdit(params.row)}>
+          <IconButton
+            color="secondary"
+            onClick={() => handleEdit(params.row)}
+            aria-label="edit"
+          >
             <EditIcon />
           </IconButton>
           <IconButton
             color="error"
-            onClick={() => handleDeleteClick(params.row.id)}
+            onClick={() => handleDeleteClick(params.id)}
+            aria-label="delete"
           >
             <DeleteIcon />
           </IconButton>
@@ -227,40 +258,38 @@ export default function Assurance() {
   ];
 
   return (
-    <Box>
+    <Box sx={{ p: 3 }}>
       <div className="buttons">
-        <button className="blue-button" onClick={handleOpenAssuranceDialog}>
-          <p>Nouvelle assurance</p>
-        </button>
+        <Button
+          variant="contained"
+          onClick={handleOpenAssuranceDialog}
+          sx={{ mb: 2 }}
+        >
+          Nouvelle assurance
+        </Button>
       </div>
 
       {/* Dialog to add a new assurance */}
-      {assuranceDialogOpen && (
-        <AssuranceDialog
-          open={assuranceDialogOpen}
-          onClose={handleCloseAssuranceDialog}
-          onSave={handleCreate}
-        />
-      )}
+      <AssuranceDialog
+        open={assuranceDialogOpen}
+        onClose={handleCloseAssuranceDialog}
+        onSave={handleCreate}
+      />
 
       {/* Dialog to view assurance details */}
-      {viewDialogOpen && (
-        <ViewAssuranceDialog
-          open={viewDialogOpen}
-          onClose={() => setViewDialogOpen(false)}
-          assurance={selectedRow}
-        />
-      )}
+      <ViewAssuranceDialog
+        open={viewDialogOpen}
+        onClose={() => setViewDialogOpen(false)}
+        assurance={selectedRow}
+      />
 
       {/* Dialog to edit an assurance */}
-      {editDialogOpen && (
-        <EditAssuranceDialog
-          open={editDialogOpen}
-          onClose={() => setEditDialogOpen(false)}
-          assurance={selectedRow}
-          onSave={handleSave}
-        />
-      )}
+      <EditAssuranceDialog
+        open={editDialogOpen}
+        onClose={() => setEditDialogOpen(false)}
+        assurance={selectedRow}
+        onSave={handleSave}
+      />
 
       {/* DataGrid to display assurances */}
       <DataGrid
@@ -278,37 +307,43 @@ export default function Assurance() {
         checkboxSelection
         disableRowSelectionOnClick
         slots={{ toolbar: CustomToolbar }}
-        style={{ border: "none", marginLeft: 30 }}
         sx={{
-          "@media print": {
-            ".MuiDataGrid-toolbarContainer": {
-              display: "none",
-            },
+          border: "none",
+          "& .MuiDataGrid-cell": {
+            borderBottom: "none",
+          },
+          "& .MuiDataGrid-columnHeaders": {
+            borderBottom: "none",
           },
         }}
       />
 
       {/* Delete Confirmation Dialog */}
       <Dialog
-        autoHideDuration={3000}
         open={deleteDialogOpen}
         onClose={handleCloseDeleteDialog}
         aria-labelledby="delete-dialog-title"
-        aria-describedby="delete-dialog-description"
       >
-        <DialogTitle id="delete-dialog-title">Confirm Deletion</DialogTitle>
+        <DialogTitle id="delete-dialog-title">
+          Confirmer la suppression
+        </DialogTitle>
         <DialogContent>
-          <DialogContentText id="delete-dialog-description">
-            Are you sure you want to delete this assurance? This action cannot
-            be undone.
+          <DialogContentText>
+            Êtes-vous sûr de vouloir supprimer cette assurance ? Cette action
+            est irréversible.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDeleteDialog} color="primary">
-            Cancel
+          <Button onClick={handleCloseDeleteDialog} disabled={isDeleting}>
+            Annuler
           </Button>
-          <Button onClick={handleDelete} color="error" autoFocus>
-            Delete
+          <Button
+            onClick={handleDelete}
+            color="error"
+            disabled={isDeleting}
+            startIcon={isDeleting ? <CircularProgress size={20} /> : null}
+          >
+            {isDeleting ? "Suppression..." : "Supprimer"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -316,7 +351,7 @@ export default function Assurance() {
       {/* Success Snackbar */}
       <Snackbar
         open={isSuccess}
-        autoHideDuration={3000}
+        autoHideDuration={5000}
         onClose={handleCloseSuccess}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
@@ -324,15 +359,17 @@ export default function Assurance() {
           onClose={handleCloseSuccess}
           severity="success"
           sx={{ width: "100%" }}
+          elevation={6}
+          variant="filled"
         >
-          Operation successful!
+          {successMessage}
         </MuiAlert>
       </Snackbar>
 
       {/* Error Snackbars */}
       <Snackbar
         open={isFailedAssurancesFetch}
-        autoHideDuration={3000}
+        autoHideDuration={6000}
         onClose={handleCloseFailedAssurancesFetch}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
@@ -340,13 +377,16 @@ export default function Assurance() {
           onClose={handleCloseFailedAssurancesFetch}
           severity="error"
           sx={{ width: "100%" }}
+          elevation={6}
+          variant="filled"
         >
-          Failed to fetch assurances!
+          Échec du chargement des assurances !
         </MuiAlert>
       </Snackbar>
+
       <Snackbar
         open={isFailedAssuranceDelete}
-        autoHideDuration={3000}
+        autoHideDuration={6000}
         onClose={handleCloseFailedAssuranceDelete}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
@@ -354,13 +394,16 @@ export default function Assurance() {
           onClose={handleCloseFailedAssuranceDelete}
           severity="error"
           sx={{ width: "100%" }}
+          elevation={6}
+          variant="filled"
         >
-          Failed to delete assurance!
+          Échec de la suppression de l'assurance !
         </MuiAlert>
       </Snackbar>
+
       <Snackbar
         open={isFailedAssuranceUpdate}
-        autoHideDuration={3000}
+        autoHideDuration={6000}
         onClose={handleCloseFailedAssuranceUpdate}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
@@ -368,13 +411,17 @@ export default function Assurance() {
           onClose={handleCloseFailedAssuranceUpdate}
           severity="error"
           sx={{ width: "100%" }}
+          elevation={6}
+          variant="filled"
         >
-          Failed to update assurance! Verify the entered data.
+          Échec de la mise à jour de l'assurance ! Veuillez vérifier les données
+          saisies.
         </MuiAlert>
       </Snackbar>
+
       <Snackbar
         open={isFailedAssuranceCreate}
-        autoHideDuration={3000}
+        autoHideDuration={6000}
         onClose={handleCloseFailedAssuranceCreate}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
@@ -382,8 +429,11 @@ export default function Assurance() {
           onClose={handleCloseFailedAssuranceCreate}
           severity="error"
           sx={{ width: "100%" }}
+          elevation={6}
+          variant="filled"
         >
-          Failed to create assurance! Verify the entered data.
+          Échec de la création de l'assurance ! Veuillez vérifier les données
+          saisies.
         </MuiAlert>
       </Snackbar>
     </Box>

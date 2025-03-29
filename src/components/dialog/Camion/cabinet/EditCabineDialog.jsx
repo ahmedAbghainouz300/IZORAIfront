@@ -9,11 +9,15 @@ import {
   FormControl,
   CircularProgress,
   Snackbar,
-  Alert,
+  Alert as MuiAlert,
 } from "@mui/material";
 import AssuranceSelect from "../../../select/AssuranceSelect";
 import CarteGriseSelect from "../../../select/CarteGriseSelect";
 import TypeCabineSelect from "../../../select/TypeCabineSelect";
+
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
   const [formData, setFormData] = useState(cabine);
@@ -21,55 +25,77 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
   const [error, setError] = useState(null);
   const [isAssuranceModalOpen, setIsAssuranceModalOpen] = useState(false);
   const [isCarteGriseModalOpen, setIsCarteGriseModalOpen] = useState(false);
-  const [isTypeCamionModalOpen, setIsTypeCamionModalOpen] = useState(false); // State for TypeCamion modal
+  const [isTypeCamionModalOpen, setIsTypeCamionModalOpen] = useState(false);
+  const [validationError, setValidationError] = useState("");
+  const [showValidationError, setShowValidationError] = useState(false);
 
   useEffect(() => {
     if (open) {
       setFormData(cabine);
+      setValidationError(""); // Clear validation errors when opening
+      setShowValidationError(false); // Reset validation error display
     }
   }, [open, cabine]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    // Clear validation error when user types in immatriculation
+    if (name === "immatriculation" && validationError) {
+      setValidationError("");
+    }
+  };
+
+  const validateForm = () => {
+    if (!formData.immatriculation?.trim()) {
+      setValidationError("L'immatriculation est obligatoire");
+      setShowValidationError(true);
+      return false;
+    }
+    setValidationError("");
+    return true;
   };
 
   const handleSelectAssurance = (assurance) => {
     setFormData({ ...formData, assurance });
-    setIsAssuranceModalOpen(false); // Close the modal after selection
+    setIsAssuranceModalOpen(false);
   };
 
   const handleSelectCarteGrise = (carteGrise) => {
     setFormData({ ...formData, carteGrise });
-    setIsCarteGriseModalOpen(false); // Close the modal after selection
+    setIsCarteGriseModalOpen(false);
   };
 
-  // Handler for selecting a TypeCamion
   const handleSelectTypeCamion = (typeCamion) => {
     setFormData({ ...formData, typeCamion });
-    setIsTypeCamionModalOpen(false); // Close the modal after selection
+    setIsTypeCamionModalOpen(false);
+  };
+
+  const handleCloseValidationError = () => {
+    setShowValidationError(false);
   };
 
   const handleSubmit = async () => {
-    const payload = {
-      immatriculation: formData.immatriculation,
-      typeCamion: formData.typeCamion, // Updated to use typeCamion
-      poidsMax: Number(formData.poidsMax),
-      consommation: Number(formData.consommation),
-      assurance: formData.assurance,
-      carteGrise: formData.carteGrise,
-    };
+    if (!validateForm()) return;
 
-    setFormData({
-      immatriculation: "",
-      typeCamion: null, // Reset to null
-      poidsMax: 0,
-      consommation: 0,
-      assurance: null,
-      carteGrise: null,
-    });
-    onSave(payload);
-    onClose();
+    try {
+      setLoading(true);
+      const payload = {
+        immatriculation: formData.immatriculation,
+        typeCamion: formData.typeCamion,
+        poidsMax: Number(formData.poidsMax),
+        consommation: Number(formData.consommation),
+        assurance: formData.assurance,
+        carteGrise: formData.carteGrise,
+      };
+
+      await onSave(payload);
+      onClose();
+    } catch (err) {
+      setError(err.message || "Une erreur est survenue");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -80,7 +106,7 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
           <div
             style={{
               display: "flex",
-              justifyContent: "space-between",
+              justifyContent: "center",
               alignItems: "center",
               height: "200px",
             }}
@@ -89,28 +115,25 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
           </div>
         ) : (
           <>
-            {/* Immatriculation Field */}
+            {/* Required Immatriculation Field */}
             <TextField
               name="immatriculation"
-              label="Immatriculation"
+              label="Immatriculation*"
               value={formData.immatriculation || ""}
               onChange={handleChange}
               fullWidth
               margin="normal"
+              error={!!validationError}
+              helperText={validationError}
+              required
             />
 
-            {/* Type de Camion Field */}
+            {/* Rest of the form fields remain unchanged */}
             <FormControl fullWidth margin="normal">
               <TextField
-                value={
-                  formData.typeCamion
-                    ? formData.typeCamion.type // Assuming `typeCamion` has a `type` property
-                    : ""
-                }
-                InputProps={{
-                  readOnly: true, // Make the field read-only
-                }}
-                onClick={() => setIsTypeCamionModalOpen(true)} // Open the modal on click
+                value={formData.typeCamion?.type || ""}
+                InputProps={{ readOnly: true }}
+                onClick={() => setIsTypeCamionModalOpen(true)}
                 fullWidth
                 label="Type de Camion"
               />
@@ -123,7 +146,6 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
               </Button>
             </FormControl>
 
-            {/* Poids Max Field */}
             <TextField
               name="poidsMax"
               label="Poids Max (kg)"
@@ -134,7 +156,6 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
               type="number"
             />
 
-            {/* Consommation Field */}
             <TextField
               name="consommation"
               label="Consommation (L/100km)"
@@ -145,7 +166,6 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
               type="number"
             />
 
-            {/* Assurance Field */}
             <FormControl fullWidth margin="normal">
               <TextField
                 value={
@@ -153,10 +173,8 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
                     ? `${formData.assurance.company} | ${formData.assurance.numeroContrat}`
                     : ""
                 }
-                InputProps={{
-                  readOnly: true, // Make the field read-only
-                }}
-                onClick={() => setIsAssuranceModalOpen(true)} // Open the modal on click
+                InputProps={{ readOnly: true }}
+                onClick={() => setIsAssuranceModalOpen(true)}
                 fullWidth
                 label="Assurance"
               />
@@ -169,7 +187,6 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
               </Button>
             </FormControl>
 
-            {/* Carte Grise Field */}
             <FormControl fullWidth margin="normal">
               <TextField
                 value={
@@ -177,10 +194,8 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
                     ? `${formData.carteGrise.marque} | ${formData.carteGrise.numeroSerie}`
                     : ""
                 }
-                InputProps={{
-                  readOnly: true, // Make the field read-only
-                }}
-                onClick={() => setIsCarteGriseModalOpen(true)} // Open the modal on click
+                InputProps={{ readOnly: true }}
+                onClick={() => setIsCarteGriseModalOpen(true)}
                 fullWidth
                 label="Carte Grise"
               />
@@ -193,25 +208,22 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
               </Button>
             </FormControl>
 
-            {/* Assurance Selection Modal */}
             <AssuranceSelect
               open={isAssuranceModalOpen}
               onClose={() => setIsAssuranceModalOpen(false)}
               onSelectAssurance={handleSelectAssurance}
             />
 
-            {/* Carte Grise Selection Modal */}
             <CarteGriseSelect
               open={isCarteGriseModalOpen}
               onClose={() => setIsCarteGriseModalOpen(false)}
               onSelectCarteGrise={handleSelectCarteGrise}
             />
 
-            {/* TypeCamion Selection Modal */}
             <TypeCabineSelect
               open={isTypeCamionModalOpen}
               onClose={() => setIsTypeCamionModalOpen(false)}
-              onSelect={handleSelectTypeCamion} // Pass the handler for selection
+              onSelect={handleSelectTypeCamion}
             />
           </>
         )}
@@ -223,14 +235,26 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
         </Button>
       </DialogActions>
 
-      {/* Error Snackbar */}
+      {/* Error Snackbars */}
       <Snackbar
         open={!!error}
         autoHideDuration={6000}
         onClose={() => setError(null)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert onClose={() => setError(null)} severity="error">
           {error}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={showValidationError}
+        autoHideDuration={6000}
+        onClose={handleCloseValidationError}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="error">
+          Veuillez remplir tous les champs obligatoires
         </Alert>
       </Snackbar>
     </Dialog>

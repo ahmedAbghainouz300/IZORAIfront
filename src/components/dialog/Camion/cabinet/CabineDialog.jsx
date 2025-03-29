@@ -12,10 +12,16 @@ import Slide from "@mui/material/Slide";
 import { Button, TextField, Box, FormControl } from "@mui/material";
 import AssuranceSelect from "../../../select/AssuranceSelect";
 import CarteGriseSelect from "../../../select/CarteGriseSelect";
-import TypeCabineSelect from "../../../select/TypeCabineSelect"; // Import the TypeCabineSelect component
+import TypeCabineSelect from "../../../select/TypeCabineSelect";
+import MuiAlert from "@mui/material/Alert";
+import Snackbar from "@mui/material/Snackbar";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
+});
+
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
 export default function CabineDialog({ open, onClose, onSave }) {
@@ -23,11 +29,13 @@ export default function CabineDialog({ open, onClose, onSave }) {
   const [isCarteGriseModalOpen, setIsCarteGriseModalOpen] =
     React.useState(false);
   const [isTypeCabineModalOpen, setIsTypeCabineModalOpen] =
-    React.useState(false); // State for TypeCabine modal
+    React.useState(false);
+  const [validationError, setValidationError] = React.useState("");
+  const [isFailedValidation, setIsFailedValidation] = React.useState(false);
 
   const [cabineData, setCabineData] = React.useState({
     immatriculation: "",
-    typeCabine: null, // Use typeCabine instead of typeCamion
+    typeCabine: null,
     poidsMax: "",
     consommation: "",
     assurance: null,
@@ -37,6 +45,25 @@ export default function CabineDialog({ open, onClose, onSave }) {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setCabineData({ ...cabineData, [name]: value });
+    // Clear validation error when user types
+    if (name === "immatriculation" && validationError) {
+      setValidationError("");
+    }
+  };
+
+  const validateForm = () => {
+    if (!cabineData.immatriculation.trim()) {
+      setValidationError("L'immatriculation est obligatoire");
+      setIsFailedValidation(true);
+      return false;
+    }
+    setValidationError("");
+    return true;
+  };
+
+  const handleCloseFailedValidation = (event, reason) => {
+    if (reason === "clickaway") return;
+    setIsFailedValidation(false);
   };
 
   const handleSelectAssurance = (assurance) => {
@@ -49,16 +76,17 @@ export default function CabineDialog({ open, onClose, onSave }) {
     setIsCarteGriseModalOpen(false);
   };
 
-  // Handler for selecting a TypeCabine
   const handleSelectTypeCabine = (typeCabine) => {
-    setCabineData({ ...cabineData, typeCabine }); // Update typeCabine field
-    setIsTypeCabineModalOpen(false); // Close the modal
+    setCabineData({ ...cabineData, typeCabine });
+    setIsTypeCabineModalOpen(false);
   };
 
   const handleSubmit = async () => {
+    if (!validateForm()) return;
+
     const payload = {
       immatriculation: cabineData.immatriculation,
-      typeCabine: cabineData.typeCabine, // Use typeCabine
+      typeCabine: cabineData.typeCabine,
       poidsMax: Number(cabineData.poidsMax),
       consommation: Number(cabineData.consommation),
       assurance: cabineData.assurance,
@@ -67,7 +95,7 @@ export default function CabineDialog({ open, onClose, onSave }) {
 
     setCabineData({
       immatriculation: "",
-      typeCabine: null, // Reset to null
+      typeCabine: null,
       poidsMax: "",
       consommation: "",
       assurance: null,
@@ -105,21 +133,19 @@ export default function CabineDialog({ open, onClose, onSave }) {
       <Box sx={{ p: 3 }}>
         <TextField
           fullWidth
-          label="Immatriculation"
+          label="Immatriculation*"
           name="immatriculation"
           value={cabineData.immatriculation}
           onChange={handleInputChange}
           margin="normal"
+          error={!!validationError}
+          helperText={validationError}
+          required
         />
 
-        {/* Replace the TextField for Type de Cabine with TypeCabineSelect */}
         <FormControl fullWidth margin="normal">
           <TextField
-            value={
-              cabineData.typeCabine
-                ? cabineData.typeCabine.type // Assuming `typeCabine` has a `type` property
-                : ""
-            }
+            value={cabineData.typeCabine ? cabineData.typeCabine.type : ""}
             InputProps={{
               readOnly: true,
             }}
@@ -215,13 +241,24 @@ export default function CabineDialog({ open, onClose, onSave }) {
           onSelectCarteGrise={handleSelectCarteGrise}
         />
 
-        {/* TypeCabineSelect Modal */}
         <TypeCabineSelect
           open={isTypeCabineModalOpen}
           onClose={() => setIsTypeCabineModalOpen(false)}
-          onSelect={handleSelectTypeCabine} // Pass the handler for selection
+          onSelect={handleSelectTypeCabine}
         />
       </Box>
+
+      {/* Validation Error Snackbar */}
+      <Snackbar
+        open={isFailedValidation}
+        autoHideDuration={3000}
+        onClose={handleCloseFailedValidation}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="error">
+          Veuillez remplir tous les champs obligatoires
+        </Alert>
+      </Snackbar>
     </Dialog>
   );
 }

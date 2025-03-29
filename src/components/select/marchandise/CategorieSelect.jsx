@@ -132,7 +132,6 @@ export default function CategorieSelect({ open, onClose, onSelectCategorie }) {
     }
   };
 
-  // Add these missing handler functions
   const handleCloseSuccess = (event, reason) => {
     if (reason === "clickaway") return;
     setIsSuccess(false);
@@ -193,6 +192,7 @@ export default function CategorieSelect({ open, onClose, onSelectCategorie }) {
             }}
             error={!!validationError}
             helperText={validationError}
+            required
           />
           <TextField
             fullWidth
@@ -288,6 +288,7 @@ export default function CategorieSelect({ open, onClose, onSelectCategorie }) {
         open={isSuccess}
         autoHideDuration={3000}
         onClose={handleCloseSuccess}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert severity="success">Opération réussie!</Alert>
       </Snackbar>
@@ -296,6 +297,7 @@ export default function CategorieSelect({ open, onClose, onSelectCategorie }) {
         open={isFailedFetch}
         autoHideDuration={3000}
         onClose={handleCloseFailedFetch}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert severity="error">Échec de la récupération des catégories</Alert>
       </Snackbar>
@@ -304,6 +306,7 @@ export default function CategorieSelect({ open, onClose, onSelectCategorie }) {
         open={isFailedDelete}
         autoHideDuration={3000}
         onClose={handleCloseFailedDelete}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert severity="error">Échec de la suppression</Alert>
       </Snackbar>
@@ -312,6 +315,7 @@ export default function CategorieSelect({ open, onClose, onSelectCategorie }) {
         open={isFailedUpdate}
         autoHideDuration={3000}
         onClose={handleCloseFailedUpdate}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert severity="error">Échec de la mise à jour</Alert>
       </Snackbar>
@@ -320,6 +324,7 @@ export default function CategorieSelect({ open, onClose, onSelectCategorie }) {
         open={isFailedCreate}
         autoHideDuration={3000}
         onClose={handleCloseFailedCreate}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert severity="error">Échec de la création</Alert>
       </Snackbar>

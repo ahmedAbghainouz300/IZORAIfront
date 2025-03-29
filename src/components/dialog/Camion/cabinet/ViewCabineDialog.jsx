@@ -16,6 +16,7 @@ export default function ViewCabineDialog({ open, onClose, cabine }) {
     typeCamion = "",
     poidsMax = "",
     consommation = "",
+    assurance = "",
   } = cabine || {};
 
   // Convert cabine data to Descriptions items format
@@ -27,7 +28,7 @@ export default function ViewCabineDialog({ open, onClose, cabine }) {
     },
     {
       label: "Type de Cabine",
-      children: typeCamion.type,
+      children: typeCamion && typeCamion.type ? typeCamion.type : "-",
       span: 3,
     },
     {
@@ -38,6 +39,11 @@ export default function ViewCabineDialog({ open, onClose, cabine }) {
     {
       label: "Consommation (L/100km)",
       children: consommation,
+      span: 3,
+    },
+    {
+      label: "Assurance",
+      children: assurance && assurance.company ? assurance.company : "-",
       span: 3,
     },
   ];

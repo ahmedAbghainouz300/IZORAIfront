@@ -11,7 +11,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import MarchandiseDialog from "../../components/dialog/Marchandise/MarchandiseDialog";
-import ViewMarchandiseDialog from "../../components/dialog/Marchandise/ViewMarchandiseDialog";
 import EditMarchandiseDialog from "../../components/dialog/Marchandise/EditMarchandiseDialog";
 import "../../styles/DataGrid.css";
 import Snackbar from "@mui/material/Snackbar";
@@ -23,6 +22,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Button from "@mui/material/Button";
 import marchandiseService from "../../service/marchandise/MarchandiseService";
+import ViewMarchandiseDialog from "../../components/dialog/marchandise/ViewMarchandiseDialog";
 
 function CustomToolbar() {
   return (
@@ -255,6 +255,7 @@ export default function Marchandise() {
         open={isSuccess}
         autoHideDuration={3000}
         onClose={handleCloseSuccess}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <MuiAlert severity="success">Opération réussie!</MuiAlert>
       </Snackbar>
@@ -263,6 +264,7 @@ export default function Marchandise() {
         open={isFailedFetch}
         autoHideDuration={3000}
         onClose={handleCloseFailedFetch}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <MuiAlert severity="error">
           Échec de la récupération des marchandises
@@ -281,6 +283,7 @@ export default function Marchandise() {
         open={isFailedUpdate}
         autoHideDuration={3000}
         onClose={handleCloseFailedUpdate}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <MuiAlert severity="error">Échec de la mise à jour</MuiAlert>
       </Snackbar>
@@ -289,6 +292,7 @@ export default function Marchandise() {
         open={isFailedCreate}
         autoHideDuration={3000}
         onClose={handleCloseFailedCreate}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <MuiAlert severity="error">Échec de la création</MuiAlert>
       </Snackbar>

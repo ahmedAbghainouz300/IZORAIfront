@@ -8,6 +8,7 @@ import {
   CarOutlined,
   UserOutlined,
   FileOutlined,
+  ProductOutlined,
 } from "@ant-design/icons";
 import { Button, Layout, Menu } from "antd";
 import allRoutes from "../routes/AllRoutes";
@@ -99,7 +100,7 @@ const NavComponent = (children) => {
             },
             {
               key: allRoutes.marchandise,
-              icon: <HomeOutlined />,
+              icon: <ProductOutlined />,
               label: "Marchandise",
             },
           ]}
