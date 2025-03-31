@@ -10,19 +10,25 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import MarchandiseDialog from "../../components/dialog/Marchandise/MarchandiseDialog";
-import EditMarchandiseDialog from "../../components/dialog/Marchandise/EditMarchandiseDialog";
+import marchandiseService from "../../service/marchandise/marchandiseService";
 import "../../styles/DataGrid.css";
-import Snackbar from "@mui/material/Snackbar";
-import MuiAlert from "@mui/material/Alert";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
-import Button from "@mui/material/Button";
-import marchandiseService from "../../service/marchandise/MarchandiseService";
+import {
+  Snackbar,
+  Alert as MuiAlert,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button,
+} from "@mui/material";
 import ViewMarchandiseDialog from "../../components/dialog/marchandise/ViewMarchandiseDialog";
+import MarchandiseDialog from "../../components/dialog/marchandise/MarchandiseDialog";
+import EditMarchandiseDialog from "../../components/dialog/marchandise/EditMarchandiseDialog";
+
+const Alert = React.forwardRef((props, ref) => (
+  <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />
+));
 
 function CustomToolbar() {
   return (
@@ -38,11 +44,8 @@ export default function Marchandise() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [rows, setRows] = useState([]);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [isFailedFetch, setIsFailedFetch] = useState(false);
-  const [isFailedDelete, setIsFailedDelete] = useState(false);
-  const [isFailedUpdate, setIsFailedUpdate] = useState(false);
-  const [isFailedCreate, setIsFailedCreate] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState({ message: null, severity: "success" });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [marchandiseToDelete, setMarchandiseToDelete] = useState(null);
 
@@ -51,13 +54,23 @@ export default function Marchandise() {
   }, []);
 
   const fetchMarchandises = async () => {
+    setLoading(true);
     try {
       const response = await marchandiseService.getAll();
       setRows(response.data);
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching marchandises:", error);
-      setIsFailedFetch(true);
+      setAlert({
+        message: "Erreur lors du chargement des marchandises",
+        severity: "error",
+      });
+      setLoading(false);
     }
+  };
+
+  const handleCloseAlert = () => {
+    setAlert({ message: null, severity: "success" });
   };
 
   const handleOpenMarchandiseDialog = () => setMarchandiseDialogOpen(true);
@@ -78,75 +91,75 @@ export default function Marchandise() {
     setDeleteDialogOpen(true);
   };
 
-  const handleDelete = async () => {
+  const handleDeleteConfirm = async () => {
+    setLoading(true);
     try {
       await marchandiseService.delete(marchandiseToDelete);
-      setIsSuccess(true);
-      setDeleteDialogOpen(false);
       fetchMarchandises();
+      setAlert({
+        message: "Marchandise supprimée avec succès",
+        severity: "success",
+      });
     } catch (error) {
       console.error("Error deleting marchandise:", error);
-      setIsFailedDelete(true);
+      setAlert({
+        message: "Erreur lors de la suppression de la marchandise",
+        severity: "error",
+      });
+    } finally {
+      setLoading(false);
       setDeleteDialogOpen(false);
     }
   };
 
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setMarchandiseToDelete(null);
+  };
+
   const handleSave = async (updatedMarchandise) => {
+    setLoading(true);
     try {
       await marchandiseService.update(
         updatedMarchandise.id,
         updatedMarchandise
       );
-      setRows(
-        rows.map((row) =>
-          row.id === updatedMarchandise.id ? updatedMarchandise : row
-        )
-      );
-      setEditDialogOpen(false);
-      setIsSuccess(true);
       fetchMarchandises();
+      setEditDialogOpen(false);
+      setAlert({
+        message: "Marchandise mise à jour avec succès",
+        severity: "success",
+      });
     } catch (error) {
       console.error("Error updating marchandise:", error);
-      setIsFailedUpdate(true);
+      setAlert({
+        message: "Erreur lors de la mise à jour de la marchandise",
+        severity: "error",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleCreate = async (newMarchandise) => {
+    setLoading(true);
     try {
-      const response = await marchandiseService.create(newMarchandise);
-      setRows([...rows, response.data]);
-      setMarchandiseDialogOpen(false);
-      setIsSuccess(true);
+      await marchandiseService.create(newMarchandise);
       fetchMarchandises();
+      setMarchandiseDialogOpen(false);
+      setAlert({
+        message: "Marchandise ajoutée avec succès",
+        severity: "success",
+      });
     } catch (error) {
       console.error("Error creating marchandise:", error);
-      setIsFailedCreate(true);
+      setAlert({
+        message: "Erreur lors de la création de la marchandise",
+        severity: "error",
+      });
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleCloseSuccess = (event, reason) => {
-    if (reason === "clickaway") return;
-    setIsSuccess(false);
-  };
-
-  const handleCloseFailedFetch = (event, reason) => {
-    if (reason === "clickaway") return;
-    setIsFailedFetch(false);
-  };
-
-  const handleCloseFailedDelete = (event, reason) => {
-    if (reason === "clickaway") return;
-    setIsFailedDelete(false);
-  };
-
-  const handleCloseFailedUpdate = (event, reason) => {
-    if (reason === "clickaway") return;
-    setIsFailedUpdate(false);
-  };
-
-  const handleCloseFailedCreate = (event, reason) => {
-    if (reason === "clickaway") return;
-    setIsFailedCreate(false);
   };
 
   const columns = [
@@ -176,6 +189,7 @@ export default function Marchandise() {
           <IconButton
             color="error"
             onClick={() => handleDeleteClick(params.row.id)}
+            disabled={loading}
           >
             <DeleteIcon />
           </IconButton>
@@ -185,117 +199,109 @@ export default function Marchandise() {
   ];
 
   return (
-    <Box>
-      <div className="buttons">
-        <button className="blue-button" onClick={handleOpenMarchandiseDialog}>
-          <p>Nouvelle Marchandise</p>
-        </button>
-      </div>
+    <div>
+      <h1>Gestion des Marchandises :</h1>
 
-      {marchandiseDialogOpen && (
-        <MarchandiseDialog
-          open={marchandiseDialogOpen}
-          onClose={handleCloseMarchandiseDialog}
-          onCreate={handleCreate}
-        />
-      )}
+      <Box>
+        <Button
+          variant="contained"
+          onClick={handleOpenMarchandiseDialog}
+          sx={{ mb: 2 }}
+        >
+          Ajouter une Marchandise
+        </Button>
 
-      {viewDialogOpen && (
-        <ViewMarchandiseDialog
-          open={viewDialogOpen}
-          onClose={() => setViewDialogOpen(false)}
-          marchandise={selectedRow}
-        />
-      )}
+        {marchandiseDialogOpen && (
+          <MarchandiseDialog
+            open={marchandiseDialogOpen}
+            onClose={handleCloseMarchandiseDialog}
+            onCreate={handleCreate}
+          />
+        )}
 
-      {editDialogOpen && (
-        <EditMarchandiseDialog
-          open={editDialogOpen}
-          onClose={() => setEditDialogOpen(false)}
-          marchandise={selectedRow}
-          onSave={handleSave}
-        />
-      )}
+        {viewDialogOpen && (
+          <ViewMarchandiseDialog
+            open={viewDialogOpen}
+            onClose={() => setViewDialogOpen(false)}
+            marchandise={selectedRow}
+          />
+        )}
 
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        getRowId={(row) => row.id}
-        initialState={{
-          pagination: {
-            paginationModel: {
-              pageSize: 5,
+        {editDialogOpen && (
+          <EditMarchandiseDialog
+            open={editDialogOpen}
+            onClose={() => setEditDialogOpen(false)}
+            marchandise={selectedRow}
+            onSave={handleSave}
+          />
+        )}
+
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          loading={loading}
+          getRowId={(row) => row.id}
+          initialState={{
+            pagination: {
+              paginationModel: {
+                pageSize: 5,
+              },
             },
-          },
-        }}
-        disableRowSelectionOnClick
-        slots={{ toolbar: CustomToolbar }}
-        style={{ border: "none", marginLeft: 30 }}
-      />
+          }}
+          pageSizeOptions={[5, 10, 20]}
+          checkboxSelection
+          disableRowSelectionOnClick
+          slots={{ toolbar: CustomToolbar }}
+          sx={{
+            "@media print": {
+              ".MuiDataGrid-toolbarContainer": { display: "none" },
+            },
+          }}
+        />
+      </Box>
 
+      {/* Delete Confirmation Dialog */}
       <Dialog
         open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen(false)}
+        onClose={handleCloseDeleteDialog}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
       >
-        <DialogTitle>Confirmer la suppression</DialogTitle>
+        <DialogTitle id="delete-dialog-title">
+          Confirmer la suppression
+        </DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            Êtes-vous sûr de vouloir supprimer cette marchandise ?
+          <DialogContentText id="delete-dialog-description">
+            Êtes-vous sûr de vouloir supprimer cette marchandise? Cette action
+            est irréversible.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Annuler</Button>
-          <Button onClick={handleDelete} color="error">
+          <Button onClick={handleCloseDeleteDialog} color="primary">
+            Annuler
+          </Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            color="error"
+            autoFocus
+            disabled={loading}
+          >
             Supprimer
           </Button>
         </DialogActions>
       </Dialog>
 
+      {/* Global Notification Snackbar */}
       <Snackbar
-        open={isSuccess}
-        autoHideDuration={3000}
-        onClose={handleCloseSuccess}
+        open={!!alert.message}
+        autoHideDuration={6000}
+        onClose={handleCloseAlert}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <MuiAlert severity="success">Opération réussie!</MuiAlert>
+        <Alert severity={alert.severity} onClose={handleCloseAlert}>
+          {alert.message}
+        </Alert>
       </Snackbar>
-
-      <Snackbar
-        open={isFailedFetch}
-        autoHideDuration={3000}
-        onClose={handleCloseFailedFetch}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <MuiAlert severity="error">
-          Échec de la récupération des marchandises
-        </MuiAlert>
-      </Snackbar>
-
-      <Snackbar
-        open={isFailedDelete}
-        autoHideDuration={3000}
-        onClose={handleCloseFailedDelete}
-      >
-        <MuiAlert severity="error">Échec de la suppression</MuiAlert>
-      </Snackbar>
-
-      <Snackbar
-        open={isFailedUpdate}
-        autoHideDuration={3000}
-        onClose={handleCloseFailedUpdate}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <MuiAlert severity="error">Échec de la mise à jour</MuiAlert>
-      </Snackbar>
-
-      <Snackbar
-        open={isFailedCreate}
-        autoHideDuration={3000}
-        onClose={handleCloseFailedCreate}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <MuiAlert severity="error">Échec de la création</MuiAlert>
-      </Snackbar>
-    </Box>
+    </div>
   );
 }

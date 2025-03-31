@@ -6,8 +6,8 @@ import {
 } from "@mui/x-data-grid";
 import ChauffeurDialog from "../../components/dialog/partenaire/chauffeur/ChauffeurDialog";
 import chauffeurService from "../../service/partenaire/chaufeurService";
-import VoirChauffeurDialog from "../../components/dialog/partenaire/chauffeur/VoirChauffeurDialog"; // Nouveau dialogue pour voir les détails
-import ModifierChauffeurDialog from "../../components/dialog/partenaire/chauffeur/ModifierChauffeurDialog.jsx"; // Nouveau dialogue pour modifier les détails
+import VoirChauffeurDialog from "../../components/dialog/partenaire/chauffeur/VoirChauffeurDialog";
+import ModifierChauffeurDialog from "../../components/dialog/partenaire/chauffeur/ModifierChauffeurDialog.jsx";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -24,25 +24,19 @@ import {
   DialogContent,
   DialogActions,
   Card,
-  CardContent, // Add Badge import here
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
-  Avatar,
-} from "@mui/material"; // Installer react-countup
+  CardContent,
+  Snackbar,
+  Alert as MuiAlert,
+  DialogContentText,
+} from "@mui/material";
 import CountUp from "react-countup";
-import AvailableDriversDialog from "../../components/dialog/partenaire/chauffeur/AvailableDriversDialog"; // Nouveau dialogue pour les chauffeurs disponibles
-import {
-  Warning as WarningIcon,
-  ErrorOutline as ErrorOutlineIcon,
-  Close as CloseIcon,
-  Badge as BadgeIcon,
-  Phone as PhoneIcon,
-  DateRange as DateRangeIcon,
-} from "@mui/icons-material";
-import ExpiredPermisDialog from "../../components/dialog/partenaire/chauffeur/ExpiredPermisDialog"; // Nouveau dialogue pour les chauffeurs avec permis expiré
-// Nouveau composant pour les statistiques
+import AvailableDriversDialog from "../../components/dialog/partenaire/chauffeur/AvailableDriversDialog";
+import ExpiredPermisDialog from "../../components/dialog/partenaire/chauffeur/ExpiredPermisDialog";
+
+const Alert = React.forwardRef((props, ref) => (
+  <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />
+));
+
 const StatsCard = ({ title, value, color }) => (
   <Card
     sx={{
@@ -63,7 +57,7 @@ const StatsCard = ({ title, value, color }) => (
   </Card>
 );
 
-const columns = (handleDelete, handleVoir, handleModifier) => [
+const columns = (handleDeleteClick, handleVoir, handleModifier, loading) => [
   { field: "idPartenaire", headerName: "ID", width: 90 },
   { field: "nom", headerName: "Nom", flex: 1 },
   { field: "prenom", headerName: "Prénom", flex: 1 },
@@ -78,7 +72,6 @@ const columns = (handleDelete, handleVoir, handleModifier) => [
     headerName: "dateExpirationPermis",
     flex: 1,
   },
-
   {
     field: "actions",
     headerName: "Actions",
@@ -86,29 +79,23 @@ const columns = (handleDelete, handleVoir, handleModifier) => [
     renderCell: (params) => (
       <strong>
         <IconButton
-          variant="contained"
           color="primary"
-          size="small"
           onClick={() => handleVoir(params.row)}
           style={{ marginRight: 8 }}
         >
           <VisibilityIcon />
         </IconButton>
         <IconButton
-          variant="contained"
-          color="warning"
-          size="small"
+          color="secondary"
           onClick={() => handleModifier(params.row)}
           style={{ marginRight: 8 }}
         >
           <EditIcon />
         </IconButton>
         <IconButton
-          variant="contained"
-          color="secondary"
-          size="small"
-          onClick={() => handleDelete(params.row.idPartenaire)}
-          style={{ marginRight: 8 }}
+          color="error"
+          onClick={() => handleDeleteClick(params.row.idPartenaire)}
+          disabled={loading}
         >
           <DeleteIcon />
         </IconButton>
@@ -128,8 +115,8 @@ function CustomToolbar() {
 export default function Chauffeur() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [voirDialogOpen, setVoirDialogOpen] = useState(false);
-  const [selectedChauffeur, setSelectedChauffeur] = useState(null);
   const [modifierDialogOpen, setModifierDialogOpen] = useState(false);
+  const [selectedChauffeur, setSelectedChauffeur] = useState(null);
   const [expiredInsuranceDrivers, setExpiredInsuranceDrivers] = useState([]);
   const [insuranceDialogOpen, setInsuranceDialogOpen] = useState(false);
   const [availabilityDialogOpen, setAvailabilityDialogOpen] = useState(false);
@@ -139,17 +126,17 @@ export default function Chauffeur() {
     loading: true,
   });
   const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState({ message: null, severity: "success" });
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [chauffeurToDelete, setChauffeurToDelete] = useState(null);
 
   useEffect(() => {
     fetchChauffeurs();
     fetchStats();
-
     fetchExpiredPermisDrivers();
   }, []);
 
-  // Fetch Available Drivers
-
-  // Fetch Drivers with Expired Insurance
   const fetchExpiredPermisDrivers = () => {
     chauffeurService
       .getWithExpiredPermis()
@@ -165,11 +152,23 @@ export default function Chauffeur() {
   };
 
   const fetchChauffeurs = () => {
+    setLoading(true);
     chauffeurService
       .getAll()
-      .then((response) => setRows(response.data))
-      .catch((error) => console.error("Erreur:", error));
+      .then((response) => {
+        setRows(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Erreur:", error);
+        setAlert({
+          message: "Erreur lors du chargement des chauffeurs",
+          severity: "error",
+        });
+        setLoading(false);
+      });
   };
+
   const fetchStats = () => {
     setStats((prev) => ({ ...prev, loading: true }));
 
@@ -190,33 +189,76 @@ export default function Chauffeur() {
       });
   };
 
-  const handleDelete = (id) => {
+  const handleCloseAlert = () => {
+    setAlert({ message: null, severity: "success" });
+  };
+
+  const handleDeleteClick = (id) => {
+    setChauffeurToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    setLoading(true);
     chauffeurService
-      .delete(id)
+      .delete(chauffeurToDelete)
       .then(() => {
-        setRows(rows.filter((row) => row.idPartenaire !== id));
         fetchChauffeurs();
+        setAlert({
+          message: "Chauffeur supprimé avec succès",
+          severity: "success",
+        });
       })
-      .catch((error) => console.error("Erreur suppression:", error));
+      .catch((error) => {
+        console.error("Erreur suppression:", error);
+        setAlert({
+          message: "Erreur lors de la suppression du chauffeur",
+          severity: "error",
+        });
+      })
+      .finally(() => {
+        setLoading(false);
+        setDeleteDialogOpen(false);
+      });
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setChauffeurToDelete(null);
   };
 
   const handleVoir = (chauffeur) => {
     setSelectedChauffeur(chauffeur);
     setVoirDialogOpen(true);
   };
+
   const handleModifier = (chauffeur) => {
     setSelectedChauffeur(chauffeur);
-    fetchChauffeurs();
     setModifierDialogOpen(true);
+  };
+
+  const handleAddSuccess = () => {
+    fetchChauffeurs();
+    setDialogOpen(false);
+    setAlert({
+      message: "Chauffeur ajouté avec succès",
+      severity: "success",
+    });
+  };
+
+  const handleUpdateSuccess = () => {
+    fetchChauffeurs();
+    setModifierDialogOpen(false);
+    setAlert({
+      message: "Chauffeur modifié avec succès",
+      severity: "success",
+    });
   };
 
   return (
     <div>
       <h1>Gestion des Chauffeurs :</h1>
       <Box sx={{ mb: 2 }}>
-        {/* <Typography variant="h6" sx={{ mb: 1 }}>
-          Statistiques
-        </Typography> */}
         <Grid
           container
           spacing={3}
@@ -248,7 +290,7 @@ export default function Chauffeur() {
           </Grid>
         </Grid>
       </Box>
-      {/* Boutons d'action principaux */}
+
       <Box
         sx={{
           display: "flex",
@@ -259,7 +301,7 @@ export default function Chauffeur() {
         <Button
           variant="contained"
           onClick={() => setDialogOpen(true)}
-          sx={{ bgcolor: "#1976d2", "&:hover": { bgcolor: "#1565c0" } }}
+          sx={{ mb: 2 }}
         >
           Ajouter un Chauffeur
         </Button>
@@ -284,14 +326,14 @@ export default function Chauffeur() {
           <ChauffeurDialog
             open={dialogOpen}
             onClose={() => setDialogOpen(false)}
+            onAdd={handleAddSuccess}
           />
         )}
         {voirDialogOpen && (
           <VoirChauffeurDialog
             open={voirDialogOpen}
             onClose={() => setVoirDialogOpen(false)}
-            chauffeurId={selectedChauffeur.idPartenaire}
-            onEdit={handleModifier}
+            chauffeur={selectedChauffeur}
           />
         )}
         {modifierDialogOpen && (
@@ -299,16 +341,22 @@ export default function Chauffeur() {
             open={modifierDialogOpen}
             onClose={() => setModifierDialogOpen(false)}
             chauffeur={selectedChauffeur}
-            onUpdate={handleModifier}
+            onUpdate={handleUpdateSuccess}
           />
         )}
 
         <DataGrid
           rows={rows}
-          columns={columns(handleDelete, handleVoir, handleModifier)}
+          columns={columns(
+            handleDeleteClick,
+            handleVoir,
+            handleModifier,
+            loading
+          )}
+          loading={loading}
           getRowId={(row) => row.idPartenaire}
           initialState={{
-            pagination: { paginationModel: { pageSize: 4 } },
+            pagination: { paginationModel: { pageSize: 5 } },
           }}
           pageSizeOptions={[5, 10, 20]}
           checkboxSelection
@@ -321,6 +369,49 @@ export default function Chauffeur() {
           }}
         />
       </Box>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">
+          Confirmer la suppression
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Êtes-vous sûr de vouloir supprimer ce chauffeur? Cette action est
+            irréversible.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="primary">
+            Annuler
+          </Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            color="error"
+            autoFocus
+            disabled={loading}
+          >
+            Supprimer
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Global Notification Snackbar */}
+      <Snackbar
+        open={!!alert.message}
+        autoHideDuration={6000}
+        onClose={handleCloseAlert}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity={alert.severity} onClose={handleCloseAlert}>
+          {alert.message}
+        </Alert>
+      </Snackbar>
 
       {/* Dialogs for Available Drivers and Expired Insurance */}
       {insuranceDialogOpen && (

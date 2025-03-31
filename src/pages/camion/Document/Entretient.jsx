@@ -15,15 +15,21 @@ import EntretienDialog from "../../../components/dialog/Camion/Document/entretie
 import ViewEntretienDialog from "../../../components/dialog/Camion/Document/entretien/ViewEntretienDialog";
 import EditEntretienDialog from "../../../components/dialog/Camion/Document/entretien/EditEntretienDialog";
 import entretienService from "../../../service/camion/entretienService";
-import "../../../styles/DataGrid.css";
-import Snackbar from "@mui/material/Snackbar";
-import MuiAlert from "@mui/material/Alert";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
-import CircularProgress from "@mui/material/CircularProgress";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  CircularProgress,
+  Snackbar,
+  Alert as MuiAlert,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+
+const Alert = React.forwardRef((props, ref) => (
+  <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />
+));
 
 function CustomToolbar() {
   return (
@@ -39,33 +45,33 @@ export default function Entretien() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [rows, setRows] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [isFailedFetch, setIsFailedFetch] = useState(false);
-  const [isFailedDelete, setIsFailedDelete] = useState(false);
-  const [isFailedUpdate, setIsFailedUpdate] = useState(false);
-  const [isFailedCreate, setIsFailedCreate] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState({ message: null, severity: "success" });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [entretienToDelete, setEntretienToDelete] = useState(null);
-  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Load data on component mount
   useEffect(() => {
     fetchEntretiens();
   }, []);
 
   const fetchEntretiens = async () => {
-    setIsLoading(true);
+    setLoading(true);
     try {
       const response = await entretienService.getAll();
       setRows(response.data);
+      setLoading(false);
     } catch (error) {
       console.error("Erreur lors de la récupération des entretiens:", error);
-      setIsFailedFetch(true);
-    } finally {
-      setIsLoading(false);
+      setAlert({
+        message: "Erreur lors du chargement des entretiens",
+        severity: "error",
+      });
+      setLoading(false);
     }
+  };
+
+  const handleCloseAlert = () => {
+    setAlert({ message: null, severity: "success" });
   };
 
   const handleOpenEntretienDialog = () => setEntretienDialogOpen(true);
@@ -86,61 +92,73 @@ export default function Entretien() {
     setDeleteDialogOpen(true);
   };
 
-  const handleDelete = async () => {
-    setIsDeleting(true);
+  const handleDeleteConfirm = async () => {
+    setLoading(true);
     try {
       await entretienService.delete(entretienToDelete);
-      setSuccessMessage("Entretien supprimé avec succès");
-      setIsSuccess(true);
       fetchEntretiens();
+      setAlert({
+        message: "Entretien supprimé avec succès",
+        severity: "success",
+      });
     } catch (error) {
       console.error("Erreur lors de la suppression de l'entretien:", error);
-      setIsFailedDelete(true);
+      setAlert({
+        message: "Erreur lors de la suppression de l'entretien",
+        severity: "error",
+      });
     } finally {
-      setIsDeleting(false);
+      setLoading(false);
       setDeleteDialogOpen(false);
     }
   };
 
   const handleCloseDeleteDialog = () => {
-    if (!isDeleting) {
-      setDeleteDialogOpen(false);
-      setEntretienToDelete(null);
-    }
+    setDeleteDialogOpen(false);
+    setEntretienToDelete(null);
   };
 
   const handleSave = async (updatedEntretien) => {
+    setLoading(true);
     try {
       await entretienService.update(updatedEntretien.id, updatedEntretien);
-      setSuccessMessage("Entretien mis à jour avec succès");
-      setIsSuccess(true);
-      setEditDialogOpen(false);
       fetchEntretiens();
+      setEditDialogOpen(false);
+      setAlert({
+        message: "Entretien mis à jour avec succès",
+        severity: "success",
+      });
     } catch (error) {
       console.error("Erreur lors de la mise à jour de l'entretien:", error);
-      setIsFailedUpdate(true);
+      setAlert({
+        message: "Erreur lors de la mise à jour de l'entretien",
+        severity: "error",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleCreate = async (newEntretien) => {
+    setLoading(true);
     try {
-      const response = await entretienService.create(newEntretien);
-      setSuccessMessage("Entretien créé avec succès");
-      setIsSuccess(true);
-      setEntretienDialogOpen(false);
+      await entretienService.create(newEntretien);
       fetchEntretiens();
+      setEntretienDialogOpen(false);
+      setAlert({
+        message: "Entretien ajouté avec succès",
+        severity: "success",
+      });
     } catch (error) {
       console.error("Erreur lors de la création de l'entretien:", error);
-      setIsFailedCreate(true);
+      setAlert({
+        message: "Erreur lors de la création de l'entretien",
+        severity: "error",
+      });
+    } finally {
+      setLoading(false);
     }
   };
-
-  // Close handlers for notifications
-  const handleCloseSuccess = () => setIsSuccess(false);
-  const handleCloseFailedFetch = () => setIsFailedFetch(false);
-  const handleCloseFailedDelete = () => setIsFailedDelete(false);
-  const handleCloseFailedUpdate = () => setIsFailedUpdate(false);
-  const handleCloseFailedCreate = () => setIsFailedCreate(false);
 
   const columns = [
     { field: "dateEntretien", headerName: "Date d'Entretien", flex: 1 },
@@ -156,7 +174,7 @@ export default function Entretien() {
       field: "camion",
       headerName: "Camion",
       flex: 1,
-      valueGetter: (params) => params.immatriculation || "N/A",
+      valueGetter: (params) => params?.immatriculation || "N/A",
     },
     {
       field: "actions",
@@ -174,6 +192,7 @@ export default function Entretien() {
           <IconButton
             color="error"
             onClick={() => handleDeleteClick(params.row.id)}
+            disabled={loading}
           >
             <DeleteIcon />
           </IconButton>
@@ -183,130 +202,113 @@ export default function Entretien() {
   ];
 
   return (
-    <Box sx={{ p: 3 }}>
-      <div className="buttons">
+    <div>
+      <h1>Gestion des Entretiens :</h1>
+
+      <Box>
         <Button
           variant="contained"
           onClick={handleOpenEntretienDialog}
           sx={{ mb: 2 }}
         >
-          Nouvel Entretien
+          Ajouter un Entretien
         </Button>
-      </div>
 
-      <EntretienDialog
-        open={entretienDialogOpen}
-        onClose={handleCloseEntretienDialog}
-        onCreate={handleCreate}
-      />
+        <EntretienDialog
+          open={entretienDialogOpen}
+          onClose={handleCloseEntretienDialog}
+          onCreate={handleCreate}
+        />
 
-      <ViewEntretienDialog
-        open={viewDialogOpen}
-        onClose={() => setViewDialogOpen(false)}
-        entretien={selectedRow}
-      />
+        <ViewEntretienDialog
+          open={viewDialogOpen}
+          onClose={() => setViewDialogOpen(false)}
+          entretien={selectedRow}
+        />
 
-      <EditEntretienDialog
-        open={editDialogOpen}
-        onClose={() => setEditDialogOpen(false)}
-        entretien={selectedRow}
-        onSave={handleSave}
-      />
+        <EditEntretienDialog
+          open={editDialogOpen}
+          onClose={() => setEditDialogOpen(false)}
+          entretien={selectedRow}
+          onSave={handleSave}
+        />
 
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        loading={isLoading}
-        getRowId={(row) => row.id}
-        initialState={{
-          pagination: {
-            paginationModel: {
-              pageSize: 5,
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          loading={loading}
+          getRowId={(row) => row.id}
+          initialState={{
+            pagination: {
+              paginationModel: {
+                pageSize: 5,
+              },
             },
-          },
-        }}
-        slots={{ toolbar: CustomToolbar }}
-        sx={{ border: "none" }}
-      />
+          }}
+          pageSizeOptions={[5, 10, 20]}
+          checkboxSelection
+          disableRowSelectionOnClick
+          slots={{ toolbar: CustomToolbar }}
+          sx={{
+            "@media print": {
+              ".MuiDataGrid-toolbarContainer": { display: "none" },
+            },
+          }}
+        />
+      </Box>
 
-      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Confirmer la suppression</DialogTitle>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">
+          Confirmer la suppression
+          <IconButton
+            aria-label="close"
+            onClick={handleCloseDeleteDialog}
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            Êtes-vous sûr de vouloir supprimer cet entretien ?
+          <DialogContentText id="delete-dialog-description">
+            Êtes-vous sûr de vouloir supprimer cet entretien? Cette action est
+            irréversible.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDeleteDialog} disabled={isDeleting}>
+          <Button onClick={handleCloseDeleteDialog} color="primary">
             Annuler
           </Button>
           <Button
-            onClick={handleDelete}
+            onClick={handleDeleteConfirm}
             color="error"
-            disabled={isDeleting}
-            startIcon={isDeleting ? <CircularProgress size={20} /> : null}
+            autoFocus
+            disabled={loading}
           >
-            {isDeleting ? "Suppression..." : "Supprimer"}
+            Supprimer
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Success Notification */}
       <Snackbar
-        open={isSuccess}
-        autoHideDuration={5000}
-        onClose={handleCloseSuccess}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <MuiAlert severity="success" onClose={handleCloseSuccess}>
-          {successMessage}
-        </MuiAlert>
-      </Snackbar>
-
-      {/* Error Notifications */}
-      <Snackbar
-        open={isFailedFetch}
+        open={!!alert.message}
         autoHideDuration={6000}
-        onClose={handleCloseFailedFetch}
+        onClose={handleCloseAlert}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <MuiAlert severity="error" onClose={handleCloseFailedFetch}>
-          Échec du chargement des entretiens
-        </MuiAlert>
+        <Alert severity={alert.severity} onClose={handleCloseAlert}>
+          {alert.message}
+        </Alert>
       </Snackbar>
-
-      <Snackbar
-        open={isFailedDelete}
-        autoHideDuration={6000}
-        onClose={handleCloseFailedDelete}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <MuiAlert severity="error" onClose={handleCloseFailedDelete}>
-          Échec de la suppression de l'entretien
-        </MuiAlert>
-      </Snackbar>
-
-      <Snackbar
-        open={isFailedUpdate}
-        autoHideDuration={6000}
-        onClose={handleCloseFailedUpdate}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <MuiAlert severity="error" onClose={handleCloseFailedUpdate}>
-          Échec de la mise à jour de l'entretien
-        </MuiAlert>
-      </Snackbar>
-
-      <Snackbar
-        open={isFailedCreate}
-        autoHideDuration={6000}
-        onClose={handleCloseFailedCreate}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <MuiAlert severity="error" onClose={handleCloseFailedCreate}>
-          Échec de la création de l'entretien
-        </MuiAlert>
-      </Snackbar>
-    </Box>
+    </div>
   );
 }

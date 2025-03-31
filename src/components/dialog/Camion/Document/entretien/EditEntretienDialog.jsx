@@ -7,13 +7,19 @@ import {
   TextField,
   Button,
   FormControl,
-  Alert,
-  Snackbar,
+  IconButton,
+  CircularProgress,
 } from "@mui/material";
-import CamionSelect from "../../../../select/CamionSelect";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import CamionSelect from "../../../../select/CamionSelect";
+import CloseIcon from "@mui/icons-material/Close";
+import { Snackbar, Alert as MuiAlert } from "@mui/material";
+
+const Alert = React.forwardRef((props, ref) => (
+  <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />
+));
 
 export default function EditEntretienDialog({
   open,
@@ -23,24 +29,33 @@ export default function EditEntretienDialog({
 }) {
   const [formData, setFormData] = useState(entretien);
   const [isCamionModalOpen, setIsCamionModalOpen] = useState(false);
-  const [validationError, setValidationError] = useState("");
-  const [showValidationError, setShowValidationError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState({ message: null, severity: "success" });
+  const [errors, setErrors] = useState({
+    dateEntretien: false,
+    typeEntretien: false,
+    cout: false,
+  });
 
   useEffect(() => {
     if (open) {
       setFormData(entretien);
-      setValidationError("");
-      setShowValidationError(false);
+      setAlert({ message: null, severity: "success" });
+      setErrors({
+        dateEntretien: false,
+        typeEntretien: false,
+        cout: false,
+      });
     }
   }, [open, entretien]);
+
+  const handleCloseAlert = () => {
+    setAlert({ message: null, severity: "success" });
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    if (["typeEntretien", "cout"].includes(name) && validationError) {
-      setValidationError("");
-      setShowValidationError(false);
-    }
   };
 
   const handleSelectCamion = (camion) => {
@@ -49,67 +64,78 @@ export default function EditEntretienDialog({
   };
 
   const validateForm = () => {
-    if (!formData.dateEntretien) {
-      setValidationError("La date d'entretien est obligatoire");
-      return false;
-    }
-    if (!formData.typeEntretien?.trim()) {
-      setValidationError("Le type d'entretien est obligatoire");
-      return false;
-    }
-    if (
-      !formData.cout ||
-      isNaN(formData.cout) ||
-      parseFloat(formData.cout) <= 0
-    ) {
-      setValidationError("Veuillez entrer un coût valide");
-      return false;
-    }
-    return true;
-  };
-
-  const handleSubmit = () => {
-    if (!validateForm()) {
-      setShowValidationError(true);
-      return;
-    }
-
-    const payload = {
-      ...formData,
-      cout: parseFloat(formData.cout),
+    const newErrors = {
+      dateEntretien: !formData.dateEntretien,
+      typeEntretien: !formData.typeEntretien?.trim(),
+      cout:
+        !formData.cout ||
+        isNaN(formData.cout) ||
+        parseFloat(formData.cout) <= 0,
     };
-    onSave(payload);
-    onClose();
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(Boolean);
   };
 
-  const handleCloseValidationError = () => {
-    setShowValidationError(false);
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    setLoading(true);
+    try {
+      const payload = {
+        ...formData,
+        cout: parseFloat(formData.cout),
+      };
+      await onSave(payload);
+      setAlert({
+        message: "Entretien mis à jour avec succès",
+        severity: "success",
+      });
+      onClose();
+    } catch (error) {
+      console.error("Error updating entretien:", error);
+      setAlert({
+        message: "Erreur lors de la mise à jour de l'entretien",
+        severity: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-        <DialogTitle>Modifier l'Entretien</DialogTitle>
-        <DialogContent>
+      <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+        <DialogTitle>
+          Modifier l'Entretien
+          <IconButton
+            aria-label="close"
+            onClick={onClose}
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
           <DatePicker
             label="Date d'Entretien*"
-            value={
-              formData && formData.dateEntretien ? formData.dateEntretien : "-"
-            }
+            value={formData?.dateEntretien || null}
             onChange={(newValue) => {
               setFormData({ ...formData, dateEntretien: newValue });
-              if (validationError) setValidationError("");
+              setErrors({ ...errors, dateEntretien: false });
             }}
             renderInput={(params) => (
               <TextField
                 {...params}
                 fullWidth
                 margin="normal"
-                error={showValidationError && !formData.dateEntretien}
+                error={errors.dateEntretien}
                 helperText={
-                  showValidationError && !formData.dateEntretien
-                    ? "Ce champ est obligatoire"
-                    : ""
+                  errors.dateEntretien ? "Ce champ est obligatoire" : ""
                 }
                 required
               />
@@ -119,27 +145,22 @@ export default function EditEntretienDialog({
           <TextField
             name="typeEntretien"
             label="Type d'Entretien*"
-            value={
-              formData && formData.typeEntretien ? formData.typeEntretien : "-"
-            }
-            onChange={handleChange}
+            value={formData?.typeEntretien || ""}
+            onChange={(e) => {
+              handleChange(e);
+              setErrors({ ...errors, typeEntretien: false });
+            }}
             fullWidth
             margin="normal"
-            error={showValidationError && !formData.typeEntretien?.trim()}
-            helperText={
-              showValidationError && !formData.typeEntretien?.trim()
-                ? "Ce champ est obligatoire"
-                : ""
-            }
+            error={errors.typeEntretien}
+            helperText={errors.typeEntretien ? "Ce champ est obligatoire" : ""}
             required
           />
 
           <TextField
             name="description"
             label="Description"
-            value={
-              formData && formData.description ? formData.description : "-"
-            }
+            value={formData?.description || ""}
             onChange={handleChange}
             fullWidth
             margin="normal"
@@ -148,36 +169,23 @@ export default function EditEntretienDialog({
           <TextField
             name="cout"
             label="Coût (€)*"
-            value={formData && formData.cout ? formData.cout : "-"}
-            onChange={handleChange}
+            value={formData?.cout || ""}
+            onChange={(e) => {
+              handleChange(e);
+              setErrors({ ...errors, cout: false });
+            }}
             fullWidth
             margin="normal"
             type="number"
             inputProps={{ min: 0, step: 0.01 }}
-            error={
-              showValidationError &&
-              (!formData.cout ||
-                isNaN(formData.cout) ||
-                parseFloat(formData.cout) <= 0)
-            }
-            helperText={
-              showValidationError &&
-              (!formData.cout ||
-              isNaN(formData.cout) ||
-              parseFloat(formData.cout) <= 0
-                ? "Veuillez entrer un montant valide"
-                : "")
-            }
+            error={errors.cout}
+            helperText={errors.cout ? "Veuillez entrer un montant valide" : ""}
             required
           />
 
           <DatePicker
             label="Prochain Entretien"
-            value={
-              formData && formData.dateProchainEntretien
-                ? formData.dateProchainEntretien
-                : "-"
-            }
+            value={formData?.dateProchainEntretien || null}
             onChange={(newValue) =>
               setFormData({ ...formData, dateProchainEntretien: newValue })
             }
@@ -189,7 +197,7 @@ export default function EditEntretienDialog({
           <FormControl fullWidth margin="normal">
             <TextField
               value={
-                formData && formData.camion
+                formData?.camion
                   ? `Camion: ${formData.camion.immatriculation}`
                   : ""
               }
@@ -208,9 +216,16 @@ export default function EditEntretienDialog({
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose}>Annuler</Button>
-          <Button onClick={handleSubmit} color="primary">
-            Enregistrer
+          <Button onClick={onClose} color="secondary" variant="outlined">
+            Annuler
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            color="primary"
+            variant="contained"
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={24} /> : "Enregistrer"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -222,13 +237,13 @@ export default function EditEntretienDialog({
       />
 
       <Snackbar
-        open={showValidationError}
+        open={!!alert.message}
         autoHideDuration={6000}
-        onClose={handleCloseValidationError}
+        onClose={handleCloseAlert}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert severity="error" onClose={handleCloseValidationError}>
-          {validationError}
+        <Alert severity={alert.severity} onClose={handleCloseAlert}>
+          {alert.message}
         </Alert>
       </Snackbar>
     </LocalizationProvider>

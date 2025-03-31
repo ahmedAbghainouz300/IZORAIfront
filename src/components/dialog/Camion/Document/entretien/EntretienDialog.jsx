@@ -7,13 +7,19 @@ import {
   TextField,
   Button,
   FormControl,
-  Alert,
-  Snackbar,
+  IconButton,
+  CircularProgress,
 } from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import CamionSelect from "../../../../select/CamionSelect";
+import CloseIcon from "@mui/icons-material/Close";
+import { Snackbar, Alert as MuiAlert } from "@mui/material";
+
+const Alert = React.forwardRef((props, ref) => (
+  <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />
+));
 
 export default function EntretienDialog({ open, onClose, onCreate }) {
   const [entretienData, setEntretienData] = React.useState({
@@ -25,27 +31,29 @@ export default function EntretienDialog({ open, onClose, onCreate }) {
     statut: "",
     camion: null,
   });
-
   const [isCamionModalOpen, setIsCamionModalOpen] = React.useState(false);
-  const [validationError, setValidationError] = React.useState("");
-  const [showValidationError, setShowValidationError] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const [alert, setAlert] = React.useState({
+    message: null,
+    severity: "success",
+  });
+  const [errors, setErrors] = React.useState({
+    dateEntretien: false,
+    typeEntretien: false,
+    cout: false,
+  });
+
+  const handleCloseAlert = () => {
+    setAlert({ message: null, severity: "success" });
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEntretienData({ ...entretienData, [name]: value });
-    // Clear validation error when user types
-    if (validationError && ["typeEntretien", "cout"].includes(name)) {
-      setValidationError("");
-      setShowValidationError(false);
-    }
   };
 
   const handleDateChange = (name) => (newValue) => {
     setEntretienData({ ...entretienData, [name]: newValue });
-    if (name === "dateEntretien" && validationError) {
-      setValidationError("");
-      setShowValidationError(false);
-    }
   };
 
   const handleSelectCamion = (camion) => {
@@ -54,72 +62,100 @@ export default function EntretienDialog({ open, onClose, onCreate }) {
   };
 
   const validateForm = () => {
-    if (!entretienData.dateEntretien) {
-      setValidationError("La date d'entretien est obligatoire");
-      return false;
-    }
-    if (!entretienData.typeEntretien.trim()) {
-      setValidationError("Le type d'entretien est obligatoire");
-      return false;
-    }
-    if (!entretienData.cout) {
-      setValidationError("Le coût est obligatoire");
-      return false;
-    }
-    if (isNaN(entretienData.cout) || parseFloat(entretienData.cout) <= 0) {
-      setValidationError("Veuillez entrer un coût valide");
+    const newErrors = {
+      dateEntretien: !entretienData.dateEntretien,
+      typeEntretien: !entretienData.typeEntretien.trim(),
+      cout:
+        !entretienData.cout ||
+        isNaN(entretienData.cout) ||
+        parseFloat(entretienData.cout) <= 0,
+    };
+    setErrors(newErrors);
+
+    const errorMessages = [];
+    if (newErrors.dateEntretien) errorMessages.push("La date d'entretien");
+    if (newErrors.typeEntretien) errorMessages.push("Le type d'entretien");
+    if (newErrors.cout) errorMessages.push("Le coût");
+
+    if (errorMessages.length > 0) {
+      setAlert({
+        message: `${errorMessages.join(", ")} ${errorMessages.length > 1 ? "sont" : "est"} obligatoire(s)`,
+        severity: "error",
+      });
       return false;
     }
     return true;
   };
 
-  const handleSubmit = () => {
-    if (!validateForm()) {
-      setShowValidationError(true);
-      return;
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    setLoading(true);
+    try {
+      const payload = {
+        ...entretienData,
+        cout: parseFloat(entretienData.cout),
+      };
+      await onCreate(payload);
+      setAlert({
+        message: "Entretien ajouté avec succès",
+        severity: "success",
+      });
+      setEntretienData({
+        dateEntretien: null,
+        typeEntretien: "",
+        description: "",
+        cout: "",
+        dateProchainEntretien: null,
+        statut: "",
+        camion: null,
+      });
+      onClose();
+    } catch (error) {
+      console.error("Error creating entretien:", error);
+      setAlert({
+        message: "Erreur lors de la création de l'entretien",
+        severity: "error",
+      });
+    } finally {
+      setLoading(false);
     }
-
-    const payload = {
-      ...entretienData,
-      cout: parseFloat(entretienData.cout),
-    };
-    onCreate(payload);
-    onClose();
-    // Reset form
-    setEntretienData({
-      dateEntretien: null,
-      typeEntretien: "",
-      description: "",
-      cout: "",
-      dateProchainEntretien: null,
-      statut: "",
-      camion: null,
-    });
-  };
-
-  const handleCloseValidationError = () => {
-    setShowValidationError(false);
   };
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-        <DialogTitle>Ajouter Entretien</DialogTitle>
-        <DialogContent>
+      <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+        <DialogTitle>
+          Ajouter Entretien
+          <IconButton
+            aria-label="close"
+            onClick={onClose}
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
           <DatePicker
             label="Date d'Entretien*"
             value={entretienData.dateEntretien}
-            onChange={handleDateChange("dateEntretien")}
+            onChange={(newValue) => {
+              handleDateChange("dateEntretien")(newValue);
+              setErrors({ ...errors, dateEntretien: false });
+            }}
             renderInput={(params) => (
               <TextField
                 {...params}
                 fullWidth
                 margin="normal"
-                error={showValidationError && !entretienData.dateEntretien}
+                error={errors.dateEntretien}
                 helperText={
-                  showValidationError && !entretienData.dateEntretien
-                    ? "Ce champ est obligatoire"
-                    : ""
+                  errors.dateEntretien ? "Ce champ est obligatoire" : ""
                 }
                 required
               />
@@ -131,14 +167,13 @@ export default function EntretienDialog({ open, onClose, onCreate }) {
             label="Type d'Entretien*"
             name="typeEntretien"
             value={entretienData.typeEntretien}
-            onChange={handleInputChange}
+            onChange={(e) => {
+              handleInputChange(e);
+              setErrors({ ...errors, typeEntretien: false });
+            }}
             margin="normal"
-            error={showValidationError && !entretienData.typeEntretien.trim()}
-            helperText={
-              showValidationError && !entretienData.typeEntretien.trim()
-                ? "Ce champ est obligatoire"
-                : ""
-            }
+            error={errors.typeEntretien}
+            helperText={errors.typeEntretien ? "Ce champ est obligatoire" : ""}
             required
           />
 
@@ -156,24 +191,15 @@ export default function EntretienDialog({ open, onClose, onCreate }) {
             label="Coût (€)*"
             name="cout"
             value={entretienData.cout}
-            onChange={handleInputChange}
+            onChange={(e) => {
+              handleInputChange(e);
+              setErrors({ ...errors, cout: false });
+            }}
             margin="normal"
             type="number"
             inputProps={{ min: 0, step: 0.01 }}
-            error={
-              showValidationError &&
-              (!entretienData.cout ||
-                isNaN(entretienData.cout) ||
-                parseFloat(entretienData.cout) <= 0)
-            }
-            helperText={
-              showValidationError &&
-              (!entretienData.cout ||
-              isNaN(entretienData.cout) ||
-              parseFloat(entretienData.cout) <= 0
-                ? "Veuillez entrer un montant valide"
-                : "")
-            }
+            error={errors.cout}
+            helperText={errors.cout ? "Veuillez entrer un montant valide" : ""}
             required
           />
 
@@ -217,9 +243,16 @@ export default function EntretienDialog({ open, onClose, onCreate }) {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose}>Annuler</Button>
-          <Button onClick={handleSubmit} color="primary">
-            Enregistrer
+          <Button onClick={onClose} color="secondary" variant="outlined">
+            Annuler
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            color="primary"
+            variant="contained"
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={24} /> : "Enregistrer"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -231,13 +264,13 @@ export default function EntretienDialog({ open, onClose, onCreate }) {
       />
 
       <Snackbar
-        open={showValidationError}
+        open={!!alert.message}
         autoHideDuration={6000}
-        onClose={handleCloseValidationError}
+        onClose={handleCloseAlert}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert severity="error" onClose={handleCloseValidationError}>
-          {validationError}
+        <Alert onClose={handleCloseAlert} severity={alert.severity}>
+          {alert.message}
         </Alert>
       </Snackbar>
     </LocalizationProvider>

@@ -1,17 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from "@mui/material";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+} from "@mui/material";
 import { idID } from "@mui/material/locale";
 import adressService from "../../../../service/partenaire/adressService";
 
 export default function EditAdress({ open, onClose, adresse, onUpdate }) {
   const [formData, setFormData] = useState({
     idAdress: 0,
+    type: "",
     rue: "",
     ville: "",
     codePostal: "",
     pays: "",
   });
-
 
   const handleEditAddress = async (editedAddress) => {
     try {
@@ -23,12 +30,12 @@ export default function EditAdress({ open, onClose, adresse, onUpdate }) {
       alert("Erreur lors de la mise à jour de l'adresse.");
     }
   };
-  
+
   // Mettre à jour formData lorsque `adresse` change
   useEffect(() => {
     if (adresse) {
       setFormData({
-        idAdress: adresse.idAdress ,
+        idAdress: adresse.idAdress,
         rue: adresse.rue || "",
         ville: adresse.ville || "",
         codePostal: adresse.codePostal || "",
@@ -42,10 +49,15 @@ export default function EditAdress({ open, onClose, adresse, onUpdate }) {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
   };
-  
+
   // Gérer la soumission
   const handleSubmit = () => {
-    if (!formData.rue || !formData.ville || !formData.codePostal || !formData.pays) {
+    if (
+      !formData.rue ||
+      !formData.ville ||
+      !formData.codePostal ||
+      !formData.pays
+    ) {
       alert("Veuillez remplir tous les champs obligatoires.");
       return;
     }
@@ -91,8 +103,12 @@ export default function EditAdress({ open, onClose, adresse, onUpdate }) {
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="secondary">Annuler</Button>
-        <Button onClick={handleSubmit} color="primary">Enregistrer</Button>
+        <Button onClick={onClose} color="secondary">
+          Annuler
+        </Button>
+        <Button onClick={handleSubmit} color="primary">
+          Enregistrer
+        </Button>
       </DialogActions>
     </Dialog>
   );

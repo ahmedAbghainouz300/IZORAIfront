@@ -1,99 +1,233 @@
 import React, { useState, useEffect } from "react";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  FormControl,
+  Box,
+  Snackbar,
+  Alert as MuiAlert,
+} from "@mui/material";
 import AdressTable from "../adress/AdressTable";
-import AddAdress from "../adress/addAdress";
 import EditAdress from "../adress/editAdress";
 import ViewAdress from "../adress/voirAdress";
 import moraleService from "../../../../service/partenaire/moraleService";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
 import TypePartenaireTable from "../typepartenaire/typePartenaieTable";
+import AdressDialog from "../AdressDialog";
 
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
-export default function EditMoraleDialog({ open, onClose, partenaire, onSave }) {
-  const [formData, setFormData] = useState(partenaire);
-  const [adresses, setAdresses] = useState([]);
+export default function EditMoraleDialog({
+  open,
+  onClose,
+  partenaire,
+  onSave,
+}) {
+  // Main form state
+  const [formData, setFormData] = useState({
+    nom: "",
+    ice: "",
+    numeroRC: "",
+    abreviation: "",
+    telephone: "",
+    email: "",
+    formeJuridique: "",
+    typePartenaire: null,
+    adresses: [],
+  });
+
+  // UI state
+  const [validationError, setValidationError] = useState("");
+  const [isFailedValidation, setIsFailedValidation] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+
+  // Address management
   const [isAdressModalOpen, setIsAdressModalOpen] = useState(false);
   const [isAddAddressOpen, setIsAddAddressOpen] = useState(false);
   const [isEditAddressOpen, setIsEditAddressOpen] = useState(false);
   const [isViewAddressOpen, setIsViewAddressOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const [isTypePartenaireModalOpen, setIsTypePartenaireModalOpen] = useState(false);
-  const [selectedTypePartenaire, setSelectedTypePartenaire] = useState(partenaire?.typePartenaire || null);
-  // Gestion de la sélection du type partenaire
 
-const handleSelectTypePartenaire = (selectedType) => {
-  setSelectedTypePartenaire(selectedType); // Mise à jour de l'état local
-  setFormData({ ...formData, typePartenaire: selectedType }); // Mise à jour du formData
-  setIsTypePartenaireModalOpen(false);
-};
+  // Type partenaire management
+  const [isTypePartenaireModalOpen, setIsTypePartenaireModalOpen] =
+    useState(false);
+  const [selectedTypePartenaire, setSelectedTypePartenaire] = useState(null);
 
-  
-
-  const handleSelectIdTypePartenaire = (selectedId) => {
-    setFormData((prev) => ({
-      ...prev,
-      typePartenaireId: selectedId,
-    }));
-    setIsTypePartenaireModalOpen(false); // Close the modal after selection
-  };
-
+  // Initialize form data when dialog opens or partenaire changes
   useEffect(() => {
-    if (partenaire) {
-      fetchAdressesById(partenaire.idPartenaire);
+    if (open && partenaire) {
+      setFormData({
+        nom: partenaire.nom || "",
+        ice: partenaire.ice?.toString() || "",
+        numeroRC: partenaire.numeroRC?.toString() || "",
+        abreviation: partenaire.abreviation || "",
+        telephone: partenaire.telephone || "",
+        email: partenaire.email || "",
+        formeJuridique: partenaire.formeJuridique || "",
+        typePartenaire: partenaire.typePartenaire || null,
+        adresses: partenaire.adresses || [],
+      });
+      setSelectedTypePartenaire(partenaire.typePartenaire || null);
+
+      if (partenaire.idPartenaire) {
+        fetchAdressesById(partenaire.idPartenaire);
+      }
     }
-  }, [partenaire]);
+  }, [open, partenaire]);
 
   const fetchAdressesById = (id) => {
+    setIsLoading(true);
     moraleService
       .getAdressesByPartenaire(id)
-      .then((response) => setAdresses(response.data))
-      .catch((error) => console.error("Erreur lors de la récupération des adresses:", error));
+      .then((response) => {
+        setFormData((prev) => ({ ...prev, adresses: response.data || [] }));
+      })
+      .catch((error) => {
+        console.error("Error fetching addresses:", error);
+        setError("Failed to load addresses");
+      })
+      .finally(() => setIsLoading(false));
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSubmitEdit = async () => {
-    try {
-      await moraleService.update(partenaire.idPartenaire, formData);
-      onSave(); 
-      onClose();
-      alert("Partenaire mis à jour avec succès !");
-    } catch (error) {
-      console.error("Erreur lors de la mise à jour du partenaire :", error);
-      alert("Erreur lors de la mise à jour du partenaire.");
+    if (
+      (name === "nom" || name === "ice" || name === "telephone") &&
+      validationError
+    ) {
+      setValidationError("");
     }
   };
 
+  const validateForm = () => {
+    if (!formData.nom.trim()) {
+      setValidationError("Name is required");
+      setIsFailedValidation(true);
+      return false;
+    }
+    if (!formData.ice) {
+      setValidationError("ICE is required");
+      setIsFailedValidation(true);
+      return false;
+    }
+    if (isNaN(formData.ice)) {
+      setValidationError("ICE must be a valid number");
+      setIsFailedValidation(true);
+      return false;
+    }
+    if (!formData.telephone) {
+      setValidationError("Phone number is required");
+      setIsFailedValidation(true);
+      return false;
+    }
+    if (isNaN(formData.telephone)) {
+      setValidationError("Phone must be a valid number");
+      setIsFailedValidation(true);
+      return false;
+    }
+    if (!formData.typePartenaire) {
+      setValidationError("Partner type is required");
+      setIsFailedValidation(true);
+      return false;
+    }
+    setValidationError("");
+    return true;
+  };
+
+  const handleSelectTypePartenaire = (selectedType) => {
+    setSelectedTypePartenaire(selectedType);
+    setFormData({ ...formData, typePartenaire: selectedType });
+    setIsTypePartenaireModalOpen(false);
+    if (validationError === "Partner type is required") {
+      setValidationError("");
+    }
+  };
+
+  const handleSubmitEdit = async () => {
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    try {
+      const updatedData = {
+        nom: formData.nom,
+        ice: Number(formData.ice),
+        numeroRC: formData.numeroRC ? Number(formData.numeroRC) : null,
+        telephone: formData.telephone,
+        email: formData.email || null,
+        abreviation: formData.abreviation || null,
+        formeJuridique: formData.formeJuridique || null,
+        typePartenaire: formData.typePartenaire,
+      };
+
+      await moraleService.update(partenaire.idPartenaire, updatedData);
+      setSuccess("Partner updated successfully");
+      onSave();
+      onClose();
+    } catch (error) {
+      console.error("Update error:", error);
+      setError(error.response?.data?.message || "Failed to update partner");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Address operations
   const handleAddAddress = async (newAddress) => {
     try {
-      const address = await moraleService.addAdresse(partenaire.idPartenaire, newAddress);
-      console.log("Adresse ajoutée avec succès:", address);
-      await fetchAdressesById(partenaire.idPartenaire); // Refresh addresses
-      alert("Adresse ajoutée avec succès !");
+      setIsLoading(true);
+      await moraleService.addAdresse(partenaire.idPartenaire, newAddress);
+      await fetchAdressesById(partenaire.idPartenaire);
+      setSuccess("Address added successfully");
+      setIsAddAddressOpen(false);
     } catch (error) {
-      console.error("Erreur lors de l'ajout de l'adresse :", error);
-      alert("Erreur lors de l'ajout de l'adresse.");
+      console.error("Add address error:", error);
+      setError("Failed to add address");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUpdateAddress = async (updatedAddress) => {
+    try {
+      setIsLoading(true);
+      await moraleService.updateAdresse(
+        updatedAddress.idAdresse,
+        updatedAddress
+      );
+      await fetchAdressesById(partenaire.idPartenaire);
+      setSuccess("Address updated successfully");
+      setIsEditAddressOpen(false);
+    } catch (error) {
+      console.error("Update address error:", error);
+      setError("Failed to update address");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleDeleteAdresse = async (id) => {
     try {
+      setIsLoading(true);
       await moraleService.deleteAdresse(id);
-      fetchAdressesById(partenaire.idPartenaire);
+      await fetchAdressesById(partenaire.idPartenaire);
+      setSuccess("Address deleted successfully");
     } catch (error) {
-      console.error("Erreur lors de la suppression de l'adresse :", error);
+      console.error("Delete address error:", error);
+      setError("Failed to delete address");
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  // Dialog handlers
   const openEditDialog = (adresse) => {
     setSelectedAddress(adresse);
     setIsEditAddressOpen(true);
@@ -104,60 +238,246 @@ const handleSelectTypePartenaire = (selectedType) => {
     setIsViewAddressOpen(true);
   };
 
-  return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>Modifier le Partenaire</DialogTitle>
-      <DialogContent>
-        <TextField name="nom" label="Nom" value={formData.nom} onChange={handleChange} fullWidth margin="normal" autoFocus/>
-        <TextField name="ice" label="ICE" value={formData.ice} onChange={handleChange} fullWidth margin="normal" />
-        <TextField name="numeroRC" label="Numéro RC" value={formData.numeroRC} onChange={handleChange} fullWidth margin="normal" />
-        <TextField name="abreviation" label="Abréviation" value={formData.abreviation} onChange={handleChange} fullWidth margin="normal" />
-        <TextField name="formeJuridique" label="Forme Juridique" value={formData.formeJuridique} onChange={handleChange} fullWidth margin="normal" />
-        <FormControl fullWidth margin="normal">
-          <TextField
-            label="Type Partenaire"
-            value={selectedTypePartenaire?.libelle || partenaire?.typePartenaire?.libelle || ""}
-            fullWidth margin="normal" InputProps={{   readOnly: true,  }}
-          />
-          <Button variant="outlined"  onClick={() => setIsTypePartenaireModalOpen(true)}  style={{ marginTop: "8px" }}>
-            Modifier le Type Partenaire
-          </Button>
-        </FormControl>
-        <Button variant="outlined" onClick={() => setIsAdressModalOpen(true)} style={{ marginTop: "16px", marginBottom: "16px" }}>
-          Afficher Adresse
-        </Button>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Annuler</Button>
-        <Button onClick={handleSubmitEdit} color="primary">
-          Enregistrer
-        </Button>
-      </DialogActions>
+  const handleCloseFailedValidation = (event, reason) => {
+    if (reason === "clickaway") return;
+    setIsFailedValidation(false);
+  };
 
-      {/* Nested Dialogs */}
+  const handleCloseError = (event, reason) => {
+    if (reason === "clickaway") return;
+    setError(null);
+  };
+
+  const handleCloseSuccess = (event, reason) => {
+    if (reason === "clickaway") return;
+    setSuccess(null);
+  };
+
+  return (
+    <>
+      {/* Main Edit Dialog */}
+      <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+        <DialogTitle>Edit Moral Partner</DialogTitle>
+        <DialogContent>
+          <Box sx={{ p: 2 }}>
+            <TextField
+              label="Name*"
+              fullWidth
+              margin="normal"
+              name="nom"
+              value={formData.nom}
+              onChange={handleChange}
+              error={!!validationError && !formData.nom.trim()}
+              helperText={
+                validationError && !formData.nom.trim() ? validationError : ""
+              }
+              required
+            />
+
+            <TextField
+              label="ICE*"
+              fullWidth
+              margin="normal"
+              name="ice"
+              type="number"
+              value={formData.ice}
+              onChange={handleChange}
+              error={
+                !!validationError && (!formData.ice || isNaN(formData.ice))
+              }
+              helperText={
+                validationError && (!formData.ice || isNaN(formData.ice))
+                  ? validationError
+                  : ""
+              }
+              required
+              inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+            />
+
+            <TextField
+              label="RC Number"
+              fullWidth
+              margin="normal"
+              name="numeroRC"
+              type="number"
+              value={formData.numeroRC}
+              onChange={handleChange}
+              inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+            />
+
+            <TextField
+              label="Phone*"
+              fullWidth
+              margin="normal"
+              name="telephone"
+              value={formData.telephone}
+              onChange={handleChange}
+              error={
+                !!validationError &&
+                (!formData.telephone || isNaN(formData.telephone))
+              }
+              helperText={
+                validationError &&
+                (!formData.telephone || isNaN(formData.telephone))
+                  ? validationError
+                  : ""
+              }
+              required
+              inputProps={{ inputMode: "tel", pattern: "[0-9]*" }}
+            />
+
+            <TextField
+              label="Email"
+              fullWidth
+              margin="normal"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+            />
+
+            <TextField
+              label="Abbreviation"
+              fullWidth
+              margin="normal"
+              name="abreviation"
+              value={formData.abreviation}
+              onChange={handleChange}
+            />
+
+            <TextField
+              label="Legal Form"
+              fullWidth
+              margin="normal"
+              name="formeJuridique"
+              value={formData.formeJuridique}
+              onChange={handleChange}
+            />
+
+            <FormControl fullWidth margin="normal">
+              <TextField
+                label="Partner Type"
+                value={selectedTypePartenaire?.libelle || ""}
+                fullWidth
+                margin="normal"
+                InputProps={{ readOnly: true }}
+                error={!!validationError && !formData.typePartenaire}
+                helperText={
+                  validationError && !formData.typePartenaire
+                    ? validationError
+                    : ""
+                }
+              />
+              <Button
+                variant="outlined"
+                onClick={() => setIsTypePartenaireModalOpen(true)}
+                sx={{ mt: 1 }}
+              >
+                {selectedTypePartenaire
+                  ? "Change Partner Type*"
+                  : "Select Partner Type*"}
+              </Button>
+            </FormControl>
+
+            <Box sx={{ mt: 2 }}>
+              <Button
+                variant="outlined"
+                onClick={() => setIsAdressModalOpen(true)}
+                sx={{ mb: 2 }}
+              >
+                Manage Addresses ({formData.adresses.length})
+              </Button>
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onClose} disabled={isLoading}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmitEdit}
+            color="primary"
+            disabled={isLoading}
+          >
+            {isLoading ? "Saving..." : "Save"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Address Table Dialog */}
       <AdressTable
-        adresses={adresses}
+        adresses={formData.adresses}
         onView={openViewDialog}
         onEdit={openEditDialog}
         onDelete={handleDeleteAdresse}
         open={isAdressModalOpen}
         onClose={() => setIsAdressModalOpen(false)}
         onAddAddress={() => setIsAddAddressOpen(true)}
-        title="Liste des Adresses"
+        title="Address List"
       />
-      {/* TypePartenaireTable Modal */}
-            <TypePartenaireTable
-              open={isTypePartenaireModalOpen}
-              onClose={() => setIsTypePartenaireModalOpen(false)}
-              onSelectTypePartenaire={(selectedType) => {
-                console.log("Type sélectionné :", selectedType)
-                handleSelectTypePartenaire(selectedType)}
-             }
-           />
 
-      <AddAdress open={isAddAddressOpen} onClose={() => setIsAddAddressOpen(false)} onAdd={handleAddAddress} />
-      <EditAdress open={isEditAddressOpen} onClose={() => setIsEditAddressOpen(false)} adresse={selectedAddress} />
-      <ViewAdress open={isViewAddressOpen} onClose={() => setIsViewAddressOpen(false)} adresse={selectedAddress} />
-    </Dialog>
+      {/* Partner Type Selection Dialog */}
+      <TypePartenaireTable
+        open={isTypePartenaireModalOpen}
+        onClose={() => setIsTypePartenaireModalOpen(false)}
+        onSelectTypePartenaire={handleSelectTypePartenaire}
+      />
+
+      {/* Add Address Dialog */}
+      <AdressDialog
+        open={isAddAddressOpen}
+        onClose={() => setIsAddAddressOpen(false)}
+        onAdd={handleAddAddress}
+      />
+
+      {/* Edit Address Dialog */}
+      <EditAdress
+        open={isEditAddressOpen}
+        onClose={() => setIsEditAddressOpen(false)}
+        adresse={selectedAddress}
+        onUpdate={handleUpdateAddress}
+      />
+
+      {/* View Address Dialog */}
+      <ViewAdress
+        open={isViewAddressOpen}
+        onClose={() => setIsViewAddressOpen(false)}
+        adresse={selectedAddress}
+      />
+
+      {/* Notification Snackbars */}
+      <Snackbar
+        open={isFailedValidation}
+        autoHideDuration={6000}
+        onClose={handleCloseFailedValidation}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="error" onClose={handleCloseFailedValidation}>
+          {validationError || "Please fill all required fields"}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={handleCloseError}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="error" onClose={handleCloseError}>
+          {error}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={!!success}
+        autoHideDuration={6000}
+        onClose={handleCloseSuccess}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="success" onClose={handleCloseSuccess}>
+          {success}
+        </Alert>
+      </Snackbar>
+    </>
   );
 }

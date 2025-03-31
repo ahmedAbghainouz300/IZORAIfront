@@ -56,7 +56,7 @@ export default function ViewEntretienDialog({ open, onClose, entretien }) {
     },
     {
       label: "Immatriculation Camion",
-      children: camion.immatriculation,
+      children: camion?.immatriculation,
       span: 3,
     },
   ];
