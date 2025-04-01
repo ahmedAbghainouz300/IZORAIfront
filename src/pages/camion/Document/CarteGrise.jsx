@@ -72,7 +72,9 @@ export default function CarteGrise() {
   const handleOpenCarteGriseDialog = () => setCarteGriseDialogOpen(true);
 
   // Close the dialog to add a new carteGrise
-  const handleCloseCarteGriseDialog = () => setCarteGriseDialogOpen(false);
+  const handleCloseCarteGriseDialog = () => {
+    setCarteGriseDialogOpen(false);
+  fetchCarteGrises(); }
 
   // Handle view action
   const handleView = (row) => {
@@ -132,18 +134,20 @@ export default function CarteGrise() {
       setIsFailedCarteGriseUpdate(true);
     }
   };
-
-  // Handle create action for new carteGrise
-  const handleCreate = async (newCarteGrise) => {
+  const handleCreate = async (formData) => {
     try {
-      console.log(newCarteGrise);
-      const response = await carteGriseService.create(newCarteGrise);
+      const response = await carteGriseService.create(formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
       setRows([...rows, response.data]);
       setCarteGriseDialogOpen(false);
       setIsSuccess(true);
-      console.log("Carte Grise créée avec succès");
+      console.log("Carte Grise created successfully", response.data);
     } catch (error) {
-      console.error("Erreur lors de la création de la carte grise:", error);
+      console.error("Error creating carte grise:", error);
       setIsFailedCarteGriseCreate(true);
     }
   };
@@ -162,7 +166,7 @@ export default function CarteGrise() {
       return;
     }
     setIsFailedCarteGrisesFetch(false);
-  };
+  };                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
 
   const handleCloseFailedCarteGriseDelete = (event, reason) => {
     if (reason === "clickaway") {
@@ -257,7 +261,6 @@ export default function CarteGrise() {
         <CarteGriseDialog
           open={carteGriseDialogOpen}
           onClose={handleCloseCarteGriseDialog}
-          onSave={handleCreate}
         />
       )}
 

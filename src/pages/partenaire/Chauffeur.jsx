@@ -19,30 +19,13 @@
     Typography, 
     Grid, 
     CircularProgress, 
-    Dialog, 
-    DialogTitle, 
-    DialogContent, 
-    DialogActions ,
     Card,
     CardContent, // Add Badge import here
-    List,
-    ListItem,
-    ListItemText,
-    ListItemAvatar,
-    Avatar,
 
   } from "@mui/material";// Installer react-countup
   import CountUp from 'react-countup';
   import AvailableDriversDialog from "../../components/dialog/partenaire/chauffeur/AvailableDriversDialog"; // Nouveau dialogue pour les chauffeurs disponibles
-  import {
-    Warning as WarningIcon,
-    ErrorOutline as ErrorOutlineIcon,
-    Close as CloseIcon,
-    Badge as BadgeIcon,
-    Phone as PhoneIcon,
-    DateRange as DateRangeIcon,
-    
-  } from '@mui/icons-material';
+
   import ExpiredPermisDialog from "../../components/dialog/partenaire/chauffeur/ExpiredPermisDialog"; // Nouveau dialogue pour les chauffeurs avec permis expiré
   // Nouveau composant pour les statistiques
   const StatsCard = ({ title, value, color }) => (
@@ -138,7 +121,6 @@
     useEffect(() => {
       fetchChauffeurs();
       fetchStats();
-
       fetchExpiredPermisDrivers();
 
     }, []);
@@ -160,12 +142,6 @@
     };
 
     
-
-  
-  
-
-    
-
     const fetchChauffeurs = () => {
       chauffeurService
         .getAll()
@@ -263,32 +239,9 @@
       </Box>
 
         <Box>
-          
 
-          {dialogOpen && (
-            <ChauffeurDialog
-              open={dialogOpen}
-              onClose={() => setDialogOpen(false)}
-            />
-          )}
-          {voirDialogOpen && (
-            <VoirChauffeurDialog
-              open={voirDialogOpen}
-              onClose={() => setVoirDialogOpen(false)}
-              chauffeurId={selectedChauffeur.idPartenaire}
-              onEdit={handleModifier}
-            />
-          )}
-            {modifierDialogOpen && (
-              <ModifierChauffeurDialog
-                open={modifierDialogOpen}
-                onClose={() => setModifierDialogOpen(false)}
-                chauffeur={selectedChauffeur}
-                onUpdate={handleModifier}
-              />
-            )}
 
-          <DataGrid
+        <DataGrid
             rows={rows}
             columns={columns(handleDelete, handleVoir, handleModifier)}
             getRowId={(row) => row.idPartenaire}
@@ -306,6 +259,37 @@
             }}
           />
         </Box>
+          
+          {/* Dialog for adding a new driver */}
+          {dialogOpen && (
+            <ChauffeurDialog
+              open={dialogOpen}
+              onClose={() => setDialogOpen(false)}
+            />
+          )}
+
+
+          {/* Dialog for viewing driver details */}
+          {voirDialogOpen && (
+            <VoirChauffeurDialog
+              open={voirDialogOpen}
+              onClose={() => setVoirDialogOpen(false)}
+              chauffeurId={selectedChauffeur.idPartenaire}
+              onEdit={handleModifier}
+            />
+          )}
+
+          {/* Dialog for modifying driver details */}
+            {modifierDialogOpen && (
+              <ModifierChauffeurDialog
+                open={modifierDialogOpen}
+                onClose={() => setModifierDialogOpen(false)}
+                chauffeur={selectedChauffeur}
+                onUpdate={handleModifier}
+              />
+            )}
+
+      
         
         {/* Dialogs for Available Drivers and Expired Insurance */}
         {insuranceDialogOpen && (

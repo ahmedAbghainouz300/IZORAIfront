@@ -82,7 +82,6 @@ export default function TypePartenaire() {
       .getAll()
       .then((response) => {
         setRows(response.data);
-        fetchTypePartenaires();
       })
       .catch((error) => console.error("Erreur:", error));
   };

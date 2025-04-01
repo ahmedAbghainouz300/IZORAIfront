@@ -50,9 +50,9 @@ export default function Cabine() {
   // Load data when the component mounts or when refreshFlag changes
   useEffect(() => {
     fetchCamions();
-  });
+  }, []);
 
-  // Function to fetch data from the backend
+ 
   const fetchCamions = async () => {
     try {
       const response = await camionService.getAll();
@@ -81,20 +81,17 @@ export default function Cabine() {
     setEditDialogOpen(true);
   };
 
-  // Open the delete confirmation dialog
   const handleDeleteClick = (immatriculation) => {
     setCamionToDelete(immatriculation);
     setDeleteDialogOpen(true);
   };
 
-  // Handle the actual deletion
   const handleDelete = async () => {
     try {
-      await camionService.delete(camionToDelete);
-      console.log("Camion supprimé avec succès");
+      await camionService.delete(camionToDelete.immatriculation);
       setIsSuccess(true);
       setDeleteDialogOpen(false);
-      fetchCamions(); // Refresh the data
+      fetchCamions();
     } catch (error) {
       console.error("Erreur lors de la suppression du camion:", error);
       setIsFailedCamionDelete(true);
@@ -200,12 +197,12 @@ export default function Cabine() {
       flex: 1,
       type: "number",
     },
-    {
-      field: "consommation",
-      headerName: "Consommation (L/100km)",
-      flex: 1,
-      type: "number",
-    },
+    // {
+    //   field: "consommation",
+    //   headerName: "Consommation (L/100km)",
+    //   flex: 1,
+    //   type: "number",
+    // },
     {
       field: "actions",
       headerName: "Actions",
