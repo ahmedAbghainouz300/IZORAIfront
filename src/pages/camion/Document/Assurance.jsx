@@ -93,7 +93,6 @@ export default function Assurance() {
   const handleDelete = async () => {
     try {
       await assuranceService.delete(assuranceToDelete);
-      setRows(rows.filter((row) => row.id !== assuranceToDelete));
       console.log("Assurance supprimée avec succès");
       setIsSuccess(true);
       setDeleteDialogOpen(false);
@@ -217,7 +216,7 @@ export default function Assurance() {
           </IconButton>
           <IconButton
             color="error"
-            onClick={() => handleDeleteClick(params.row.id)}
+            onClick={() => handleDeleteClick(params.row.numeroContrat)}
           >
             <DeleteIcon />
           </IconButton>
@@ -248,7 +247,7 @@ export default function Assurance() {
         <ViewAssuranceDialog
           open={viewDialogOpen}
           onClose={() => setViewDialogOpen(false)}
-          assurance={selectedRow}
+          assuranceId={selectedRow.numeroContrat}
         />
       )}
 

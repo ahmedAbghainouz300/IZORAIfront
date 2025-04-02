@@ -129,6 +129,7 @@ export default function Cabine() {
       console.log(newCabine);
       const response = await camionService.create(newCabine);
       setRows([...rows, response.data]);
+      
       setCabineDialogOpen(false);
       setIsSuccess(true);
       fetchCamions();

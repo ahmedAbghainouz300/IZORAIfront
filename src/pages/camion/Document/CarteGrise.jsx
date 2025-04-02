@@ -269,7 +269,7 @@ export default function CarteGrise() {
         <ViewCarteGriseDialog
           open={viewDialogOpen}
           onClose={() => setViewDialogOpen(false)}
-          carteGrise={selectedRow}
+          carteGriseId={selectedRow.id}
         />
       )}
 

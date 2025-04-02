@@ -69,7 +69,7 @@ export default function ViewPhysiqueDialog({ open, onClose, partenaire }) {
           <Divider sx={{ my: 1 }} />
           <Box sx={{ pl: 2 }}>
             <Typography variant="body1">
-              <strong>CNI :</strong> {partenaire.CNI}
+              <strong>CNI :</strong> {partenaire.cni}
             </Typography>
           </Box>
         </Box>
