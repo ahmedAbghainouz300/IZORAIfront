@@ -24,7 +24,7 @@ export default function ChauffeurDialog({ open, onClose }) {
   const [formData, setFormData] = useState({
     nom: "",
     prenom: "",
-    CNI: "",
+    cni: "",
     dateExpirationPermis: "",
     email: "",
     telephone: "",
@@ -38,7 +38,7 @@ export default function ChauffeurDialog({ open, onClose }) {
   const [errors, setErrors] = useState({
     nom: false,
     prenom: false,
-    CNI: false,
+    cni: false,
     telephone: false,
     dateExpirationPermis: false,
   });
@@ -52,7 +52,7 @@ export default function ChauffeurDialog({ open, onClose }) {
     const newErrors = {
       nom: formData.nom.trim() === "",
       prenom: formData.prenom.trim() === "",
-      CNI: formData.CNI.trim() === "",
+      cni: formData.cni.trim() === "",
       telephone: formData.telephone.trim() === "",
       dateExpirationPermis: formData.dateExpirationPermis.trim() === "",
     };
@@ -136,7 +136,7 @@ export default function ChauffeurDialog({ open, onClose }) {
           ? Array.from(new Uint8Array(formData.photoPermisVerso))
           : null,
       };
-
+      console.log(chauffeurData);
       await chauffeurService.create(chauffeurData);
       onClose();
       setFormData({
@@ -190,12 +190,12 @@ export default function ChauffeurDialog({ open, onClose }) {
           <Grid item xs={6}>
             <TextField
               label="CNI *"
-              name="CNI"
+              name="cni"
               fullWidth
-              value={formData.CNI}
+              value={formData.cni}
               onChange={handleChange}
-              error={errors.CNI}
-              helperText={errors.CNI ? "Ce champ est obligatoire" : ""}
+              error={errors.cni}
+              helperText={errors.cni ? "Ce champ est obligatoire" : ""}
               required
             />
           </Grid>
@@ -399,7 +399,7 @@ export default function ChauffeurDialog({ open, onClose }) {
       <AdressDialog
         open={openAdress}
         onClose={() => setOpenAdress(false)}
-        onSave={handleAddAdress}
+        onAdd={handleAddAdress}
       />
     </Dialog>
   );

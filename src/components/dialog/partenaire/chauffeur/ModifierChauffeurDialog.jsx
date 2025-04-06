@@ -18,12 +18,10 @@ export default function ModifierChauffeurDialog({
   open,
   onClose,
   chauffeur,
-  onUpdate,
+  onUpdateSuccess,
 }) {
   const [adresses, setAdresses] = useState([]);
   const [isAdressModalOpen, setIsAdressModalOpen] = useState(false);
-  const [isAddAddressOpen, setIsAddAddressOpen] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState(null);
   const [errors, setErrors] = useState({
     nom: false,
     prenom: false,
@@ -82,17 +80,6 @@ export default function ModifierChauffeurDialog({
     }
   }, [chauffeur]);
 
-  const handleAddAddress = async (newAddress) => {
-    try {
-      await physiqueService.addAdresse(chauffeur.idPartenaire, newAddress);
-      fetchAdressesById(chauffeur.idPartenaire);
-      alert("Adresse ajoutée avec succès !");
-    } catch (error) {
-      console.error("Erreur lors de l'ajout de l'adresse :", error);
-      alert("Erreur lors de l'ajout de l'adresse.");
-    }
-  };
-
   const handleDeleteAdresse = async (id) => {
     try {
       await adressService.delete(id);
@@ -116,7 +103,7 @@ export default function ModifierChauffeurDialog({
     chauffeurService
       .update(chauffeur.idPartenaire, formData)
       .then(() => {
-        onUpdate();
+        onUpdateSuccess();
         onClose();
       })
       .catch((error) =>

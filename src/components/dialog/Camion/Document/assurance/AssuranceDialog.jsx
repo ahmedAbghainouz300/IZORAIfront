@@ -12,7 +12,6 @@ import {
   Box,
   Grid,
   styled,
-  
 } from "@mui/material";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -35,18 +34,17 @@ export default function AssuranceDialog({ open, onClose, onSave }) {
   const [photoPreview, setPhotoPreview] = React.useState(null);
   const [error, setError] = React.useState(null);
 
-  const VisuallyHiddenInput = styled('input')({
-    clip: 'rect(0 0 0 0)',
-    clipPath: 'inset(50%)',
+  const VisuallyHiddenInput = styled("input")({
+    clip: "rect(0 0 0 0)",
+    clipPath: "inset(50%)",
     height: 1,
-    overflow: 'hidden',
-    position: 'absolute',
+    overflow: "hidden",
+    position: "absolute",
     bottom: 0,
     left: 0,
-    whiteSpace: 'nowrap',
+    whiteSpace: "nowrap",
     width: 1,
   });
-
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -66,12 +64,13 @@ export default function AssuranceDialog({ open, onClose, onSave }) {
     if (!file) return;
 
     // Validation du fichier
-    if (!file.type.match('image.*')) {
+    if (!file.type.match("image.*")) {
       setError("Veuillez sélectionner un fichier image valide");
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB max
+    if (file.size > 5 * 1024 * 1024) {
+      // 5MB max
       setError("La taille de l'image ne doit pas dépasser 5MB");
       return;
     }
@@ -84,14 +83,14 @@ export default function AssuranceDialog({ open, onClose, onSave }) {
       // Convertir en base64 pour le backend
       const base64String = await new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onload = () => resolve(reader.result.split(",")[1]);
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
 
-      setAssuranceData(prev => ({
+      setAssuranceData((prev) => ({
         ...prev,
-        photoAssurance: base64String
+        photoAssurance: base64String,
       }));
       setError(null);
     } catch (err) {
@@ -107,9 +106,9 @@ export default function AssuranceDialog({ open, onClose, onSave }) {
     console.log(payload);
     onSave(payload);
   };
-  
+
   const handleRemovePhoto = () => {
-    setAssuranceData(prev => ({ ...prev, photoAssurance: null }));
+    setAssuranceData((prev) => ({ ...prev, photoAssurance: null }));
     setPhotoPreview(null);
   };
 
@@ -134,93 +133,94 @@ export default function AssuranceDialog({ open, onClose, onSave }) {
               }
               required
             />
+          </Box>
 
-            <TextField
-              fullWidth
-              label="Compagnie*"
-              name="company"
-              value={assuranceData.company}
-              onChange={handleInputChange}
-              margin="normal"
-              error={!!validationError && !assuranceData.company.trim()}
-              helperText={
-                validationError && !assuranceData.company.trim()
-                  ? validationError
-                  : ""
-              }
-              required
+          <TextField
+            fullWidth
+            label="Compagnie*"
+            name="company"
+            value={assuranceData.company}
+            onChange={handleInputChange}
+            margin="normal"
+            error={!!validationError && !assuranceData.company.trim()}
+            helperText={
+              validationError && !assuranceData.company.trim()
+                ? validationError
+                : ""
+            }
+            required
+          />
+
+          <TextField
+            fullWidth
+            label="Type de couverture"
+            name="typeCouverture"
+            value={assuranceData.typeCouverture}
+            onChange={handleInputChange}
+            margin="normal"
+          />
+
+          <TextField
+            fullWidth
+            label="Montant"
+            name="montant"
+            value={assuranceData.montant}
+            onChange={handleInputChange}
+            margin="normal"
+            type="number"
+          />
+
+          <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+            <MobileDatePicker
+              label="Date début*"
+              value={assuranceData.dateDebut}
+              onChange={handleDateChange("dateDebut")}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  fullWidth
+                  margin="normal"
+                  error={!!validationError && !assuranceData.dateDebut}
+                  helperText={
+                    validationError && !assuranceData.dateDebut
+                      ? validationError
+                      : ""
+                  }
+                  required
+                />
+              )}
             />
 
-            <TextField
-              fullWidth
-              label="Type de couverture"
-              name="typeCouverture"
-              value={assuranceData.typeCouverture}
-              onChange={handleInputChange}
-              margin="normal"
+            <MobileDatePicker
+              label="Date expiration*"
+              value={assuranceData.dateExpiration}
+              onChange={handleDateChange("dateExpiration")}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  fullWidth
+                  margin="normal"
+                  error={!!validationError && !assuranceData.dateExpiration}
+                  helperText={
+                    validationError && !assuranceData.dateExpiration
+                      ? validationError
+                      : ""
+                  }
+                  required
+                />
+              )}
             />
+          </Box>
 
-            <TextField
-              fullWidth
-              label="Montant"
-              name="montant"
-              value={assuranceData.montant}
-              onChange={handleInputChange}
-              margin="normal"
-              type="number"
-            />
-
-            <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-              <MobileDatePicker
-                label="Date début*"
-                value={assuranceData.dateDebut}
-                onChange={handleDateChange("dateDebut")}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    fullWidth
-                    margin="normal"
-                    error={!!validationError && !assuranceData.dateDebut}
-                    helperText={
-                      validationError && !assuranceData.dateDebut
-                        ? validationError
-                        : ""
-                    }
-                    required
-                  />
-                )}
-              />
-
-              <MobileDatePicker
-                label="Date expiration*"
-                value={assuranceData.dateExpiration}
-                onChange={handleDateChange("dateExpiration")}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    fullWidth
-                    margin="normal"
-                    error={!!validationError && !assuranceData.dateExpiration}
-                    helperText={
-                      validationError && !assuranceData.dateExpiration
-                        ? validationError
-                        : ""
-                    }
-                    required
-                  />
-                )}
-              />
-            </Box>
-
-            <TextField
-              fullWidth
-              label="Prime annuelle"
-              name="primeAnnuelle"
-              value={assuranceData.primeAnnuelle}
-              onChange={handleInputChange}
-              margin="normal"
-              type="number"
-            />
+          <TextField
+            fullWidth
+            label="Prime annuelle"
+            name="primeAnnuelle"
+            value={assuranceData.primeAnnuelle}
+            onChange={handleInputChange}
+            margin="normal"
+            type="number"
+          />
 
           <TextField
             fullWidth
@@ -239,74 +239,73 @@ export default function AssuranceDialog({ open, onClose, onSave }) {
             margin="normal"
           />
 
-           <Grid item xs={12}>
-             <Box
-               sx={{
-                 border: '1px dashed',
-                 borderColor: 'divider',
-                 borderRadius: 2,
-                 p: 3,
-                 textAlign: 'center',
-                 backgroundColor: 'action.hover',
-                 '&:hover': {
-                   backgroundColor: 'action.selected',
-                 }
-               }}
-             >
-               {photoPreview ? (
-                 <Box sx={{ position: 'relative' }}>
-                   <Avatar
-                     src={photoPreview}
-                     variant="rounded"
-                     sx={{
-                       width: '100%',
-                       height: 200,
-                       mb: 2
-                     }}
-                   />
-                   <IconButton
-                     onClick={handleRemovePhoto}
-                     sx={{
-                       position: 'absolute',
-                       top: 8,
-                       right: 8,
-                       backgroundColor: 'error.main',
-                       color: 'white',
-                       '&:hover': {
-                         backgroundColor: 'error.dark',
-                       }
-                     }}
-                   >
-                     <Delete />
-                   </IconButton>
-                 </Box>
-               ) : (
-                 <>
-                   <CloudUpload fontSize="large" color="action" sx={{ mb: 1 }} />
-                   <Typography variant="subtitle1" gutterBottom>
-                     Glissez-déposez la photo de la carte grise ou
-                   </Typography>
-                   <Button
-                     component="label"
-                     variant="contained"
-                     startIcon={<AddAPhoto />}
-                     sx={{ mt: 1 }}
-                   >
-                     Sélectionner une image
-                     <VisuallyHiddenInput 
-                       type="file" 
-                       accept="image/*" 
-                       onChange={handlePhotoUpload} 
-                     />
-                   </Button>
-                   <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-                     Formats supportés: JPEG, PNG (Max. 5MB)
-                   </Typography>
-                 </>
-               )}
-             </Box>
-           </Grid>
-
+          <Grid item xs={12}>
+            <Box
+              sx={{
+                border: "1px dashed",
+                borderColor: "divider",
+                borderRadius: 2,
+                p: 3,
+                textAlign: "center",
+                backgroundColor: "action.hover",
+                "&:hover": {
+                  backgroundColor: "action.selected",
+                },
+              }}
+            >
+              {photoPreview ? (
+                <Box sx={{ position: "relative" }}>
+                  <Avatar
+                    src={photoPreview}
+                    variant="rounded"
+                    sx={{
+                      width: "100%",
+                      height: 200,
+                      mb: 2,
+                    }}
+                  />
+                  <IconButton
+                    onClick={handleRemovePhoto}
+                    sx={{
+                      position: "absolute",
+                      top: 8,
+                      right: 8,
+                      backgroundColor: "error.main",
+                      color: "white",
+                      "&:hover": {
+                        backgroundColor: "error.dark",
+                      },
+                    }}
+                  >
+                    <Delete />
+                  </IconButton>
+                </Box>
+              ) : (
+                <>
+                  <CloudUpload fontSize="large" color="action" sx={{ mb: 1 }} />
+                  <Typography variant="subtitle1" gutterBottom>
+                    Glissez-déposez la photo de la carte grise ou
+                  </Typography>
+                  <Button
+                    component="label"
+                    variant="contained"
+                    startIcon={<AddAPhoto />}
+                    sx={{ mt: 1 }}
+                  >
+                    Sélectionner une image
+                    <VisuallyHiddenInput
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoUpload}
+                    />
+                  </Button>
+                  <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+                    Formats supportés: JPEG, PNG (Max. 5MB)
+                  </Typography>
+                </>
+              )}
+            </Box>
+          </Grid>
         </DialogContent>
         <DialogActions>
           <Button onClick={onClose} disabled={isLoading}>

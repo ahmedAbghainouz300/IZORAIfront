@@ -6,8 +6,8 @@ import {
 } from "@mui/x-data-grid";
 import ChauffeurDialog from "../../components/dialog/partenaire/chauffeur/ChauffeurDialog";
 import chauffeurService from "../../service/partenaire/chaufeurService";
-import VoirChauffeurDialog from "../../components/dialog/partenaire/chauffeur/VoirChauffeurDialog"; // Nouveau dialogue pour voir les détails
-import ModifierChauffeurDialog from "../../components/dialog/partenaire/chauffeur/ModifierChauffeurDialog.jsx"; // Nouveau dialogue pour modifier les détails
+import VoirChauffeurDialog from "../../components/dialog/partenaire/chauffeur/VoirChauffeurDialog";
+import ModifierChauffeurDialog from "../../components/dialog/partenaire/chauffeur/ModifierChauffeurDialog.jsx";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -20,13 +20,17 @@ import {
   Grid,
   CircularProgress,
   Card,
-  CardContent, // Add Badge import here
-} from "@mui/material"; // Installer react-countup
+  CardContent,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+} from "@mui/material";
 import CountUp from "react-countup";
-import AvailableDriversDialog from "../../components/dialog/partenaire/chauffeur/AvailableDriversDialog"; // Nouveau dialogue pour les chauffeurs disponibles
+import AvailableDriversDialog from "../../components/dialog/partenaire/chauffeur/AvailableDriversDialog";
+import ExpiredPermisDialog from "../../components/dialog/partenaire/chauffeur/ExpiredPermisDialog";
 
-import ExpiredPermisDialog from "../../components/dialog/partenaire/chauffeur/ExpiredPermisDialog"; // Nouveau dialogue pour les chauffeurs avec permis expiré
-// Nouveau composant pour les statistiques
 const StatsCard = ({ title, value, color }) => (
   <Card sx={{ minWidth: 200, backgroundColor: color, color: "white" }}>
     <CardContent>
@@ -40,7 +44,7 @@ const StatsCard = ({ title, value, color }) => (
   </Card>
 );
 
-const columns = (handleDeleteClick, handleVoir, handleModifier, loading) => [
+const columns = (handleDeleteClick, handleVoir, handleModifier) => [
   { field: "idPartenaire", headerName: "ID", width: 90 },
   { field: "nom", headerName: "Nom", flex: 1 },
   { field: "prenom", headerName: "Prénom", flex: 1 },
@@ -52,7 +56,7 @@ const columns = (handleDeleteClick, handleVoir, handleModifier, loading) => [
   { field: "disponibilite", headerName: "Disponibilité", flex: 1 },
   {
     field: "dateExpirationPermis",
-    headerName: "dateExpirationPermis",
+    headerName: "Date Expiration Permis",
     flex: 1,
   },
   {
@@ -78,7 +82,6 @@ const columns = (handleDeleteClick, handleVoir, handleModifier, loading) => [
         <IconButton
           color="error"
           onClick={() => handleDeleteClick(params.row.idPartenaire)}
-          disabled={loading}
         >
           <DeleteIcon />
         </IconButton>
@@ -120,9 +123,6 @@ export default function Chauffeur() {
     fetchExpiredPermisDrivers();
   }, []);
 
-  // Fetch Available Drivers
-
-  // Fetch Drivers with Expired Insurance
   const fetchExpiredPermisDrivers = () => {
     chauffeurService
       .getWithExpiredPermis()
@@ -134,15 +134,29 @@ export default function Chauffeur() {
           "Erreur récupération des chauffeurs avec assurance expirée:",
           error
         );
+        setAlert({
+          message:
+            "Erreur lors de la récupération des chauffeurs avec permis expiré",
+          severity: "error",
+        });
       });
   };
 
   const fetchChauffeurs = () => {
+    setLoading(true);
     chauffeurService
       .getAll()
       .then((response) => setRows(response.data))
-      .catch((error) => console.error("Erreur:", error));
+      .catch((error) => {
+        console.error("Erreur:", error);
+        setAlert({
+          message: "Erreur lors de la récupération des chauffeurs",
+          severity: "error",
+        });
+      })
+      .finally(() => setLoading(false));
   };
+
   const fetchStats = () => {
     setStats((prev) => ({ ...prev, loading: true }));
 
@@ -160,6 +174,10 @@ export default function Chauffeur() {
       .catch((error) => {
         console.error("Erreur stats:", error);
         setStats((prev) => ({ ...prev, loading: false }));
+        setAlert({
+          message: "Erreur lors de la récupération des statistiques",
+          severity: "error",
+        });
       });
   };
 
@@ -178,6 +196,7 @@ export default function Chauffeur() {
       .delete(chauffeurToDelete)
       .then(() => {
         fetchChauffeurs();
+        fetchStats();
         setAlert({
           message: "Chauffeur supprimé avec succès",
           severity: "success",
@@ -213,6 +232,7 @@ export default function Chauffeur() {
 
   const handleAddSuccess = () => {
     fetchChauffeurs();
+    fetchStats();
     setDialogOpen(false);
     setAlert({
       message: "Chauffeur ajouté avec succès",
@@ -222,6 +242,7 @@ export default function Chauffeur() {
 
   const handleUpdateSuccess = () => {
     fetchChauffeurs();
+    fetchStats();
     setModifierDialogOpen(false);
     setAlert({
       message: "Chauffeur modifié avec succès",
@@ -245,7 +266,6 @@ export default function Chauffeur() {
               <StatsCard
                 title="Chauffeurs Actifs"
                 value={stats.active}
-                total={rows.length}
                 color="#4caf50"
               />
             )}
@@ -257,7 +277,6 @@ export default function Chauffeur() {
               <StatsCard
                 title="En Mission"
                 value={stats.onMission}
-                total={rows.length}
                 color="#ff9800"
               />
             )}
@@ -291,14 +310,14 @@ export default function Chauffeur() {
           color="warning"
           onClick={() => setInsuranceDialogOpen(true)}
         >
-          Assurances Expirées
+          Permis Expirés
         </Button>
       </Box>
 
       <Box>
         <DataGrid
           rows={rows}
-          columns={columns(handleDelete, handleVoir, handleModifier)}
+          columns={columns(handleDeleteClick, handleVoir, handleModifier)}
           getRowId={(row) => row.idPartenaire}
           initialState={{
             pagination: { paginationModel: { pageSize: 4 } },
@@ -312,16 +331,39 @@ export default function Chauffeur() {
               ".MuiDataGrid-toolbarContainer": { display: "none" },
             },
           }}
+          loading={loading}
         />
       </Box>
 
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          Confirmer la suppression
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Êtes-vous sûr de vouloir supprimer ce chauffeur ?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog}>Annuler</Button>
+          <Button onClick={handleDeleteConfirm} color="error" autoFocus>
+            Supprimer
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Dialog for adding a new driver */}
-      {dialogOpen && (
-        <ChauffeurDialog
-          open={dialogOpen}
-          onClose={() => setDialogOpen(false)}
-        />
-      )}
+      <ChauffeurDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        onSuccess={handleAddSuccess}
+      />
 
       {/* Dialog for viewing driver details */}
       {voirDialogOpen && (
@@ -329,7 +371,7 @@ export default function Chauffeur() {
           open={voirDialogOpen}
           onClose={() => setVoirDialogOpen(false)}
           chauffeurId={selectedChauffeur.idPartenaire}
-          onEdit={handleModifier}
+          onEdit={() => handleModifier(selectedChauffeur)}
         />
       )}
 
@@ -339,7 +381,7 @@ export default function Chauffeur() {
           open={modifierDialogOpen}
           onClose={() => setModifierDialogOpen(false)}
           chauffeur={selectedChauffeur}
-          onUpdate={handleModifier}
+          onUpdateSuccess={handleUpdateSuccess}
         />
       )}
 
