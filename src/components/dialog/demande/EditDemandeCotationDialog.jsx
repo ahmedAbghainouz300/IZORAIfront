@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // Corrigé l'import de useEffect
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -16,9 +16,11 @@ import {
   Grid,
   Chip,
   Box,
-  IconButton
+  IconButton,
+  Tooltip,
+  Stack
 } from '@mui/material';
-import { LocationOn, Edit, Delete } from '@mui/icons-material';
+import { LocationOn, Edit, Delete, Check, Close, MoreVert } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
 import demandeCotationService from '../../../service/demande/demandeCotationService';
 import AddAdress from '../partenaire/adress/addAdress';
@@ -38,6 +40,12 @@ const typeMarchandiseOptions = [
   'EQUIPEMENTS_INDUSTRIELS'
 ];
 
+const statusOptions = [
+  { value: 'EN_ATTENTE', label: 'En attente' },
+  { value: 'VALIDEE', label: 'Validée', color: 'success' },
+  { value: 'REJETEE', label: 'Rejetée', color: 'error' }
+];
+
 export default function EditDemandeCotationDialog({ open, onClose, onSave, demandeId }) {
   const { enqueueSnackbar } = useSnackbar();
   const [formData, setFormData] = useState({
@@ -55,7 +63,8 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
 
   const [openAdress, setOpenAdress] = useState(false);
   const [currentAddressType, setCurrentAddressType] = useState(null);
-  const [editAddress, setEditAddress] = useState(null); // Nouvel état pour l'adresse en édition
+  const [editAddress, setEditAddress] = useState(null);
+  const [statusMenuAnchor, setStatusMenuAnchor] = useState(null);
 
   useEffect(() => {
     const fetchDemande = async () => {
@@ -91,6 +100,23 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+  };
+
+  const handleStatusChange = async (newStatus) => {
+    try {
+      console.log(newStatus);
+      await demandeCotationService.updateStatus(demandeId, newStatus);
+      setFormData(prev => ({ ...prev, statut: newStatus }));
+      enqueueSnackbar(`Statut changé à ${newStatus === 'VALIDEE' ? 'Validée' : 'Rejetée'}`, { 
+        variant: 'success' 
+      });
+      onSave({ ...formData, statut: newStatus });
+    } catch (error) {
+      enqueueSnackbar('Erreur lors du changement de statut', { variant: 'error' });
+      console.error('Error updating status:', error);
+    } finally {
+      setStatusMenuAnchor(null);
+    }
   };
 
   const handleOpenAddressDialog = (type, address = null) => {
@@ -165,9 +191,47 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
   return (
     <>
       <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-        <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white' }}>
-          {demandeId ? 'Modifier la Demande' : 'Nouvelle Demande de Cotation'}
+        <DialogTitle sx={{ 
+          bgcolor: 'primary.main', 
+          color: 'white',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <Box>
+            {demandeId ? 'Modifier la Demande' : 'Nouvelle Demande de Cotation'}
+          </Box>
+          {demandeId && (
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Chip 
+                label={statusOptions.find(s => s.value === formData.statut)?.label || formData.statut}
+                color={statusOptions.find(s => s.value === formData.statut)?.color || 'default'}
+                sx={{ color: 'white', fontWeight: 'bold' }}
+              />
+              {formData.statut === 'EN_ATTENTE' && (
+                <>
+                  <Tooltip title="Valider la demande">
+                    <IconButton 
+                      onClick={() => handleStatusChange('VALIDEE')}
+                      sx={{ color: 'white' }}
+                    >
+                      <Check />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Rejeter la demande">
+                    <IconButton 
+                      onClick={() => handleStatusChange('REJETEE')}
+                      sx={{ color: 'white' }}
+                    >
+                      <Close />
+                    </IconButton>
+                  </Tooltip>
+                </>
+              )}
+            </Stack>
+          )}
         </DialogTitle>
+        
         <DialogContent dividers>
           <Grid container spacing={3} sx={{ pt: 2 }}>
             {/* Basic Information Section */}
@@ -188,6 +252,7 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
                         value={formData.typeMarchandise}
                         onChange={handleChange}
                         size="small"
+                        disabled={formData.statut !== 'EN_ATTENTE'}
                       >
                         {typeMarchandiseOptions.map((option) => (
                           <MenuItem key={option} value={option}>
@@ -205,6 +270,7 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
                         value={formData.typeRemorque}
                         onChange={handleChange}
                         size="small"
+                        disabled={formData.statut !== 'EN_ATTENTE'}
                       >
                         {typeRemorqueOptions.map((option) => (
                           <MenuItem key={option} value={option}>
@@ -223,6 +289,7 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
                         onChange={handleChange}
                         size="small"
                         InputLabelProps={{ shrink: true }}
+                        disabled={formData.statut !== 'EN_ATTENTE'}
                       />
                     </Grid>
                     <Grid item xs={12} md={6}>
@@ -233,6 +300,7 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
                             onChange={handleChange}
                             name="transitEtranger"
                             color="primary"
+                            disabled={formData.statut !== 'EN_ATTENTE'}
                           />
                         }
                         label="Transit à l'étranger"
@@ -263,19 +331,25 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
                           color={formData.adresseChargement ? 'primary' : 'default'}
                           sx={{ flexGrow: 1, justifyContent: 'flex-start' }}
                         />
-                        <IconButton 
-                          color="primary"
-                          onClick={() => handleOpenAddressDialog('chargement', formData.adresseChargement)}
-                        >
-                          <Edit />
-                        </IconButton>
-                        {formData.adresseChargement && (
-                          <IconButton 
-                            color="error"
-                            onClick={() => handleRemoveAddress('chargement')}
-                          >
-                            <Delete />
-                          </IconButton>
+                        {formData.statut === 'EN_ATTENTE' && (
+                          <>
+                            <IconButton 
+                              color="primary"
+                              onClick={() => handleOpenAddressDialog('chargement', formData.adresseChargement)}
+                              disabled={formData.statut !== 'EN_ATTENTE'}
+                            >
+                              <Edit />
+                            </IconButton>
+                            {formData.adresseChargement && (
+                              <IconButton 
+                                color="error"
+                                onClick={() => handleRemoveAddress('chargement')}
+                                disabled={formData.statut !== 'EN_ATTENTE'}
+                              >
+                                <Delete />
+                              </IconButton>
+                            )}
+                          </>
                         )}
                       </Box>
                     </Grid>
@@ -290,19 +364,25 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
                           color={formData.adresseDechargement ? 'primary' : 'default'}
                           sx={{ flexGrow: 1, justifyContent: 'flex-start' }}
                         />
-                        <IconButton 
-                          color="primary"
-                          onClick={() => handleOpenAddressDialog('dechargement', formData.adresseDechargement)}
-                        >
-                          <Edit />
-                        </IconButton>
-                        {formData.adresseDechargement && (
-                          <IconButton 
-                            color="error"
-                            onClick={() => handleRemoveAddress('dechargement')}
-                          >
-                            <Delete />
-                          </IconButton>
+                        {formData.statut === 'EN_ATTENTE' && (
+                          <>
+                            <IconButton 
+                              color="primary"
+                              onClick={() => handleOpenAddressDialog('dechargement', formData.adresseDechargement)}
+                              disabled={formData.statut !== 'EN_ATTENTE'}
+                            >
+                              <Edit />
+                            </IconButton>
+                            {formData.adresseDechargement && (
+                              <IconButton 
+                                color="error"
+                                onClick={() => handleRemoveAddress('dechargement')}
+                                disabled={formData.statut !== 'EN_ATTENTE'}
+                              >
+                                <Delete />
+                              </IconButton>
+                            )}
+                          </>
                         )}
                       </Box>
                     </Grid>
@@ -328,6 +408,7 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
                         value={formData.periodeTransport}
                         onChange={handleChange}
                         size="small"
+                        disabled={formData.statut !== 'EN_ATTENTE'}
                       />
                     </Grid>
                     <Grid item xs={12} md={6}>
@@ -338,6 +419,7 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
                         value={formData.exigencesParticulieres}
                         onChange={handleChange}
                         size="small"
+                        disabled={formData.statut !== 'EN_ATTENTE'}
                       />
                     </Grid>
                   </Grid>
@@ -348,9 +430,11 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
         </DialogContent>
         <DialogActions>
           <Button onClick={onClose}>Annuler</Button>
-          <Button onClick={handleSubmit} variant="contained" color="primary">
-            {demandeId ? "Mettre à jour" : "Créer"}
-          </Button>
+          {formData.statut === 'EN_ATTENTE' && (
+            <Button onClick={handleSubmit} variant="contained" color="primary">
+              {demandeId ? "Mettre à jour" : "Créer"}
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
 
@@ -358,7 +442,7 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
         open={openAdress}
         onClose={() => setOpenAdress(false)}
         onAdd={handleAddAdress}
-        address={editAddress} // Passer l'adresse à éditer si elle existe
+        address={editAddress}
       />
     </>
   );

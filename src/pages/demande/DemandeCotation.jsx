@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
+import { 
+  Box, Button, IconButton, Avatar,
+  FormControl, InputLabel, MenuItem, Select,
+  Typography, Grid, Paper, Stack, LinearProgress
+} from "@mui/material";
 import { DataGrid, GridToolbarContainer, GridToolbarExport } from "@mui/x-data-grid";
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { useSnackbar } from "notistack";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -12,7 +13,94 @@ import DemandeCotationDialog from "../../components/dialog/demande/DemandeCotati
 import EditDemandeCotationDialog from "../../components/dialog/demande/EditDemandeCotationDialog";
 import ViewDemandeCotationDialog from "../../components/dialog/demande/ViewDemandeCotationDialog";
 import demandeCotationService from "../../service/demande/demandeCotationService";
+import HourglassTopIcon from '@mui/icons-material/HourglassTop';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 
+
+
+const DemandStatistics = ({ stats }) => {
+  const total = Object.values(stats).reduce((sum, count) => sum + count, 0);
+
+  const statuses = [
+    {
+      status: 'EN_ATTENTE',
+      label: 'En attente',
+      icon: <HourglassTopIcon color="warning" />,
+      color: '#FFE0B2'
+    },
+    {
+      status: 'VALIDEE',
+      label: 'Validées',
+      icon: <CheckCircleIcon color="success" />,
+      color: '#C8E6C9'
+    },
+    {
+      status: 'REJETEE',
+      label: 'Rejetées',
+      icon: <CancelIcon color="error" />,
+      color: '#FFCDD2'
+    },
+  ];
+
+  return (
+    <Paper elevation={3} sx={{ p: 3, mb: 3, borderRadius: 3 }}>
+      <Typography variant="h5" sx={{ fontWeight: "bold", mb: 2 }}>
+        📊 Statistiques des demandes
+      </Typography>
+
+      <Grid container spacing={2}>
+        {statuses.map(({ status, label, icon, color }) => {
+          const count = stats[status] || 0;
+          const percent = total > 0 ? Math.round((count / total) * 100) : 0;
+
+          return (
+            <Grid item xs={12} sm={4} key={status}>
+              <Paper elevation={1} sx={{ p: 2, borderRadius: 2, backgroundColor: color }}>
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Avatar sx={{ bgcolor: 'white' }}>{icon}</Avatar>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      {label}
+                    </Typography>
+                    <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+                      {count}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {percent}%
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Paper>
+            </Grid>
+          );
+        })}
+      </Grid>
+
+      {/* Progress Bar */}
+      <Box sx={{ mt: 4 }}>
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+          Répartition visuelle
+        </Typography>
+        <Stack direction="row" spacing={0.5} sx={{ height: 12, borderRadius: 5, overflow: 'hidden' }}>
+          {statuses.map(({ status, color }) => (
+            <Box
+              key={status}
+              sx={{
+                width: `${total > 0 ? (stats[status] || 0) / total * 100 : 0}%`,
+                backgroundColor: color,
+                transition: "width 0.3s ease"
+              }}
+            />
+          ))}
+        </Stack>
+      </Box>
+    </Paper>
+  );
+};
+
+
+// Rest of your component remains the same...
 function CustomToolbar({ statusFilter, setStatusFilter }) {
   return (
     <GridToolbarContainer sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -24,7 +112,6 @@ function CustomToolbar({ statusFilter, setStatusFilter }) {
           label="Filtrer par statut"
         >
           <MenuItem value="TOUS">Tous les statuts</MenuItem>
-          <MenuItem value="BROUILLON">Brouillon</MenuItem>
           <MenuItem value="EN_ATTENTE">En attente</MenuItem>
           <MenuItem value="VALIDEE">Validée</MenuItem>
           <MenuItem value="REJETEE">Rejetée</MenuItem>
@@ -35,6 +122,7 @@ function CustomToolbar({ statusFilter, setStatusFilter }) {
   );
 }
 
+
 export default function DemandeCotation() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -43,6 +131,8 @@ export default function DemandeCotation() {
   const [rows, setRows] = useState([]);
   const [statusFilter, setStatusFilter] = useState("TOUS");
   const { enqueueSnackbar } = useSnackbar();
+  
+  const [stats, setStats] = useState({});
 
   const fetchDemandes = async () => {
     try {
@@ -59,8 +149,19 @@ export default function DemandeCotation() {
     }
   };
 
+  const fetchStatistics = async () => {
+    try {
+      const response = await demandeCotationService.getStatistics();
+      setStats(response.data);
+    } catch (error) {
+      enqueueSnackbar("Erreur lors du chargement des statistiques", { variant: "error" });
+      console.error("Erreur:", error);
+    }
+  };
+
   useEffect(() => {
     fetchDemandes();
+    fetchStatistics()
   }, [statusFilter]);
 
   const handleOpenDialog = () => {
@@ -166,6 +267,28 @@ export default function DemandeCotation() {
   return (
     <div>
       <h1>Gestion des Demandes de Cotation</h1>
+
+      {/* <Box sx={{ mb: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          Statistiques des demandes
+        </Typography>
+        <Grid container spacing={2}>
+          <Grid item>
+            <StatusCard status="EN_ATTENTE" count={stats.EN_ATTENTE || 0} />
+          </Grid>
+          <Grid item>
+            <StatusCard status="VALIDEE" count={stats.VALIDEE || 0} />
+          </Grid>
+          <Grid item>
+            <StatusCard status="REJETEE" count={stats.REJETEE || 0} />
+          </Grid>
+      
+        </Grid>
+      </Box> */}
+
+      <DemandStatistics stats={stats} />
+
+
 
       <Box>
         <Button variant="contained" onClick={handleOpenDialog} sx={{ mb: 2 }}>
