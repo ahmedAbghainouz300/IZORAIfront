@@ -101,7 +101,7 @@ export default function Assurance() {
     console.log(assuranceToDelete);
     try {
       await assuranceService.delete(assuranceToDelete);
-      setSuccessMessage("Assurance supprimée avec succès");
+      console.log("Assurance supprimée avec succès");
       setIsSuccess(true);
       setDeleteDialogOpen(false);
       fetchAssurances();
@@ -247,8 +247,7 @@ export default function Assurance() {
           </IconButton>
           <IconButton
             color="error"
-            onClick={() => handleDeleteClick(params.id)}
-            aria-label="delete"
+            onClick={() => handleDeleteClick(params.row.numeroContrat)}
           >
             <DeleteIcon />
           </IconButton>
@@ -277,11 +276,13 @@ export default function Assurance() {
       />
 
       {/* Dialog to view assurance details */}
-      <ViewAssuranceDialog
-        open={viewDialogOpen}
-        onClose={() => setViewDialogOpen(false)}
-        assurance={selectedRow}
-      />
+      {viewDialogOpen && (
+        <ViewAssuranceDialog
+          open={viewDialogOpen}
+          onClose={() => setViewDialogOpen(false)}
+          assuranceId={selectedRow.numeroContrat}
+        />
+      )}
 
       {/* Dialog to edit an assurance */}
       <EditAssuranceDialog

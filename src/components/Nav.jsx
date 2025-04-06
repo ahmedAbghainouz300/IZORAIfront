@@ -99,9 +99,14 @@ const NavComponent = (children) => {
               ],
             },
             {
-              key: allRoutes.marchandise,
-              icon: <ProductOutlined />,
+              key: allRoutes.marchandise.base,
+              icon: <FileOutlined />,
               label: "Marchandise",
+            },
+            {
+              key: allRoutes.demandeCotation.base,
+              icon: <FileOutlined />,
+              label: "DemandeCotation",
             },
           ]}
         />

@@ -9,20 +9,30 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import Slide from "@mui/material/Slide";
-import { Button, TextField, Box, FormControl } from "@mui/material";
+import {
+  Button,
+  TextField,
+  Box,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from "@mui/material";
 import AssuranceSelect from "../../../select/AssuranceSelect";
 import CarteGriseSelect from "../../../select/CarteGriseSelect";
 import TypeCabineSelect from "../../../select/TypeCabineSelect";
-import MuiAlert from "@mui/material/Alert";
-import Snackbar from "@mui/material/Snackbar";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const Alert = React.forwardRef(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
+// Status options based on your enum
+const statusOptions = [
+  { value: "EN_SERVICE", label: "En Service" },
+  { value: "EN_REPARATION", label: "En Réparation" },
+  { value: "EN_MISSION", label: "En Mission" },
+  { value: "HORS_SERVICE", label: "Hors Service" },
+];
 
 export default function CabineDialog({ open, onClose, onSave }) {
   const [isAssuranceModalOpen, setIsAssuranceModalOpen] = React.useState(false);
@@ -30,14 +40,12 @@ export default function CabineDialog({ open, onClose, onSave }) {
     React.useState(false);
   const [isTypeCabineModalOpen, setIsTypeCabineModalOpen] =
     React.useState(false);
-  const [validationError, setValidationError] = React.useState("");
-  const [isFailedValidation, setIsFailedValidation] = React.useState(false);
 
   const [cabineData, setCabineData] = React.useState({
     immatriculation: "",
-    typeCabine: null,
+    typeCamion: null,
     poidsMax: "",
-    consommation: "",
+    status: "", // Added status field
     assurance: null,
     carteGrise: null,
   });
@@ -88,16 +96,16 @@ export default function CabineDialog({ open, onClose, onSave }) {
       immatriculation: cabineData.immatriculation,
       typeCabine: cabineData.typeCabine,
       poidsMax: Number(cabineData.poidsMax),
-      consommation: Number(cabineData.consommation),
+      status: cabineData.status, // Include status in payload
       assurance: cabineData.assurance,
       carteGrise: cabineData.carteGrise,
     };
 
     setCabineData({
       immatriculation: "",
-      typeCabine: null,
+      typeCamion: null,
       poidsMax: "",
-      consommation: "",
+      status: "", // Reset status
       assurance: null,
       carteGrise: null,
     });
@@ -145,7 +153,7 @@ export default function CabineDialog({ open, onClose, onSave }) {
 
         <FormControl fullWidth margin="normal">
           <TextField
-            value={cabineData.typeCabine ? cabineData.typeCabine.type : ""}
+            value={cabineData.typeCamion ? cabineData.typeCamion.type : ""}
             InputProps={{
               readOnly: true,
             }}
@@ -172,15 +180,24 @@ export default function CabineDialog({ open, onClose, onSave }) {
           type="number"
         />
 
-        <TextField
-          fullWidth
-          label="Consommation"
-          name="consommation"
-          value={cabineData.consommation}
-          onChange={handleInputChange}
-          margin="normal"
-          type="number"
-        />
+        {/* Status Dropdown */}
+        <FormControl fullWidth margin="normal">
+          <InputLabel id="status-label">Statut</InputLabel>
+          <Select
+            labelId="status-label"
+            id="status"
+            name="status"
+            value={cabineData.status}
+            label="Statut"
+            onChange={handleInputChange}
+          >
+            {statusOptions.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
         <FormControl fullWidth margin="normal">
           <TextField

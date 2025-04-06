@@ -7,19 +7,37 @@ import {
   TextField,
   Button,
   FormControl,
-  IconButton,
-  CircularProgress,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import CamionSelect from "../../../../select/CamionSelect";
-import CloseIcon from "@mui/icons-material/Close";
-import { Snackbar, Alert as MuiAlert } from "@mui/material";
 
-const Alert = React.forwardRef((props, ref) => (
-  <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />
-));
+// Enum options for TypeEntretien
+const typeEntretienOptions = [
+  { value: "VIDANGE", label: "Vidange" },
+  { value: "FREINS", label: "Freins" },
+  { value: "PNEUMATIQUES", label: "Pneumatiques" },
+  { value: "SUSPENSION", label: "Suspension" },
+  { value: "FILTRES", label: "Filtres" },
+  { value: "BATTERIE", label: "Batterie" },
+  { value: "COURROIE", label: "Courroie" },
+  { value: "REFROIDISSEMENT", label: "Refroidissement" },
+  { value: "ELECTRICITE", label: "Electricité" },
+  { value: "TRANSMISSION", label: "Transmission" },
+  { value: "AUTRE", label: "Autre" },
+];
+
+// Enum options for StatusEntretien
+const statusEntretienOptions = [
+  { value: "PROGRAMME", label: "Programmé" },
+  { value: "EN_COURS", label: "En Cours" },
+  { value: "TERMINE", label: "Terminé" },
+  { value: "ANNULE", label: "Annulé" },
+];
 
 export default function EntretienDialog({ open, onClose, onCreate }) {
   const [entretienData, setEntretienData] = React.useState({
@@ -28,7 +46,7 @@ export default function EntretienDialog({ open, onClose, onCreate }) {
     description: "",
     cout: "",
     dateProchainEntretien: null,
-    statut: "",
+    statusEntretien: "",
     camion: null,
   });
   const [isCamionModalOpen, setIsCamionModalOpen] = React.useState(false);
@@ -162,20 +180,24 @@ export default function EntretienDialog({ open, onClose, onCreate }) {
             )}
           />
 
-          <TextField
-            fullWidth
-            label="Type d'Entretien*"
-            name="typeEntretien"
-            value={entretienData.typeEntretien}
-            onChange={(e) => {
-              handleInputChange(e);
-              setErrors({ ...errors, typeEntretien: false });
-            }}
-            margin="normal"
-            error={errors.typeEntretien}
-            helperText={errors.typeEntretien ? "Ce champ est obligatoire" : ""}
-            required
-          />
+          {/* Type Entretien Dropdown */}
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="type-entretien-label">Type d'Entretien</InputLabel>
+            <Select
+              labelId="type-entretien-label"
+              id="typeEntretien"
+              name="typeEntretien"
+              value={entretienData.typeEntretien}
+              label="Type d'Entretien"
+              onChange={handleInputChange}
+            >
+              {typeEntretienOptions.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
           <TextField
             fullWidth
@@ -212,20 +234,31 @@ export default function EntretienDialog({ open, onClose, onCreate }) {
             )}
           />
 
-          <TextField
-            fullWidth
-            label="Statut"
-            name="statut"
-            value={entretienData.statut}
-            onChange={handleInputChange}
-            margin="normal"
-          />
+          {/* Status Dropdown */}
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="status-label">Statut</InputLabel>
+            <Select
+              labelId="statusEntretien-label"
+              id="statusEntretien"
+              name="statusEntretien"
+              value={entretienData.statusEntretien}
+              label="statusEntretien"
+              onChange={handleInputChange}
+            >
+              {statusEntretienOptions.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
+          {/* Camion Selection Field */}
           <FormControl fullWidth margin="normal">
             <TextField
               value={
                 entretienData.camion
-                  ? `Camion: ${entretienData.camion.immatriculation}`
+                  ? "Immatriculation: " + entretienData.camion.immatriculation
                   : ""
               }
               InputProps={{ readOnly: true }}
@@ -262,17 +295,6 @@ export default function EntretienDialog({ open, onClose, onCreate }) {
         onClose={() => setIsCamionModalOpen(false)}
         onSelect={handleSelectCamion}
       />
-
-      <Snackbar
-        open={!!alert.message}
-        autoHideDuration={6000}
-        onClose={handleCloseAlert}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert onClose={handleCloseAlert} severity={alert.severity}>
-          {alert.message}
-        </Alert>
-      </Snackbar>
     </LocalizationProvider>
   );
 }

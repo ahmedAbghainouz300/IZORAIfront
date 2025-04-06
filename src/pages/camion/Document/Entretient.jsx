@@ -80,27 +80,20 @@ export default function Entretien() {
   const handleView = (row) => {
     setSelectedRow(row);
     setViewDialogOpen(true);
+    fetchEntretiens(); // Recharger les données pour s'assurer que l'ID est valide
   };
 
   const handleEdit = (row) => {
     setSelectedRow(row);
     setEditDialogOpen(true);
+    fetchEntretiens(); // Recharger les données pour s'assurer que l'ID est valide
   };
 
-  const handleDeleteClick = (id) => {
-    setEntretienToDelete(id);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    setLoading(true);
+  const handleDelete = async (id) => {
     try {
-      await entretienService.delete(entretienToDelete);
-      fetchEntretiens();
-      setAlert({
-        message: "Entretien supprimé avec succès",
-        severity: "success",
-      });
+      await entretienService.delete(id);
+      fetchEntretiens(); // Recharger les données après la suppression
+      console.log("Entretien supprimé avec succès");
     } catch (error) {
       console.error("Erreur lors de la suppression de l'entretien:", error);
       setAlert({
@@ -121,8 +114,9 @@ export default function Entretien() {
   const handleSave = async (updatedEntretien) => {
     setLoading(true);
     try {
+      console.log("Mise à jour de l'entretien:", updatedEntretien);
       await entretienService.update(updatedEntretien.id, updatedEntretien);
-      fetchEntretiens();
+      fetchEntretiens;
       setEditDialogOpen(false);
       setAlert({
         message: "Entretien mis à jour avec succès",
@@ -142,13 +136,11 @@ export default function Entretien() {
   const handleCreate = async (newEntretien) => {
     setLoading(true);
     try {
-      await entretienService.create(newEntretien);
-      fetchEntretiens();
-      setEntretienDialogOpen(false);
-      setAlert({
-        message: "Entretien ajouté avec succès",
-        severity: "success",
-      });
+      console.log("Création d'un nouvel entretien:", newEntretien);
+      const response = await entretienService.create(newEntretien);
+      setRows([...rows, response.data]);
+      fetchEntretiens;
+      console.log("Entretien créé avec succès");
     } catch (error) {
       console.error("Erreur lors de la création de l'entretien:", error);
       setAlert({
@@ -163,6 +155,7 @@ export default function Entretien() {
   const columns = [
     { field: "dateEntretien", headerName: "Date d'Entretien", flex: 1 },
     { field: "typeEntretien", headerName: "Type d'Entretien", flex: 1 },
+    { field: "statusEntretien", headerName: "status d'Entretien", flex: 1 },
     { field: "description", headerName: "Description", flex: 1 },
     { field: "cout", headerName: "Coût (€)", flex: 1, type: "number" },
     {
@@ -223,7 +216,7 @@ export default function Entretien() {
         <ViewEntretienDialog
           open={viewDialogOpen}
           onClose={() => setViewDialogOpen(false)}
-          entretien={selectedRow}
+          entretienId={selectedRow.id}
         />
 
         <EditEntretienDialog

@@ -1,40 +1,39 @@
-import axiosClient from "../axiosClient";
+  import axiosClient from "../axiosClient";
 
-const carburantService = {
-  // Récupérer toutes les entrées de carburant
-  getAll: () => axiosClient.get("/api/carburants"),
+  const carburantService = {
+    // Récupérer toutes les entrées de carburant
+    getAll: () => axiosClient.get("/api/carburants"),
 
-  // Récupérer une entrée de carburant par son ID
-  getById: (id) => axiosClient.get(`/api/carburants/${id}`),
+    // Récupérer une entrée de carburant par son ID
+    getById: (id) => axiosClient.get(`/api/carburants/${id}`),
 
-  // Créer une nouvelle entrée de carburant
-  create: (data) => axiosClient.post("/api/carburants", data),
+    // Créer une nouvelle entrée de carburant
+    create: (data) => axiosClient.post("/api/carburants", data),
+    
 
-  // Mettre à jour une entrée de carburant existante
-  update: (id, data) => axiosClient.put(`/api/carburants/${id}`, data),
+    // Mettre à jour une entrée de carburant existante
+    update: (id, data) => axiosClient.put(`/api/carburants/${id}`, data),
 
-  // Supprimer une entrée de carburant par son ID
-  delete: (id) => axiosClient.delete(`/api/carburants/${id}`),
+    // Supprimer une entrée de carburant par son ID
+    delete: (id) => axiosClient.delete(`/api/carburants/${id}`),
+    // Consommation moyenne d'un camion
+    getConsommationMoyenne: (immatriculationCamion) => axiosClient.get(`/api/carburants/consommation/${immatriculationCamion}`),
 
-  // Récupérer les carburants associés à un camion
-  getByCamion: (immatriculationCamion) =>
-    axiosClient.get(`/api/carburants/camion/${immatriculationCamion}`),
+    // Coût total du carburant
+    getCoutTotal: () => axiosClient.get("/api/carburants/cout-total"),
 
-  // Récupérer les carburants dans un intervalle de dates
-  getByDateRange: (debut, fin) =>
-    axiosClient.get("/api/carburants/date-range", {
-      params: { debut, fin },
-    }),
+    // Distance totale parcourue
+    getDistanceTotal: () => axiosClient.get("/api/carburants/distance-total"),
 
-  // Récupérer la consommation moyenne d'un camion
-  getConsommationMoyenneByCamion: (immatriculationCamion) =>
-    axiosClient.get(
-      `/api/carburants/consommation-moyenne/${immatriculationCamion}`
-    ),
+    // Quantité totale de carburant consommée
+    getQuantityTotal: () => axiosClient.get("/api/carburants/quantite-total"),
 
-  // Récupérer le coût total de carburant d'un camion
-  getCoutTotalCarburant: (immatriculationCamion) =>
-    axiosClient.get(`/api/carburants/cout-total/${immatriculationCamion}`),
-};
+    // Prix moyen du carburant
+    getPrixMoyenne: () => axiosClient.get("/api/carburants/prix-moyen"),
 
-export default carburantService;
+    // Taux de consommation moyenne
+    getTauxConsommation: () => axiosClient.get("/api/carburants/taux-consommation"),
+
+  };
+
+  export default carburantService;

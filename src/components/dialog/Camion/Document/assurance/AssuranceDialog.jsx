@@ -6,18 +6,18 @@ import {
   DialogActions,
   TextField,
   Button,
-  FormControl,
+  IconButton,
+  Avatar,
+  Typography,
   Box,
-  Snackbar,
-  Alert as MuiAlert,
+  Grid,
+  styled,
+  
 } from "@mui/material";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
-
-const Alert = React.forwardRef(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
+import { CloudUpload, AddAPhoto, Delete } from "@mui/icons-material";
 
 export default function AssuranceDialog({ open, onClose, onSave }) {
   const [assuranceData, setAssuranceData] = React.useState({
@@ -30,12 +30,23 @@ export default function AssuranceDialog({ open, onClose, onSave }) {
     primeAnnuelle: "",
     numCarteVerte: "",
     statutCarteVerte: "",
+    photoAssurance: null,
+  });
+  const [photoPreview, setPhotoPreview] = React.useState(null);
+  const [error, setError] = React.useState(null);
+
+  const VisuallyHiddenInput = styled('input')({
+    clip: 'rect(0 0 0 0)',
+    clipPath: 'inset(50%)',
+    height: 1,
+    overflow: 'hidden',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    whiteSpace: 'nowrap',
+    width: 1,
   });
 
-  const [validationError, setValidationError] = React.useState("");
-  const [isFailedValidation, setIsFailedValidation] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [error, setError] = React.useState(null);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -50,64 +61,56 @@ export default function AssuranceDialog({ open, onClose, onSave }) {
     setAssuranceData({ ...assuranceData, [name]: newValue });
   };
 
-  const validateForm = () => {
-    if (!assuranceData.numeroContrat.trim()) {
-      setValidationError("Le numéro de contrat est obligatoire");
-      setIsFailedValidation(true);
-      return false;
-    }
-    if (!assuranceData.company.trim()) {
-      setValidationError("La compagnie est obligatoire");
-      setIsFailedValidation(true);
-      return false;
-    }
-    if (!assuranceData.dateDebut) {
-      setValidationError("La date de début est obligatoire");
-      setIsFailedValidation(true);
-      return false;
-    }
-    if (!assuranceData.dateExpiration) {
-      setValidationError("La date d'expiration est obligatoire");
-      setIsFailedValidation(true);
-      return false;
-    }
-    setValidationError("");
-    return true;
-  };
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-  const handleCloseFailedValidation = (event, reason) => {
-    if (reason === "clickaway") return;
-    setIsFailedValidation(false);
+    // Validation du fichier
+    if (!file.type.match('image.*')) {
+      setError("Veuillez sélectionner un fichier image valide");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB max
+      setError("La taille de l'image ne doit pas dépasser 5MB");
+      return;
+    }
+
+    try {
+      // Créer l'aperçu
+      const previewURL = URL.createObjectURL(file);
+      setPhotoPreview(previewURL);
+
+      // Convertir en base64 pour le backend
+      const base64String = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      setAssuranceData(prev => ({
+        ...prev,
+        photoAssurance: base64String
+      }));
+      setError(null);
+    } catch (err) {
+      setError("Erreur lors du traitement de l'image");
+      console.error(err);
+    }
   };
 
   const handleSubmit = async () => {
-    if (!validateForm()) return;
-
-    setIsLoading(true);
-    try {
-      const payload = {
-        ...assuranceData,
-        montant: Number(assuranceData.montant),
-        primeAnnuelle: Number(assuranceData.primeAnnuelle),
-      };
-      await onSave(payload);
-      // Reset form on successful submission
-      setAssuranceData({
-        numeroContrat: "",
-        company: "",
-        typeCouverture: "",
-        montant: "",
-        dateDebut: null,
-        dateExpiration: null,
-        primeAnnuelle: "",
-        numCarteVerte: "",
-        statutCarteVerte: "",
-      });
-    } catch (err) {
-      setError(err.message || "Une erreur est survenue lors de la création");
-    } finally {
-      setIsLoading(false);
-    }
+    const payload = {
+      ...assuranceData,
+    };
+    console.log(payload);
+    onSave(payload);
+  };
+  
+  const handleRemovePhoto = () => {
+    setAssuranceData(prev => ({ ...prev, photoAssurance: null }));
+    setPhotoPreview(null);
   };
 
   return (
@@ -219,24 +222,91 @@ export default function AssuranceDialog({ open, onClose, onSave }) {
               type="number"
             />
 
-            <TextField
-              fullWidth
-              label="Numéro de la carte verte"
-              name="numCarteVerte"
-              value={assuranceData.numCarteVerte}
-              onChange={handleInputChange}
-              margin="normal"
-            />
+          <TextField
+            fullWidth
+            label="numero de la carte verte"
+            name="numCarteVerte"
+            value={assuranceData.numCarteVerte}
+            onChange={handleInputChange}
+            margin="normal"
+          />
+          <TextField
+            fullWidth
+            label="statut de la carte verte"
+            name="statutCarteVerte"
+            value={assuranceData.statutCarteVerte}
+            onChange={handleInputChange}
+            margin="normal"
+          />
 
-            <TextField
-              fullWidth
-              label="Statut de la carte verte"
-              name="statutCarteVerte"
-              value={assuranceData.statutCarteVerte}
-              onChange={handleInputChange}
-              margin="normal"
-            />
-          </Box>
+           <Grid item xs={12}>
+             <Box
+               sx={{
+                 border: '1px dashed',
+                 borderColor: 'divider',
+                 borderRadius: 2,
+                 p: 3,
+                 textAlign: 'center',
+                 backgroundColor: 'action.hover',
+                 '&:hover': {
+                   backgroundColor: 'action.selected',
+                 }
+               }}
+             >
+               {photoPreview ? (
+                 <Box sx={{ position: 'relative' }}>
+                   <Avatar
+                     src={photoPreview}
+                     variant="rounded"
+                     sx={{
+                       width: '100%',
+                       height: 200,
+                       mb: 2
+                     }}
+                   />
+                   <IconButton
+                     onClick={handleRemovePhoto}
+                     sx={{
+                       position: 'absolute',
+                       top: 8,
+                       right: 8,
+                       backgroundColor: 'error.main',
+                       color: 'white',
+                       '&:hover': {
+                         backgroundColor: 'error.dark',
+                       }
+                     }}
+                   >
+                     <Delete />
+                   </IconButton>
+                 </Box>
+               ) : (
+                 <>
+                   <CloudUpload fontSize="large" color="action" sx={{ mb: 1 }} />
+                   <Typography variant="subtitle1" gutterBottom>
+                     Glissez-déposez la photo de la carte grise ou
+                   </Typography>
+                   <Button
+                     component="label"
+                     variant="contained"
+                     startIcon={<AddAPhoto />}
+                     sx={{ mt: 1 }}
+                   >
+                     Sélectionner une image
+                     <VisuallyHiddenInput 
+                       type="file" 
+                       accept="image/*" 
+                       onChange={handlePhotoUpload} 
+                     />
+                   </Button>
+                   <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+                     Formats supportés: JPEG, PNG (Max. 5MB)
+                   </Typography>
+                 </>
+               )}
+             </Box>
+           </Grid>
+
         </DialogContent>
         <DialogActions>
           <Button onClick={onClose} disabled={isLoading}>

@@ -1,209 +1,184 @@
-import * as React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
-  DialogTitle,
-  DialogContent,
   DialogActions,
+  DialogContent,
+  DialogTitle,
   TextField,
   Button,
-  Box,
-  FormControl,
-  IconButton,
-  Snackbar,
-  Alert as MuiAlert,
-  CircularProgress,
 } from "@mui/material";
-import CategorieSelect from "../../../components/select/marchandise/CategorieSelect";
-import CloseIcon from "@mui/icons-material/Close";
+import { useSnackbar } from "notistack";
+import marchandiseService from "../../../service/marchandise/marchandiseService";
+import SelectDialogCategorie from "./categorie/SelectDialogCategorie";
 
-const Alert = React.forwardRef((props, ref) => (
-  <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />
-));
-
-export default function MarchandiseDialog({ open, onClose, onCreate }) {
-  const [isCategorieModalOpen, setIsCategorieModalOpen] = React.useState(false);
-  const [marchandiseData, setMarchandiseData] = React.useState({
+export default function MarchandiseDialog({
+  open,
+  onClose,
+  marchandise,
+  onSave,
+}) {
+  const [formData, setFormData] = useState({
     libelle: "",
     description: "",
     codeMarchandise: "",
     categorie: null,
   });
-  const [validationErrors, setValidationErrors] = React.useState({
-    libelle: false,
-    codeMarchandise: false,
-  });
-  const [alert, setAlert] = React.useState({
-    message: null,
-    severity: "success",
-  });
-  const [loading, setLoading] = React.useState(false);
+  const [categorieDialogOpen, setCategorieDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
 
-  const validateForm = () => {
-    const errors = {
-      libelle: !marchandiseData.libelle.trim(),
-      codeMarchandise: !marchandiseData.codeMarchandise.trim(),
-    };
-    setValidationErrors(errors);
-    return !errors.libelle && !errors.codeMarchandise;
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setMarchandiseData({ ...marchandiseData, [name]: value });
-    if (validationErrors[name] && value.trim()) {
-      setValidationErrors({ ...validationErrors, [name]: false });
+  // Initialize form when opening or when marchandise changes
+  useEffect(() => {
+    if (open) {
+      if (marchandise) {
+        setFormData({
+          libelle: marchandise.libelle || "",
+          description: marchandise.description || "",
+          codeMarchandise: marchandise.codeMarchandise || "",
+          categorie: marchandise.categorie || null,
+        });
+      } else {
+        setFormData({
+          libelle: "",
+          description: "",
+          codeMarchandise: "",
+          categorie: null,
+        });
+      }
     }
-  };
-
-  const handleSelectCategorie = (categorie) => {
-    setMarchandiseData({ ...marchandiseData, categorie });
-    setIsCategorieModalOpen(false);
-  };
-
-  const handleCloseAlert = () => {
-    setAlert({ message: null, severity: "success" });
-  };
+  }, [open, marchandise]);
 
   const handleSubmit = async () => {
-    if (!validateForm()) return;
+    if (!formData.libelle.trim()) {
+      enqueueSnackbar("Le libellé est obligatoire", { variant: "warning" });
+      return;
+    }
+
+    if (!formData.categorie) {
+      enqueueSnackbar("Veuillez sélectionner une catégorie", {
+        variant: "warning",
+      });
+      return;
+    }
 
     setLoading(true);
     try {
-      const payload = {
-        libelle: marchandiseData.libelle,
-        description: marchandiseData.description,
-        codeMarchandise: marchandiseData.codeMarchandise,
-        categorie: marchandiseData.categorie,
+      const marchandiseData = {
+        libelle: formData.libelle.trim(),
+        description: formData.description.trim(),
+        codeMarchandise: formData.codeMarchandise.trim(),
+        categorie: { id: formData.categorie.id },
       };
 
-      await onCreate(payload);
-      setMarchandiseData({
-        libelle: "",
-        description: "",
-        codeMarchandise: "",
-        categorie: null,
-      });
-      setAlert({
-        message: "Marchandise ajoutée avec succès",
-        severity: "success",
-      });
-      onClose();
+      if (marchandise) {
+        // Update existing marchandise
+        await marchandiseService.update(marchandise.id, marchandiseData);
+        enqueueSnackbar("Marchandise mise à jour avec succès", {
+          variant: "success",
+        });
+      } else {
+        // Create new marchandise
+        await marchandiseService.create(marchandiseData);
+        enqueueSnackbar("Marchandise créée avec succès", {
+          variant: "success",
+        });
+      }
+
+      onSave(); // Notify parent to refresh data
+      onClose(); // Close dialog
     } catch (error) {
-      setAlert({
-        message: "Erreur lors de l'ajout de la marchandise",
-        severity: "error",
-      });
+      console.error("Error saving marchandise:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        `Erreur lors de ${marchandise ? "la modification" : "la création"}`;
+      enqueueSnackbar(errorMessage, { variant: "error" });
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>
-        Ajout d'une Marchandise
-        <IconButton
-          aria-label="close"
-          onClick={onClose}
-          sx={{
-            position: "absolute",
-            right: 8,
-            top: 8,
-            color: (theme) => theme.palette.grey[500],
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent dividers>
-        <Box sx={{ mt: 2 }}>
-          <TextField
-            fullWidth
-            label="Libellé*"
-            name="libelle"
-            value={marchandiseData.libelle}
-            onChange={handleInputChange}
-            margin="normal"
-            error={validationErrors.libelle}
-            helperText={
-              validationErrors.libelle ? "Ce champ est obligatoire" : ""
-            }
-            required
-          />
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
+  return (
+    <>
+      <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+        <DialogTitle>
+          {marchandise
+            ? "Modifier la marchandise"
+            : "Ajouter une nouvelle marchandise"}
+        </DialogTitle>
+        <DialogContent>
           <TextField
+            name="libelle"
+            label="Libellé *"
             fullWidth
-            label="Description"
+            value={formData.libelle}
+            onChange={handleChange}
+            margin="normal"
+            required
+            autoFocus
+            disabled={loading}
+          />
+          <TextField
             name="description"
-            value={marchandiseData.description}
-            onChange={handleInputChange}
+            label="Description"
+            fullWidth
+            value={formData.description}
+            onChange={handleChange}
             margin="normal"
             multiline
-            rows={4}
+            rows={3}
+            disabled={loading}
           />
-
           <TextField
-            fullWidth
-            label="Code Marchandise*"
             name="codeMarchandise"
-            value={marchandiseData.codeMarchandise}
-            onChange={handleInputChange}
+            label="Code Marchandise"
+            fullWidth
+            value={formData.codeMarchandise}
+            onChange={handleChange}
             margin="normal"
-            error={validationErrors.codeMarchandise}
-            helperText={
-              validationErrors.codeMarchandise ? "Ce champ est obligatoire" : ""
-            }
-            required
+            disabled={loading}
           />
+          <TextField
+            label="Catégorie *"
+            fullWidth
+            value={formData.categorie?.libelle || ""}
+            onClick={() => setCategorieDialogOpen(true)}
+            InputProps={{ readOnly: true }}
+            margin="normal"
+            required
+            disabled={loading}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onClose} color="secondary" disabled={loading}>
+            Annuler
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            color="primary"
+            variant="contained"
+            disabled={loading}
+          >
+            {loading ? "En cours..." : marchandise ? "Mettre à jour" : "Créer"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-          <FormControl fullWidth margin="normal">
-            <TextField
-              value={marchandiseData.categorie?.categorie || ""}
-              InputProps={{ readOnly: true }}
-              onClick={() => setIsCategorieModalOpen(true)}
-              fullWidth
-              label="Catégorie"
-            />
-            <Button
-              variant="outlined"
-              onClick={() => setIsCategorieModalOpen(true)}
-              style={{ marginTop: "8px" }}
-            >
-              Sélectionner une Catégorie
-            </Button>
-          </FormControl>
-        </Box>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} color="secondary" variant="outlined">
-          Annuler
-        </Button>
-        <Button
-          onClick={handleSubmit}
-          color="primary"
-          variant="contained"
-          disabled={loading}
-        >
-          {loading ? <CircularProgress size={24} /> : "Enregistrer"}
-        </Button>
-      </DialogActions>
-
-      <CategorieSelect
-        open={isCategorieModalOpen}
-        onClose={() => setIsCategorieModalOpen(false)}
-        onSelectCategorie={handleSelectCategorie}
+      <SelectDialogCategorie
+        open={categorieDialogOpen}
+        onClose={() => setCategorieDialogOpen(false)}
+        onSelect={(categorie) => {
+          setFormData((prev) => ({ ...prev, categorie }));
+          setCategorieDialogOpen(false);
+        }}
       />
-
-      <Snackbar
-        open={!!alert.message}
-        autoHideDuration={6000}
-        onClose={handleCloseAlert}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert severity={alert.severity} onClose={handleCloseAlert}>
-          {alert.message}
-        </Alert>
-      </Snackbar>
-    </Dialog>
+    </>
   );
 }

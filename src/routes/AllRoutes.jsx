@@ -31,6 +31,12 @@ const AllRoutes = {
     carburant: "/document/carburant",
     carteGrise: "/document/carteGrise",
   },
+  marchandise: {
+    base: "/marchandise",
+  },
+  demandeCotation: {
+    base: "/demandeCotation",
+  },
 };
 
 export default AllRoutes;

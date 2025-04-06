@@ -23,7 +23,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Button from "@mui/material/Button";
-
+import Typography from "@mui/material/Typography";
 // Custom Toolbar with only the CSV/Excel Export Button
 function CustomToolbar() {
   return (
@@ -32,6 +32,8 @@ function CustomToolbar() {
     </GridToolbarContainer>
   );
 }
+
+
 
 export default function Carburant() {
   const [carburantDialogOpen, setCarburantDialogOpen] = useState(false);
@@ -46,11 +48,42 @@ export default function Carburant() {
   const [isFailedCarburantCreate, setIsFailedCarburantCreate] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [carburantToDelete, setCarburantToDelete] = useState(null);
+  const [stats, setStats] = useState({
+    coutTotal: 0,
+    distanceTotal: 0,
+    quantityTotal: 0,
+    prixMoyen: 0,
+    tauxConsommation: 0
+  });
 
   // Load data when the component mounts
   useEffect(() => {
     fetchCarburants();
+    fetchStatistics(); // Add this line
+
   }, []);
+
+  const fetchStatistics = async () => {
+    try {
+      const responses = await Promise.all([
+        carburantService.getCoutTotal(),
+        carburantService.getDistanceTotal(),
+        carburantService.getQuantityTotal(),
+        carburantService.getPrixMoyenne(),
+        carburantService.getTauxConsommation()
+      ]);
+  
+      setStats({
+        coutTotal: responses[0].data,
+        distanceTotal: responses[1].data,
+        quantityTotal: responses[2].data,
+        prixMoyen: responses[3].data,
+        tauxConsommation: responses[4].data
+      });
+    } catch (error) {
+      console.error("Error fetching statistics:", error);
+    }
+  };
 
   // Fetch carburants from the backend
   const fetchCarburants = async () => {
@@ -68,7 +101,11 @@ export default function Carburant() {
   const handleOpenCarburantDialog = () => setCarburantDialogOpen(true);
 
   // Close the dialog to add a carburant
-  const handleCloseCarburantDialog = () => setCarburantDialogOpen(false);
+  const handleCloseCarburantDialog = () => {
+    setCarburantDialogOpen(false);
+    fetchCarburants();
+  }
+
 
   // Handle actions
   const handleView = (row) => {
@@ -110,28 +147,13 @@ export default function Carburant() {
   const handleSave = async (updatedCarburant) => {
     try {
       await carburantService.update(updatedCarburant.id, updatedCarburant);
-      setRows(
-        rows.map((row) =>
-          row.id === updatedCarburant.id ? updatedCarburant : row
-        )
-      );
+      console.log(updatedCarburant);
+      fetchCarburants();
       setEditDialogOpen(false);
       setIsSuccess(true);
     } catch (error) {
       console.error("Erreur lors de la mise à jour du carburant:", error);
       setIsFailedCarburantUpdate(true);
-    }
-  };
-
-  const handleCreate = async (newCarburant) => {
-    try {
-      const response = await carburantService.create(newCarburant);
-      setRows([...rows, response.data]);
-      setCarburantDialogOpen(false);
-      setIsSuccess(true);
-    } catch (error) {
-      console.error("Erreur lors de la création du carburant:", error);
-      setIsFailedCarburantCreate(true);
     }
   };
 
@@ -176,7 +198,7 @@ export default function Carburant() {
   const columns = [
     { field: "dateRemplissage", headerName: "Date de Remplissage", flex: 1.2 },
     {
-      field: "quantity",
+      field: "quantiteLitres",
       headerName: "Quantité (L)",
       flex: 0.8,
       type: "number",
@@ -194,11 +216,40 @@ export default function Carburant() {
       type: "number",
     },
     {
+      field: "montantActuel",
+      headerName: "montantActuel",
+      flex: 1,
+      type: "number",
+    },
+    {
+      field: "consommation",
+      headerName: "consommation",
+      flex: 1,
+      type: "number",
+    },
+    {
       field: "typeCarburant",
       headerName: "Type de Carburant",
       flex: 1,
       valueGetter: (params) => {
         return params ? params.type : "N/A";
+      },
+    }
+    ,
+    {
+      field: "station",
+      headerName: "station",
+      flex: 1,
+      valueGetter: (params) => {
+        return params ? params.name : "N/A";
+      },
+    },
+    {
+      field: "camion",
+      headerName: "camion",
+      flex: 1,
+      valueGetter: (params) => {
+        return params ? params.immatriculation : "N/A";
       },
     },
     {
@@ -227,6 +278,67 @@ export default function Carburant() {
     },
   ];
 
+  const StatsDisplay = () => (
+    <Box sx={{
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: 2,
+      mb: 4,
+      p: 2,
+      backgroundColor: '#f5f5f5',
+      borderRadius: 1,
+      boxShadow: 1
+    }}>
+      <StatCard 
+        title="Coût Total" 
+        value={`${stats.coutTotal.toFixed(2)} €`} 
+        icon="€"
+      />
+      <StatCard 
+        title="Distance Totale" 
+        value={`${stats.distanceTotal.toFixed(2)} km`} 
+        icon="🚛"
+      />
+      <StatCard 
+        title="Quantité Totale" 
+        value={`${stats.quantityTotal.toFixed(2)} L`} 
+        icon="⛽"
+      />
+      <StatCard 
+        title="Prix Moyen" 
+        value={`${stats.prixMoyen.toFixed(2)} €/L`} 
+        icon="💲"
+      />
+      <StatCard 
+        title="Consommation Moyenne" 
+        value={`${stats.tauxConsommation.toFixed(2)} L/100km`} 
+        icon="📊"
+      />
+    </Box>
+  );
+  
+  const StatCard = ({ title, value, icon }) => (
+    <Box sx={{
+      flex: 1,
+      minWidth: 150,
+      p: 2,
+      backgroundColor: 'white',
+      borderRadius: 1,
+      boxShadow: 1,
+      textAlign: 'center'
+    }}>
+      <Typography variant="subtitle2" color="text.secondary">
+        {title}
+      </Typography>
+      <Typography variant="h5" sx={{ mt: 1 }}>
+        {value}
+      </Typography>
+      <Typography variant="h6" sx={{ mt: 1 }}>
+        {icon}
+      </Typography>
+    </Box>
+  );
+
   return (
     <Box>
       <div className="buttons">
@@ -234,13 +346,15 @@ export default function Carburant() {
           <p>Nouveau Carburant</p>
         </button>
       </div>
+      
+    {/* Add this line */}
+    <StatsDisplay />
 
       {/* Dialog to add a carburant */}
       {carburantDialogOpen && (
         <CarburantDialog
           open={carburantDialogOpen}
           onClose={handleCloseCarburantDialog}
-          onCreate={handleCreate}
         />
       )}
 
@@ -249,7 +363,7 @@ export default function Carburant() {
         <ViewCarburantDialog
           open={viewDialogOpen}
           onClose={() => setViewDialogOpen(false)}
-          carburant={selectedRow}
+          carburantId={selectedRow.id}
         />
       )}
 
@@ -259,7 +373,7 @@ export default function Carburant() {
           open={editDialogOpen}
           onClose={() => setEditDialogOpen(false)}
           carburant={selectedRow}
-          onSave={handleSave}
+          onUpdate={handleSave}
         />
       )}
 

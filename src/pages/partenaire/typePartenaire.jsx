@@ -101,7 +101,6 @@ export default function TypePartenaire() {
       .getAll()
       .then((response) => {
         setRows(response.data);
-        setLoading(false);
       })
       .catch((error) => {
         console.error("Erreur:", error);

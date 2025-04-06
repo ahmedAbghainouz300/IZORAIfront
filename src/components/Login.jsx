@@ -2,9 +2,12 @@ import * as React from "react";
 import { AppProvider } from "@toolpad/core/AppProvider";
 import { useTheme } from "@mui/material/styles";
 import "../styles/login.css"; // Import your CSS file
+import authService from "../service/auth/authService";
 
 const CredentialsSignInPage = () => {
   const theme = useTheme();
+  const [error, setError] = React.useState("");
+
 
   // Handle form submission
   const handleSignIn = (event) => {
@@ -12,12 +15,21 @@ const CredentialsSignInPage = () => {
 
     // Get form data
     const formData = new FormData(event.target);
-    const email = formData.get("email");
+    const username = formData.get("username");
     const password = formData.get("password");
+
+    try{
+      const token = authService.login(username,password);
+      console.log("token",token)
+
+    }catch( err){
+      setError(err);
+        console.log("Erreur : ",err)
+    }
 
     // Display alert with email and password
     alert(
-      `Signing in with credentials:\nEmail: ${email}\nPassword: ${password}`
+      `Signing in with credentials:\nusername: ${username}\nPassword: ${password}`
     );
   };
 
@@ -34,10 +46,10 @@ const CredentialsSignInPage = () => {
             <input
               required
               className="input"
-              type="email"
-              name="email"
-              id="email"
-              placeholder="E-mail"
+              type="username"
+              name="username"
+              id="username"
+              placeholder="username"
             />
             <input
               required

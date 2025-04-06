@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import * as React from "react";
 import {
   Dialog,
   DialogTitle,
@@ -6,18 +6,32 @@ import {
   DialogActions,
   TextField,
   Button,
-  FormControl,
   Box,
+  Card,
+  CardMedia,
+  Grid,
+  IconButton,
+  Typography,
   CircularProgress,
-  Snackbar,
-  Alert as MuiAlert,
+  Alert,
+  Avatar,
 } from "@mui/material";
-import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
+import { CloudUpload, Delete, AddAPhoto } from "@mui/icons-material";
+import { styled } from "@mui/material/styles";
 
-const Alert = React.forwardRef(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+const VisuallyHiddenInput = styled("input")({
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  height: 1,
+  overflow: "hidden",
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  whiteSpace: "nowrap",
+  width: 1,
 });
 
 export default function EditAssuranceDialog({
@@ -25,130 +39,188 @@ export default function EditAssuranceDialog({
   onClose,
   assurance,
   onSave,
+  onSuccess,
 }) {
-  const [formData, setFormData] = useState(assurance || {});
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [validationError, setValidationError] = useState("");
-  const [showValidationError, setShowValidationError] = useState(false);
+  const [formData, setFormData] = React.useState({
+    numeroContrat: "",
+    company: "",
+    typeCouverture: "",
+    montant: "",
+    dateDebut: null,
+    dateExpiration: null,
+    primeAnnuelle: "",
+    numCarteVerte: "",
+    statutCarteVerte: "",
+    photoAssurance: null,
+  });
+  const [photoPreview, setPhotoPreview] = React.useState(null);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState(null);
 
-  useEffect(() => {
-    if (open) {
-      setFormData(assurance || {});
-      setValidationError("");
-      setShowValidationError(false);
+  // Initialize form when opening or when assurance changes
+  React.useEffect(() => {
+    if (open && assurance) {
+      setFormData({
+        ...assurance,
+        dateDebut: assurance.dateDebut ? new Date(assurance.dateDebut) : null,
+        dateExpiration: assurance.dateExpiration
+          ? new Date(assurance.dateExpiration)
+          : null,
+      });
+
+      if (assurance.photoAssurance) {
+        // If photo is stored as base64, set it directly
+        if (typeof assurance.photoAssurance === "string") {
+          setPhotoPreview(`data:image/jpeg;base64,${assurance.photoAssurance}`);
+        }
+      }
     }
   }, [open, assurance]);
 
-  const handleChange = (e) => {
+  const handleRemovePhoto = () => {
+    setFormData((prev) => ({ ...prev, photoAssurance: null }));
+    setPhotoPreview(null);
+  };
+
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-    if (name === "numeroContrat" && validationError) {
-      setValidationError("");
-    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleDateChange = (name) => (newValue) => {
-    setFormData({ ...formData, [name]: newValue });
+    setFormData((prev) => ({ ...prev, [name]: newValue }));
   };
 
-  const validateForm = () => {
-    if (!String(formData.numeroContrat)?.trim()) {
-      setValidationError("Le numéro de contrat est obligatoire");
-      setShowValidationError(true);
-      return false;
-    }
-    if (!formData.company?.trim()) {
-      setValidationError("La compagnie est obligatoire");
-      setShowValidationError(true);
-      return false;
-    }
-    if (!formData.dateDebut) {
-      setValidationError("La date de début est obligatoire");
-      setShowValidationError(true);
-      return false;
-    }
-    if (!formData.dateExpiration) {
-      setValidationError("La date d'expiration est obligatoire");
-      setShowValidationError(true);
-      return false;
-    }
-    setValidationError("");
-    return true;
-  };
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-  const handleCloseValidationError = () => {
-    setShowValidationError(false);
+    // Validation du fichier
+    if (!file.type.match("image.*")) {
+      setError("Veuillez sélectionner un fichier image valide");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      // 5MB max
+      setError("La taille de l'image ne doit pas dépasser 5MB");
+      return;
+    }
+
+    try {
+      // Créer l'aperçu
+      const previewURL = URL.createObjectURL(file);
+      setPhotoPreview(previewURL);
+
+      // Convertir en base64 pour le backend
+      const base64String = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(",")[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      setFormData((prev) => ({
+        ...prev,
+        photoAssurance: base64String,
+      }));
+      setError(null);
+    } catch (err) {
+      setError("Erreur lors du traitement de l'image");
+      console.error(err);
+    }
   };
 
   const handleSubmit = async () => {
-    if (!validateForm()) return;
+    setIsLoading(true);
+    setError(null);
 
     try {
-      setLoading(true);
+      // Validation des champs requis
+      if (!formData.numeroContrat || !formData.company) {
+        throw new Error(
+          "Les champs numéro de contrat et compagnie sont obligatoires"
+        );
+      }
+
       const payload = {
         ...formData,
-        montant: Number(formData.montant),
-        primeAnnuelle: Number(formData.primeAnnuelle),
+        dateDebut: formData.dateDebut?.toISOString(),
+        dateExpiration: formData.dateExpiration?.toISOString(),
       };
+
       await onSave(payload);
+
+      if (typeof onSuccess === "function") {
+        onSuccess();
+      }
+
       onClose();
     } catch (err) {
-      setError(err.message || "Une erreur est survenue lors de la mise à jour");
+      console.error("Erreur:", err);
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Erreur lors de la modification"
+      );
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-        <DialogTitle>Modifier l'Assurance</DialogTitle>
-        <DialogContent>
-          {loading ? (
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                height: "200px",
-              }}
-            >
-              <CircularProgress />
-            </Box>
-          ) : (
-            <Box sx={{ p: 2 }}>
+      <Dialog
+        open={open}
+        onClose={onClose}
+        fullWidth
+        maxWidth="md"
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            p: 2,
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            fontSize: "1.5rem",
+            fontWeight: "bold",
+            textAlign: "center",
+            color: "primary.main",
+          }}
+        >
+          Modifier l'Assurance
+        </DialogTitle>
+
+        <DialogContent dividers>
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
+            </Alert>
+          )}
+
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="Numéro de contrat*"
+                label="Numéro de contrat"
                 name="numeroContrat"
                 value={formData.numeroContrat || ""}
-                onChange={handleChange}
+                onChange={handleInputChange}
                 margin="normal"
-                error={
-                  !!validationError && !String(formData.numeroContrat)?.trim()
-                }
-                helperText={
-                  validationError && !String(formData.numeroContrat)?.trim()
-                    ? validationError
-                    : ""
-                }
+                variant="outlined"
                 required
               />
 
               <TextField
                 fullWidth
-                label="Compagnie*"
+                label="Compagnie"
                 name="company"
                 value={formData.company || ""}
-                onChange={handleChange}
+                onChange={handleInputChange}
                 margin="normal"
-                error={!!validationError && !formData.company?.trim()}
-                helperText={
-                  validationError && !formData.company?.trim()
-                    ? validationError
-                    : ""
-                }
+                variant="outlined"
                 required
               />
 
@@ -157,8 +229,9 @@ export default function EditAssuranceDialog({
                 label="Type de couverture"
                 name="typeCouverture"
                 value={formData.typeCouverture || ""}
-                onChange={handleChange}
+                onChange={handleInputChange}
                 margin="normal"
+                variant="outlined"
               />
 
               <TextField
@@ -166,61 +239,23 @@ export default function EditAssuranceDialog({
                 label="Montant"
                 name="montant"
                 value={formData.montant || ""}
-                onChange={handleChange}
+                onChange={handleInputChange}
                 margin="normal"
                 type="number"
+                variant="outlined"
               />
+            </Grid>
 
-              <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-                <MobileDatePicker
-                  label="Date début*"
-                  value={formData.dateDebut || null}
-                  onChange={handleDateChange("dateDebut")}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      fullWidth
-                      margin="normal"
-                      error={!!validationError && !formData.dateDebut}
-                      helperText={
-                        validationError && !formData.dateDebut
-                          ? validationError
-                          : ""
-                      }
-                      required
-                    />
-                  )}
-                />
-
-                <MobileDatePicker
-                  label="Date expiration*"
-                  value={formData.dateExpiration || null}
-                  onChange={handleDateChange("dateExpiration")}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      fullWidth
-                      margin="normal"
-                      error={!!validationError && !formData.dateExpiration}
-                      helperText={
-                        validationError && !formData.dateExpiration
-                          ? validationError
-                          : ""
-                      }
-                      required
-                    />
-                  )}
-                />
-              </Box>
-
+            <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 label="Prime annuelle"
                 name="primeAnnuelle"
                 value={formData.primeAnnuelle || ""}
-                onChange={handleChange}
+                onChange={handleInputChange}
                 margin="normal"
                 type="number"
+                variant="outlined"
               />
 
               <TextField
@@ -228,8 +263,9 @@ export default function EditAssuranceDialog({
                 label="Numéro de la carte verte"
                 name="numCarteVerte"
                 value={formData.numCarteVerte || ""}
-                onChange={handleChange}
+                onChange={handleInputChange}
                 margin="normal"
+                variant="outlined"
               />
 
               <TextField
@@ -237,42 +273,135 @@ export default function EditAssuranceDialog({
                 label="Statut de la carte verte"
                 name="statutCarteVerte"
                 value={formData.statutCarteVerte || ""}
-                onChange={handleChange}
+                onChange={handleInputChange}
                 margin="normal"
+                variant="outlined"
               />
-            </Box>
-          )}
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <DatePicker
+                label="Date de début"
+                value={formData.dateDebut}
+                onChange={handleDateChange("dateDebut")}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <DatePicker
+                label="Date d'expiration"
+                value={formData.dateExpiration}
+                onChange={handleDateChange("dateExpiration")}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <Box
+                sx={{
+                  border: "1px dashed",
+                  borderColor: "divider",
+                  borderRadius: 2,
+                  p: 3,
+                  textAlign: "center",
+                  backgroundColor: "action.hover",
+                  "&:hover": {
+                    backgroundColor: "action.selected",
+                  },
+                }}
+              >
+                {photoPreview ? (
+                  <Box sx={{ position: "relative" }}>
+                    <Avatar
+                      src={photoPreview}
+                      variant="rounded"
+                      sx={{
+                        width: "100%",
+                        height: 200,
+                        mb: 2,
+                      }}
+                    />
+                    <IconButton
+                      onClick={handleRemovePhoto}
+                      sx={{
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        backgroundColor: "error.main",
+                        color: "white",
+                        "&:hover": {
+                          backgroundColor: "error.dark",
+                        },
+                      }}
+                    >
+                      <Delete />
+                    </IconButton>
+                  </Box>
+                ) : (
+                  <>
+                    <CloudUpload
+                      fontSize="large"
+                      color="action"
+                      sx={{ mb: 1 }}
+                    />
+                    <Typography variant="subtitle1" gutterBottom>
+                      Glissez-déposez la photo de l'assurance ou
+                    </Typography>
+                    <Button
+                      component="label"
+                      variant="contained"
+                      startIcon={<AddAPhoto />}
+                      sx={{ mt: 1 }}
+                    >
+                      Sélectionner une image
+                      <VisuallyHiddenInput
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoUpload}
+                      />
+                    </Button>
+                    <Typography
+                      variant="caption"
+                      display="block"
+                      sx={{ mt: 1 }}
+                    >
+                      Formats supportés: JPEG, PNG (Max. 5MB)
+                    </Typography>
+                  </>
+                )}
+              </Box>
+            </Grid>
+          </Grid>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={onClose} disabled={loading}>
+
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={onClose} variant="outlined" disabled={isLoading}>
             Annuler
           </Button>
-          <Button onClick={handleSubmit} color="primary" disabled={loading}>
-            {loading ? "Enregistrement..." : "Enregistrer"}
+          <Button
+            onClick={handleSubmit}
+            variant="contained"
+            disabled={isLoading}
+            startIcon={isLoading ? <CircularProgress size={20} /> : null}
+          >
+            {isLoading ? "Enregistrement..." : "Enregistrer les modifications"}
           </Button>
         </DialogActions>
-
-        {/* Validation Error Snackbar */}
-        <Snackbar
-          open={showValidationError}
-          autoHideDuration={6000}
-          onClose={handleCloseValidationError}
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        >
-          <Alert severity="error">
-            Veuillez remplir tous les champs obligatoires
-          </Alert>
-        </Snackbar>
-
-        {/* Error Snackbar */}
-        <Snackbar
-          open={!!error}
-          autoHideDuration={6000}
-          onClose={() => setError(null)}
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        >
-          <Alert severity="error">{error}</Alert>
-        </Snackbar>
       </Dialog>
     </LocalizationProvider>
   );

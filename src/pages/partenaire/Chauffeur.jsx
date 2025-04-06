@@ -6,8 +6,8 @@ import {
 } from "@mui/x-data-grid";
 import ChauffeurDialog from "../../components/dialog/partenaire/chauffeur/ChauffeurDialog";
 import chauffeurService from "../../service/partenaire/chaufeurService";
-import VoirChauffeurDialog from "../../components/dialog/partenaire/chauffeur/VoirChauffeurDialog";
-import ModifierChauffeurDialog from "../../components/dialog/partenaire/chauffeur/ModifierChauffeurDialog.jsx";
+import VoirChauffeurDialog from "../../components/dialog/partenaire/chauffeur/VoirChauffeurDialog"; // Nouveau dialogue pour voir les détails
+import ModifierChauffeurDialog from "../../components/dialog/partenaire/chauffeur/ModifierChauffeurDialog.jsx"; // Nouveau dialogue pour modifier les détails
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -19,33 +19,16 @@ import {
   Typography,
   Grid,
   CircularProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Card,
-  CardContent,
-  Snackbar,
-  Alert as MuiAlert,
-  DialogContentText,
-} from "@mui/material";
+  CardContent, // Add Badge import here
+} from "@mui/material"; // Installer react-countup
 import CountUp from "react-countup";
-import AvailableDriversDialog from "../../components/dialog/partenaire/chauffeur/AvailableDriversDialog";
-import ExpiredPermisDialog from "../../components/dialog/partenaire/chauffeur/ExpiredPermisDialog";
+import AvailableDriversDialog from "../../components/dialog/partenaire/chauffeur/AvailableDriversDialog"; // Nouveau dialogue pour les chauffeurs disponibles
 
-const Alert = React.forwardRef((props, ref) => (
-  <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />
-));
-
+import ExpiredPermisDialog from "../../components/dialog/partenaire/chauffeur/ExpiredPermisDialog"; // Nouveau dialogue pour les chauffeurs avec permis expiré
+// Nouveau composant pour les statistiques
 const StatsCard = ({ title, value, color }) => (
-  <Card
-    sx={{
-      minWidth: 200,
-      backgroundColor: color,
-      color: "white",
-      width: "400px",
-    }}
-  >
+  <Card sx={{ minWidth: 200, backgroundColor: color, color: "white" }}>
     <CardContent>
       <Typography variant="h6" component="div">
         {title}
@@ -137,6 +120,9 @@ export default function Chauffeur() {
     fetchExpiredPermisDrivers();
   }, []);
 
+  // Fetch Available Drivers
+
+  // Fetch Drivers with Expired Insurance
   const fetchExpiredPermisDrivers = () => {
     chauffeurService
       .getWithExpiredPermis()
@@ -152,23 +138,11 @@ export default function Chauffeur() {
   };
 
   const fetchChauffeurs = () => {
-    setLoading(true);
     chauffeurService
       .getAll()
-      .then((response) => {
-        setRows(response.data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Erreur:", error);
-        setAlert({
-          message: "Erreur lors du chargement des chauffeurs",
-          severity: "error",
-        });
-        setLoading(false);
-      });
+      .then((response) => setRows(response.data))
+      .catch((error) => console.error("Erreur:", error));
   };
-
   const fetchStats = () => {
     setStats((prev) => ({ ...prev, loading: true }));
 
@@ -322,41 +296,12 @@ export default function Chauffeur() {
       </Box>
 
       <Box>
-        {dialogOpen && (
-          <ChauffeurDialog
-            open={dialogOpen}
-            onClose={() => setDialogOpen(false)}
-            onAdd={handleAddSuccess}
-          />
-        )}
-        {voirDialogOpen && (
-          <VoirChauffeurDialog
-            open={voirDialogOpen}
-            onClose={() => setVoirDialogOpen(false)}
-            chauffeur={selectedChauffeur}
-          />
-        )}
-        {modifierDialogOpen && (
-          <ModifierChauffeurDialog
-            open={modifierDialogOpen}
-            onClose={() => setModifierDialogOpen(false)}
-            chauffeur={selectedChauffeur}
-            onUpdate={handleUpdateSuccess}
-          />
-        )}
-
         <DataGrid
           rows={rows}
-          columns={columns(
-            handleDeleteClick,
-            handleVoir,
-            handleModifier,
-            loading
-          )}
-          loading={loading}
+          columns={columns(handleDelete, handleVoir, handleModifier)}
           getRowId={(row) => row.idPartenaire}
           initialState={{
-            pagination: { paginationModel: { pageSize: 5 } },
+            pagination: { paginationModel: { pageSize: 4 } },
           }}
           pageSizeOptions={[5, 10, 20]}
           checkboxSelection
@@ -370,48 +315,33 @@ export default function Chauffeur() {
         />
       </Box>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={deleteDialogOpen}
-        onClose={handleCloseDeleteDialog}
-        aria-labelledby="delete-dialog-title"
-        aria-describedby="delete-dialog-description"
-      >
-        <DialogTitle id="delete-dialog-title">
-          Confirmer la suppression
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="delete-dialog-description">
-            Êtes-vous sûr de vouloir supprimer ce chauffeur? Cette action est
-            irréversible.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDeleteDialog} color="primary">
-            Annuler
-          </Button>
-          <Button
-            onClick={handleDeleteConfirm}
-            color="error"
-            autoFocus
-            disabled={loading}
-          >
-            Supprimer
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Dialog for adding a new driver */}
+      {dialogOpen && (
+        <ChauffeurDialog
+          open={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+        />
+      )}
 
-      {/* Global Notification Snackbar */}
-      <Snackbar
-        open={!!alert.message}
-        autoHideDuration={6000}
-        onClose={handleCloseAlert}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert severity={alert.severity} onClose={handleCloseAlert}>
-          {alert.message}
-        </Alert>
-      </Snackbar>
+      {/* Dialog for viewing driver details */}
+      {voirDialogOpen && (
+        <VoirChauffeurDialog
+          open={voirDialogOpen}
+          onClose={() => setVoirDialogOpen(false)}
+          chauffeurId={selectedChauffeur.idPartenaire}
+          onEdit={handleModifier}
+        />
+      )}
+
+      {/* Dialog for modifying driver details */}
+      {modifierDialogOpen && (
+        <ModifierChauffeurDialog
+          open={modifierDialogOpen}
+          onClose={() => setModifierDialogOpen(false)}
+          chauffeur={selectedChauffeur}
+          onUpdate={handleModifier}
+        />
+      )}
 
       {/* Dialogs for Available Drivers and Expired Insurance */}
       {insuranceDialogOpen && (
