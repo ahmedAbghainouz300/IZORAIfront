@@ -198,12 +198,12 @@ export default function Cabine() {
       flex: 1,
       type: "number",
     },
-    // {
-    //   field: "consommation",
-    //   headerName: "Consommation (L/100km)",
-    //   flex: 1,
-    //   type: "number",
-    // },
+    {
+      field: "status",
+      headerName: "Status",
+      flex: 1,
+      type: "string",
+    },
     {
       field: "actions",
       headerName: "Actions",
@@ -253,7 +253,7 @@ export default function Cabine() {
         <ViewCabineDialog
           open={viewDialogOpen}
           onClose={() => setViewDialogOpen(false)}
-          cabine={selectedRow}
+          immatriculation={selectedRow.immatriculation}
         />
       )}
 

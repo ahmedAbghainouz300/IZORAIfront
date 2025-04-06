@@ -57,17 +57,21 @@ export default function Entretien() {
   const handleView = (row) => {
     setSelectedRow(row);
     setViewDialogOpen(true);
+    fetchEntretiens(); // Recharger les données pour s'assurer que l'ID est valide
+
   };
 
   const handleEdit = (row) => {
     setSelectedRow(row);
     setEditDialogOpen(true);
+    fetchEntretiens(); // Recharger les données pour s'assurer que l'ID est valide
+
   };
 
   const handleDelete = async (id) => {
     try {
       await entretienService.delete(id);
-      setRows(rows.filter((row) => row.id !== id));
+      fetchEntretiens(); // Recharger les données après la suppression
       console.log("Entretien supprimé avec succès");
     } catch (error) {
       console.error("Erreur lors de la suppression de l'entretien:", error);
@@ -76,12 +80,9 @@ export default function Entretien() {
 
   const handleSave = async (updatedEntretien) => {
     try {
+      console.log("Mise à jour de l'entretien:", updatedEntretien);
       await entretienService.update(updatedEntretien.id, updatedEntretien);
-      setRows(
-        rows.map((row) =>
-          row.id === updatedEntretien.id ? updatedEntretien : row
-        )
-      );
+      fetchEntretiens
       setEditDialogOpen(false);
       console.log("Entretien mis à jour avec succès");
     } catch (error) {
@@ -91,9 +92,10 @@ export default function Entretien() {
 
   const handleCreate = async (newEntretien) => {
     try {
+      console.log("Création d'un nouvel entretien:", newEntretien);
       const response = await entretienService.create(newEntretien);
       setRows([...rows, response.data]);
-      setEntretienDialogOpen(false);
+      fetchEntretiens
       console.log("Entretien créé avec succès");
     } catch (error) {
       console.error("Erreur lors de la création de l'entretien:", error);
@@ -103,6 +105,7 @@ export default function Entretien() {
   const columns = [
     { field: "dateEntretien", headerName: "Date d'Entretien", flex: 1 },
     { field: "typeEntretien", headerName: "Type d'Entretien", flex: 1 },
+    { field: "statusEntretien", headerName: "status d'Entretien", flex: 1 },  
     { field: "description", headerName: "Description", flex: 1 },
     { field: "cout", headerName: "Coût (€)", flex: 1, type: "number" },
     {

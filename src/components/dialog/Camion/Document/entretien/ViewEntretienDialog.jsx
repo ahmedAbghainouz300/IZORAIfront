@@ -32,6 +32,7 @@ export default function ViewEntretienDialog({ open, onClose, entretienId })  {
       try {
         const response = await entretienService.getById(entretienId);
         setEntretienData(response.data);
+        console.log("Données de l'entretien:", response.data);
       } catch (err) {
         console.error("Erreur lors de la récupération de l'entretien:", err);
         setError("Échec du chargement des données");
@@ -49,6 +50,7 @@ export default function ViewEntretienDialog({ open, onClose, entretienId })  {
     typeEntretien = "",
     description = "",
     cout = "",
+    statusEntretien = "", 
     dateProchainEntretien = "",
     camion = null,
   } = entretienData || {};
@@ -127,6 +129,12 @@ export default function ViewEntretienDialog({ open, onClose, entretienId })  {
                   <Grid item xs={6}>
                     <Chip label={typeEntretien || "N/A"} color="primary" />
                   </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="subtitle2">Status d'entretien:</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Chip label={statusEntretien   || "N/A"} color="primary" />
+                  </Grid>
 
                   <Grid item xs={6}>
                     <Typography variant="subtitle2">Description:</Typography>
@@ -169,18 +177,13 @@ export default function ViewEntretienDialog({ open, onClose, entretienId })  {
                       <Typography>{camion.immatriculation || "N/A"}</Typography>
                     </Grid>
 
-                    <Grid item xs={6}>
-                      <Typography variant="subtitle2">Marque:</Typography>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Typography>{camion.marque || "N/A"}</Typography>
-                    </Grid>
+                   
 
                     <Grid item xs={6}>
-                      <Typography variant="subtitle2">Kilométrage:</Typography>
+                      <Typography variant="subtitle2">status:</Typography>
                     </Grid>
                     <Grid item xs={6}>
-                      <Typography>{camion.kilometrage || "N/A"}</Typography>
+                      <Typography>{camion.status || "N/A"}</Typography>
                     </Grid>
                   </Grid>
                 ) : (

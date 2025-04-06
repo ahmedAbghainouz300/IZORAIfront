@@ -7,6 +7,9 @@ import {
   TextField,
   Button,
   FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
   CircularProgress,
   Snackbar,
   Alert,
@@ -15,13 +18,21 @@ import AssuranceSelect from "../../../select/AssuranceSelect";
 import CarteGriseSelect from "../../../select/CarteGriseSelect";
 import TypeCabineSelect from "../../../select/TypeCabineSelect";
 
+// Enum des statuts
+const statusOptions = [
+  { value: "EN_SERVICE", label: "En Service" },
+  { value: "EN_REPARATION", label: "En Réparation" },
+  { value: "EN_MISSION", label: "En Mission" },
+  { value: "HORS_SERVICE", label: "Hors Service" },
+];
+
 export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
   const [formData, setFormData] = useState(cabine);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isAssuranceModalOpen, setIsAssuranceModalOpen] = useState(false);
   const [isCarteGriseModalOpen, setIsCarteGriseModalOpen] = useState(false);
-  const [isTypeCamionModalOpen, setIsTypeCamionModalOpen] = useState(false); // State for TypeCamion modal
+  const [isTypeCabineModalOpen, setIsTypeCabineModalOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -36,38 +47,30 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
 
   const handleSelectAssurance = (assurance) => {
     setFormData({ ...formData, assurance });
-    setIsAssuranceModalOpen(false); // Close the modal after selection
+    setIsAssuranceModalOpen(false);
   };
 
   const handleSelectCarteGrise = (carteGrise) => {
     setFormData({ ...formData, carteGrise });
-    setIsCarteGriseModalOpen(false); // Close the modal after selection
+    setIsCarteGriseModalOpen(false);
   };
 
-  // Handler for selecting a TypeCamion
-  const handleSelectTypeCamion = (typeCamion) => {
-    setFormData({ ...formData, typeCamion });
-    setIsTypeCamionModalOpen(false); // Close the modal after selection
+  const handleSelectTypeCabine = (typeCabine) => {
+    setFormData({ ...formData, typeCabine });
+    setIsTypeCabineModalOpen(false);
   };
 
   const handleSubmit = async () => {
     const payload = {
       immatriculation: formData.immatriculation,
-      typeCamion: formData.typeCamion, // Updated to use typeCamion
+      typeCamion: formData.typeCamion,
       poidsMax: Number(formData.poidsMax),
       consommation: Number(formData.consommation),
+      status: formData.status,
       assurance: formData.assurance,
       carteGrise: formData.carteGrise,
     };
 
-    setFormData({
-      immatriculation: "",
-      typeCamion: null, // Reset to null
-      poidsMax: 0,
-      consommation: 0,
-      assurance: null,
-      carteGrise: null,
-    });
     onSave(payload);
     onClose();
   };
@@ -77,19 +80,11 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
       <DialogTitle>Modifier la Cabine</DialogTitle>
       <DialogContent>
         {loading ? (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              height: "200px",
-            }}
-          >
+          <div style={{ display: "flex", justifyContent: "center", height: "200px" }}>
             <CircularProgress />
           </div>
         ) : (
           <>
-            {/* Immatriculation Field */}
             <TextField
               name="immatriculation"
               label="Immatriculation"
@@ -99,31 +94,23 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
               margin="normal"
             />
 
-            {/* Type de Camion Field */}
             <FormControl fullWidth margin="normal">
               <TextField
-                value={
-                  formData.typeCamion
-                    ? formData.typeCamion.type // Assuming `typeCamion` has a `type` property
-                    : ""
-                }
-                InputProps={{
-                  readOnly: true, // Make the field read-only
-                }}
-                onClick={() => setIsTypeCamionModalOpen(true)} // Open the modal on click
+                value={formData.typeCamion ? formData.typeCamion.type : ""}
+                InputProps={{ readOnly: true }}
+                onClick={() => setIsTypeCabineModalOpen(true)}
                 fullWidth
-                label="Type de Camion"
+                label="Type de Cabine"
               />
               <Button
                 variant="outlined"
-                onClick={() => setIsTypeCamionModalOpen(true)}
+                onClick={() => setIsTypeCabineModalOpen(true)}
                 style={{ marginTop: "8px" }}
               >
-                Sélectionner un Type de Camion
+                Sélectionner un Type de Cabine
               </Button>
             </FormControl>
 
-            {/* Poids Max Field */}
             <TextField
               name="poidsMax"
               label="Poids Max (kg)"
@@ -134,18 +121,24 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
               type="number"
             />
 
-            {/* Consommation Field */}
-            <TextField
-              name="consommation"
-              label="Consommation (L/100km)"
-              value={formData.consommation || ""}
-              onChange={handleChange}
-              fullWidth
-              margin="normal"
-              type="number"
-            />
+     
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="status-label">Statut</InputLabel>
+              <Select
+                labelId="status-label"
+                name="status"
+                value={formData.status || ""}
+                onChange={handleChange}
+                label="Statut"
+              >
+                {statusOptions.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-            {/* Assurance Field */}
             <FormControl fullWidth margin="normal">
               <TextField
                 value={
@@ -153,10 +146,8 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
                     ? `${formData.assurance.company} | ${formData.assurance.numeroContrat}`
                     : ""
                 }
-                InputProps={{
-                  readOnly: true, // Make the field read-only
-                }}
-                onClick={() => setIsAssuranceModalOpen(true)} // Open the modal on click
+                InputProps={{ readOnly: true }}
+                onClick={() => setIsAssuranceModalOpen(true)}
                 fullWidth
                 label="Assurance"
               />
@@ -169,7 +160,6 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
               </Button>
             </FormControl>
 
-            {/* Carte Grise Field */}
             <FormControl fullWidth margin="normal">
               <TextField
                 value={
@@ -177,10 +167,8 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
                     ? `${formData.carteGrise.marque} | ${formData.carteGrise.numeroSerie}`
                     : ""
                 }
-                InputProps={{
-                  readOnly: true, // Make the field read-only
-                }}
-                onClick={() => setIsCarteGriseModalOpen(true)} // Open the modal on click
+                InputProps={{ readOnly: true }}
+                onClick={() => setIsCarteGriseModalOpen(true)}
                 fullWidth
                 label="Carte Grise"
               />
@@ -193,29 +181,26 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
               </Button>
             </FormControl>
 
-            {/* Assurance Selection Modal */}
+            {/* Modals */}
             <AssuranceSelect
               open={isAssuranceModalOpen}
               onClose={() => setIsAssuranceModalOpen(false)}
               onSelectAssurance={handleSelectAssurance}
             />
-
-            {/* Carte Grise Selection Modal */}
             <CarteGriseSelect
               open={isCarteGriseModalOpen}
               onClose={() => setIsCarteGriseModalOpen(false)}
               onSelectCarteGrise={handleSelectCarteGrise}
             />
-
-            {/* TypeCamion Selection Modal */}
             <TypeCabineSelect
-              open={isTypeCamionModalOpen}
-              onClose={() => setIsTypeCamionModalOpen(false)}
-              onSelect={handleSelectTypeCamion} // Pass the handler for selection
+              open={isTypeCabineModalOpen}
+              onClose={() => setIsTypeCabineModalOpen(false)}
+              onSelect={handleSelectTypeCabine}
             />
           </>
         )}
       </DialogContent>
+
       <DialogActions>
         <Button onClick={onClose}>Annuler</Button>
         <Button onClick={handleSubmit} color="primary" disabled={loading}>
@@ -223,7 +208,6 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
         </Button>
       </DialogActions>
 
-      {/* Error Snackbar */}
       <Snackbar
         open={!!error}
         autoHideDuration={6000}

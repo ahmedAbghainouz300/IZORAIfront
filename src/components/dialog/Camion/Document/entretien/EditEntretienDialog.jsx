@@ -7,8 +7,34 @@ import {
   TextField,
   Button,
   FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from "@mui/material";
-import CamionSelect from "../../../../select/CamionSelect"; // Import the CamionSelect component
+import CamionSelect from "../../../../select/CamionSelect";
+
+// Enum options for TypeEntretien
+const typeEntretienOptions = [
+  { value: "VIDANGE", label: "Vidange" },
+  { value: "FREINS", label: "Freins" },
+  { value: "PNEUMATIQUES", label: "Pneumatiques" },
+  { value: "SUSPENSION", label: "Suspension" },
+  { value: "FILTRES", label: "Filtres" },
+  { value: "BATTERIE", label: "Batterie" },
+  { value: "COURROIE", label: "Courroie" },
+  { value: "REFROIDISSEMENT", label: "Refroidissement" },
+  { value: "ELECTRICITE", label: "Electricité" },
+  { value: "TRANSMISSION", label: "Transmission" },
+  { value: "AUTRE", label: "Autre" }
+];
+
+// Enum options for StatusEntretien
+const statusEntretienOptions = [
+  { value: "PROGRAMME", label: "Programmé" },
+  { value: "EN_COURS", label: "En Cours" },
+  { value: "TERMINE", label: "Terminé" },
+  { value: "ANNULE", label: "Annulé" }
+];
 
 export default function EditEntretienDialog({
   open,
@@ -16,7 +42,10 @@ export default function EditEntretienDialog({
   entretien,
   onSave,
 }) {
-  const [formData, setFormData] = useState(entretien);
+  const [formData, setFormData] = useState({
+    ...entretien,
+    statusEntretien: entretien.statusEntretien || "", // Ensure statut exists
+  });
   const [isCamionModalOpen, setIsCamionModalOpen] = useState(false);
 
   const handleChange = (e) => {
@@ -24,7 +53,6 @@ export default function EditEntretienDialog({
     setFormData({ ...formData, [name]: value });
   };
 
-  // Handler for selecting a camion
   const handleSelectCamion = (camion) => {
     setFormData({ ...formData, camion });
     setIsCamionModalOpen(false);
@@ -49,14 +77,26 @@ export default function EditEntretienDialog({
           type="date"
           InputLabelProps={{ shrink: true }}
         />
-        <TextField
-          name="typeEntretien"
-          label="Type d'Entretien"
-          value={formData.typeEntretien}
-          onChange={handleChange}
-          fullWidth
-          margin="normal"
-        />
+
+        {/* Type Entretien Dropdown */}
+        <FormControl fullWidth margin="normal">
+          <InputLabel id="type-entretien-label">Type d'Entretien</InputLabel>
+          <Select
+            labelId="type-entretien-label"
+            id="typeEntretien"
+            name="typeEntretien"
+            value={formData.typeEntretien}
+            label="Type d'Entretien"
+            onChange={handleChange}
+          >
+            {typeEntretienOptions.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
         <TextField
           name="description"
           label="Description"
@@ -85,12 +125,31 @@ export default function EditEntretienDialog({
           InputLabelProps={{ shrink: true }}
         />
 
+        {/* Status Dropdown */}
+        <FormControl fullWidth margin="normal">
+          <InputLabel id="status-label">Statut</InputLabel>
+          <Select
+            labelId="status-label"
+            id="statusEntretien"
+            name="statusEntretien"
+            value={formData.statusEntretien}
+            label="statusEntretien"
+            onChange={handleChange}
+          >
+            {statusEntretienOptions.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
         {/* Camion Selection Field */}
         <FormControl fullWidth margin="normal">
           <TextField
             value={
               formData.camion
-                ? "Immatriculation : " + formData.camion.immatriculation // Display the selected camion's immatriculation
+                ? "Immatriculation: " + formData.camion.immatriculation
                 : ""
             }
             InputProps={{
@@ -120,7 +179,7 @@ export default function EditEntretienDialog({
       <CamionSelect
         open={isCamionModalOpen}
         onClose={() => setIsCamionModalOpen(false)}
-        onSelect={handleSelectCamion} // Pass the handler for selection
+        onSelect={handleSelectCamion}
       />
     </Dialog>
   );

@@ -9,27 +9,33 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import Slide from "@mui/material/Slide";
-import { Button, TextField, Box, FormControl } from "@mui/material";
+import { Button, TextField, Box, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import AssuranceSelect from "../../../select/AssuranceSelect";
 import CarteGriseSelect from "../../../select/CarteGriseSelect";
-import TypeCabineSelect from "../../../select/TypeCabineSelect"; // Import the TypeCabineSelect component
+import TypeCabineSelect from "../../../select/TypeCabineSelect";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
+// Status options based on your enum
+const statusOptions = [
+  { value: "EN_SERVICE", label: "En Service" },
+  { value: "EN_REPARATION", label: "En Réparation" },
+  { value: "EN_MISSION", label: "En Mission" },
+  { value: "HORS_SERVICE", label: "Hors Service" }
+];
+
 export default function CabineDialog({ open, onClose, onSave }) {
   const [isAssuranceModalOpen, setIsAssuranceModalOpen] = React.useState(false);
-  const [isCarteGriseModalOpen, setIsCarteGriseModalOpen] =
-    React.useState(false);
-  const [isTypeCabineModalOpen, setIsTypeCabineModalOpen] =
-    React.useState(false); // State for TypeCabine modal
+  const [isCarteGriseModalOpen, setIsCarteGriseModalOpen] = React.useState(false);
+  const [isTypeCabineModalOpen, setIsTypeCabineModalOpen] = React.useState(false);
 
   const [cabineData, setCabineData] = React.useState({
     immatriculation: "",
-    typeCabine: null, // Use typeCabine instead of typeCamion
+    typeCamion: null,
     poidsMax: "",
-    consommation: "",
+    status: "", // Added status field
     assurance: null,
     carteGrise: null,
   });
@@ -49,27 +55,26 @@ export default function CabineDialog({ open, onClose, onSave }) {
     setIsCarteGriseModalOpen(false);
   };
 
-  // Handler for selecting a TypeCabine
   const handleSelectTypeCabine = (typeCabine) => {
-    setCabineData({ ...cabineData, typeCabine }); // Update typeCabine field
-    setIsTypeCabineModalOpen(false); // Close the modal
+    setCabineData({ ...cabineData, typeCabine });
+    setIsTypeCabineModalOpen(false);
   };
 
   const handleSubmit = async () => {
     const payload = {
       immatriculation: cabineData.immatriculation,
-      typeCabine: cabineData.typeCabine, // Use typeCabine
+      typeCabine: cabineData.typeCabine,
       poidsMax: Number(cabineData.poidsMax),
-      consommation: Number(cabineData.consommation),
+      status: cabineData.status, // Include status in payload
       assurance: cabineData.assurance,
       carteGrise: cabineData.carteGrise,
     };
 
     setCabineData({
       immatriculation: "",
-      typeCabine: null, // Reset to null
+      typeCamion: null,
       poidsMax: "",
-      consommation: "",
+      status: "", // Reset status
       assurance: null,
       carteGrise: null,
     });
@@ -112,12 +117,11 @@ export default function CabineDialog({ open, onClose, onSave }) {
           margin="normal"
         />
 
-        {/* Replace the TextField for Type de Cabine with TypeCabineSelect */}
         <FormControl fullWidth margin="normal">
           <TextField
             value={
-              cabineData.typeCabine
-                ? cabineData.typeCabine.type // Assuming `typeCabine` has a `type` property
+              cabineData.typeCamion
+                ? cabineData.typeCamion.type
                 : ""
             }
             InputProps={{
@@ -146,15 +150,24 @@ export default function CabineDialog({ open, onClose, onSave }) {
           type="number"
         />
 
-        <TextField
-          fullWidth
-          label="Consommation"
-          name="consommation"
-          value={cabineData.consommation}
-          onChange={handleInputChange}
-          margin="normal"
-          type="number"
-        />
+        {/* Status Dropdown */}
+        <FormControl fullWidth margin="normal">
+          <InputLabel id="status-label">Statut</InputLabel>
+          <Select
+            labelId="status-label"
+            id="status"
+            name="status"
+            value={cabineData.status}
+            label="Statut"
+            onChange={handleInputChange}
+          >
+            {statusOptions.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
         <FormControl fullWidth margin="normal">
           <TextField
@@ -215,13 +228,12 @@ export default function CabineDialog({ open, onClose, onSave }) {
           onSelectCarteGrise={handleSelectCarteGrise}
         />
 
-        {/* TypeCabineSelect Modal */}
         <TypeCabineSelect
           open={isTypeCabineModalOpen}
           onClose={() => setIsTypeCabineModalOpen(false)}
-          onSelect={handleSelectTypeCabine} // Pass the handler for selection
+          onSelect={handleSelectTypeCabine}
         />
       </Box>
     </Dialog>
   );
-}
+} 
