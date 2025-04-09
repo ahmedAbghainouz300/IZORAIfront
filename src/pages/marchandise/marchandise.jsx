@@ -91,7 +91,6 @@ export default function Marchandise() {
   };
 
   const columns = [
-    { field: "id", headerName: "ID", width: 90 },
     { field: "libelle", headerName: "Libellé", flex: 1 },
     { field: "codeMarchandise", headerName: "Code Marchandise", flex: 1 },
     {
@@ -100,6 +99,22 @@ export default function Marchandise() {
       flex: 1,
       valueGetter: (params) => {
         return params ? params.libelle : "N/A";
+      },
+    },
+    {
+      field: "unite",
+      headerName: "Unite",
+      flex: 1,
+      valueGetter: (params) => {
+        return params ? params.unite : "N/A";
+      },
+    },
+    {
+      field: "emballage",
+      headerName: "Emballage",
+      flex: 1,
+      valueGetter: (params) => {
+        return params ? params.nom : "N/A";
       },
     },
     { field: "description", headerName: "Description", flex: 1 },

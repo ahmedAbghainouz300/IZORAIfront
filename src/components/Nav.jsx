@@ -13,6 +13,7 @@ import {
 import { Button, Layout, Menu } from "antd";
 import allRoutes from "../routes/AllRoutes";
 import "../styles/nav.css";
+import { MovingOutlined } from "@mui/icons-material";
 const { Header, Sider, Content } = Layout;
 
 const NavComponent = (children) => {
@@ -107,6 +108,11 @@ const NavComponent = (children) => {
               key: allRoutes.demandeCotation.base,
               icon: <FileOutlined />,
               label: "DemandeCotation",
+            },
+            {
+              key: allRoutes.voyage.base,
+              icon: <MovingOutlined />,
+              label: "Voyage",
             },
           ]}
         />

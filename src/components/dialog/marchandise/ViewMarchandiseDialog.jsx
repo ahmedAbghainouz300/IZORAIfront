@@ -41,22 +41,34 @@ export default function ViewMarchandiseDialog({
       <DialogContent>
         {loading ? (
           <CircularProgress />
-        ) : (
+        ) : marchandise ? (
           <>
-            <Typography variant="body1">
+            <Typography variant="body1" gutterBottom>
+              <strong>ID :</strong> {marchandise.id}
+            </Typography>
+            <Typography variant="body1" gutterBottom>
               <strong>Libellé :</strong> {marchandise.libelle}
             </Typography>
-            <Typography variant="body1">
+            <Typography variant="body1" gutterBottom>
               <strong>Description :</strong> {marchandise.description}
             </Typography>
-            <Typography variant="body1">
+            <Typography variant="body1" gutterBottom>
               <strong>Code Marchandise :</strong> {marchandise.codeMarchandise}
             </Typography>
-            <Typography variant="body1">
+            <Typography variant="body1" gutterBottom>
               <strong>Catégorie :</strong>{" "}
               {marchandise.categorie?.libelle || "Aucune"}
             </Typography>
+            <Typography variant="body1" gutterBottom>
+              <strong>Unité :</strong> {marchandise.unite?.libelle || "Aucune"}
+            </Typography>
+            <Typography variant="body1" gutterBottom>
+              <strong>Emballage :</strong>{" "}
+              {marchandise.emballage?.libelle || "Aucun"}
+            </Typography>
           </>
+        ) : (
+          <Typography variant="body1">Aucune donnée disponible</Typography>
         )}
       </DialogContent>
       <DialogActions>

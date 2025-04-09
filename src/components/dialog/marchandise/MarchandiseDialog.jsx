@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
-  DialogActions,
-  DialogContent,
   DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
   Button,
 } from "@mui/material";
 import { useSnackbar } from "notistack";
 import marchandiseService from "../../../service/marchandise/marchandiseService";
 import SelectDialogCategorie from "./categorie/SelectDialogCategorie";
+import SelectDialogUnite from "./unite/SelectDialogUnite";
+import SelectDialogEmballage from "./emballage/SelectDialogEmballage";
 
 export default function MarchandiseDialog({
   open,
@@ -22,12 +24,15 @@ export default function MarchandiseDialog({
     description: "",
     codeMarchandise: "",
     categorie: null,
+    unite: null,
+    emballage: null,
   });
   const [categorieDialogOpen, setCategorieDialogOpen] = useState(false);
+  const [uniteDialogOpen, setUniteDialogOpen] = useState(false);
+  const [emballageDialogOpen, setEmballageDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
 
-  // Initialize form when opening or when marchandise changes
   useEffect(() => {
     if (open) {
       if (marchandise) {
@@ -36,6 +41,8 @@ export default function MarchandiseDialog({
           description: marchandise.description || "",
           codeMarchandise: marchandise.codeMarchandise || "",
           categorie: marchandise.categorie || null,
+          unite: marchandise.unite || null,
+          emballage: marchandise.emballage || null,
         });
       } else {
         setFormData({
@@ -43,6 +50,8 @@ export default function MarchandiseDialog({
           description: "",
           codeMarchandise: "",
           categorie: null,
+          unite: null,
+          emballage: null,
         });
       }
     }
@@ -68,24 +77,25 @@ export default function MarchandiseDialog({
         description: formData.description.trim(),
         codeMarchandise: formData.codeMarchandise.trim(),
         categorie: { id: formData.categorie.id },
+        unite: formData.unite ? { id: formData.unite.id } : null,
+        emballage: formData.emballage ? { id: formData.emballage.id } : null,
       };
 
       if (marchandise) {
-        // Update existing marchandise
         await marchandiseService.update(marchandise.id, marchandiseData);
         enqueueSnackbar("Marchandise mise à jour avec succès", {
           variant: "success",
         });
       } else {
-        // Create new marchandise
+        console.log("Creating new marchandise:", marchandiseData);
         await marchandiseService.create(marchandiseData);
         enqueueSnackbar("Marchandise créée avec succès", {
           variant: "success",
         });
       }
 
-      onSave(); // Notify parent to refresh data
-      onClose(); // Close dialog
+      onSave();
+      onClose();
     } catch (error) {
       console.error("Error saving marchandise:", error);
       const errorMessage =
@@ -148,11 +158,29 @@ export default function MarchandiseDialog({
           <TextField
             label="Catégorie *"
             fullWidth
-            value={formData.categorie?.libelle || ""}
+            value={formData.categorie?.libelle || "N/A"}
             onClick={() => setCategorieDialogOpen(true)}
             InputProps={{ readOnly: true }}
             margin="normal"
             required
+            disabled={loading}
+          />
+          <TextField
+            label="Unité"
+            fullWidth
+            value={formData.unite?.unite || ""}
+            onClick={() => setUniteDialogOpen(true)}
+            InputProps={{ readOnly: true }}
+            margin="normal"
+            disabled={loading}
+          />
+          <TextField
+            label="Emballage"
+            fullWidth
+            value={formData.emballage?.nom || ""}
+            onClick={() => setEmballageDialogOpen(true)}
+            InputProps={{ readOnly: true }}
+            margin="normal"
             disabled={loading}
           />
         </DialogContent>
@@ -177,6 +205,24 @@ export default function MarchandiseDialog({
         onSelect={(categorie) => {
           setFormData((prev) => ({ ...prev, categorie }));
           setCategorieDialogOpen(false);
+        }}
+      />
+
+      <SelectDialogUnite
+        open={uniteDialogOpen}
+        onClose={() => setUniteDialogOpen(false)}
+        onSelect={(unite) => {
+          setFormData((prev) => ({ ...prev, unite }));
+          setUniteDialogOpen(false);
+        }}
+      />
+
+      <SelectDialogEmballage
+        open={emballageDialogOpen}
+        onClose={() => setEmballageDialogOpen(false)}
+        onSelect={(emballage) => {
+          setFormData((prev) => ({ ...prev, emballage }));
+          setEmballageDialogOpen(false);
         }}
       />
     </>
