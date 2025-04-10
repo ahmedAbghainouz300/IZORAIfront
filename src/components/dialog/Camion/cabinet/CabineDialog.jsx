@@ -9,7 +9,15 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
 import Slide from "@mui/material/Slide";
-import { Button, TextField, Box, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import {
+  Button,
+  TextField,
+  Box,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from "@mui/material";
 import AssuranceSelect from "../../../select/AssuranceSelect";
 import CarteGriseSelect from "../../../select/CarteGriseSelect";
 import TypeCabineSelect from "../../../select/TypeCabineSelect";
@@ -23,13 +31,15 @@ const statusOptions = [
   { value: "EN_SERVICE", label: "En Service" },
   { value: "EN_REPARATION", label: "En Réparation" },
   { value: "EN_MISSION", label: "En Mission" },
-  { value: "HORS_SERVICE", label: "Hors Service" }
+  { value: "HORS_SERVICE", label: "Hors Service" },
 ];
 
 export default function CabineDialog({ open, onClose, onSave }) {
   const [isAssuranceModalOpen, setIsAssuranceModalOpen] = React.useState(false);
-  const [isCarteGriseModalOpen, setIsCarteGriseModalOpen] = React.useState(false);
-  const [isTypeCabineModalOpen, setIsTypeCabineModalOpen] = React.useState(false);
+  const [isCarteGriseModalOpen, setIsCarteGriseModalOpen] =
+    React.useState(false);
+  const [isTypeCabineModalOpen, setIsTypeCabineModalOpen] =
+    React.useState(false);
 
   const [cabineData, setCabineData] = React.useState({
     immatriculation: "",
@@ -43,6 +53,25 @@ export default function CabineDialog({ open, onClose, onSave }) {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setCabineData({ ...cabineData, [name]: value });
+    // Clear validation error when user types
+    if (name === "immatriculation" && validationError) {
+      setValidationError("");
+    }
+  };
+
+  const validateForm = () => {
+    if (!cabineData.immatriculation.trim()) {
+      setValidationError("L'immatriculation est obligatoire");
+      setIsFailedValidation(true);
+      return false;
+    }
+    setValidationError("");
+    return true;
+  };
+
+  const handleCloseFailedValidation = (event, reason) => {
+    if (reason === "clickaway") return;
+    setIsFailedValidation(false);
   };
 
   const handleSelectAssurance = (assurance) => {
@@ -61,6 +90,8 @@ export default function CabineDialog({ open, onClose, onSave }) {
   };
 
   const handleSubmit = async () => {
+    if (!validateForm()) return;
+
     const payload = {
       immatriculation: cabineData.immatriculation,
       typeCabine: cabineData.typeCabine,
@@ -110,20 +141,19 @@ export default function CabineDialog({ open, onClose, onSave }) {
       <Box sx={{ p: 3 }}>
         <TextField
           fullWidth
-          label="Immatriculation"
+          label="Immatriculation*"
           name="immatriculation"
           value={cabineData.immatriculation}
           onChange={handleInputChange}
           margin="normal"
+          error={!!validationError}
+          helperText={validationError}
+          required
         />
 
         <FormControl fullWidth margin="normal">
           <TextField
-            value={
-              cabineData.typeCamion
-                ? cabineData.typeCamion.type
-                : ""
-            }
+            value={cabineData.typeCamion ? cabineData.typeCamion.type : ""}
             InputProps={{
               readOnly: true,
             }}
@@ -234,6 +264,18 @@ export default function CabineDialog({ open, onClose, onSave }) {
           onSelect={handleSelectTypeCabine}
         />
       </Box>
+
+      {/* Validation Error Snackbar */}
+      <Snackbar
+        open={isFailedValidation}
+        autoHideDuration={3000}
+        onClose={handleCloseFailedValidation}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="error">
+          Veuillez remplir tous les champs obligatoires
+        </Alert>
+      </Snackbar>
     </Dialog>
   );
-} 
+}

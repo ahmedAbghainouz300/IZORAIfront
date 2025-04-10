@@ -36,6 +36,9 @@ const AllRoutes = {
   demandeCotation: {
     base: "/demandeCotation",
   },
+  traject: {
+    base: "/traject",
+  },
 };
 
 export default AllRoutes;

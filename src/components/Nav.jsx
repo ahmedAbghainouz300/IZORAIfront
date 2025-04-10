@@ -8,6 +8,7 @@ import {
   CarOutlined,
   UserOutlined,
   FileOutlined,
+  ProductOutlined,
 } from "@ant-design/icons";
 import { Button, Layout, Menu } from "antd";
 import allRoutes from "../routes/AllRoutes";
@@ -106,9 +107,12 @@ const NavComponent = (children) => {
               key: allRoutes.demandeCotation.base,
               icon: <FileOutlined />,
               label: "DemandeCotation",
-        
             },
-            
+            {
+              key: allRoutes.traject.base,
+              icon: <FileOutlined />,
+              label: "Traject",
+            },
           ]}
         />
       </Sider>

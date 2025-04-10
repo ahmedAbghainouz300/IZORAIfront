@@ -95,7 +95,7 @@ export default function VoirChauffeurDialog({
   const checkPermisValidity = async () => {
     try {
       const response = await chauffeurService.checkPermisValidity(chauffeurId);
-      setPermisValidity(response.data);
+      setPermisValidity(response.data || { isValid: false, message: "Données de permis non disponibles" });
     } catch (err) {
       console.error("Erreur lors de la vérification du permis:", err);
       setPermisValidity({ isValid: false, message: "Erreur de vérification" });
@@ -123,14 +123,14 @@ export default function VoirChauffeurDialog({
   };
 
   const getPermisStatus = () => {
-    if (permisValidity ) return null;
+    if (!permisValidity || permisValidity.isValid) return null;
     
     return (
       <Alert severity="error" icon={<WarningIcon />} sx={{ mb: 2, mt: 1 }}>
         <Typography variant="body1" fontWeight="bold">
           Permis expiré
         </Typography>
-        {permisValidity.message && (
+        {permisValidity?.message && (
           <Typography variant="body2">
             {permisValidity.message}
           </Typography>

@@ -15,9 +15,9 @@ import {
   Alert,
 } from "@mui/material";
 import { format } from "date-fns";
-import entretienService from './../../../../../service/camion/entretienService';
+import entretienService from "./../../../../../service/camion/entretienService";
 
-export default function ViewEntretienDialog({ open, onClose, entretienId })  {
+export default function ViewEntretienDialog({ open, onClose, entretienId }) {
   const [entretienData, setEntretienData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -25,10 +25,10 @@ export default function ViewEntretienDialog({ open, onClose, entretienId })  {
   useEffect(() => {
     const fetchEntretienDetails = async () => {
       if (!entretienId || !open) return;
-      
+
       setLoading(true);
       setError(null);
-      
+
       try {
         const response = await entretienService.getById(entretienId);
         setEntretienData(response.data);
@@ -50,7 +50,7 @@ export default function ViewEntretienDialog({ open, onClose, entretienId })  {
     typeEntretien = "",
     description = "",
     cout = "",
-    statusEntretien = "", 
+    statusEntretien = "",
     dateProchainEntretien = "",
     camion = null,
   } = entretienData || {};
@@ -59,7 +59,7 @@ export default function ViewEntretienDialog({ open, onClose, entretienId })  {
   const formattedDateEntretien = dateEntretien
     ? format(new Date(dateEntretien), "dd/MM/yyyy")
     : "N/A";
-  
+
   const formattedDateProchainEntretien = dateProchainEntretien
     ? format(new Date(dateProchainEntretien), "dd/MM/yyyy")
     : "N/A";
@@ -110,30 +110,40 @@ export default function ViewEntretienDialog({ open, onClose, entretienId })  {
             {/* Left Column - Entretien Details */}
             <Grid item xs={12} md={6}>
               <Paper elevation={0} sx={{ p: 2, mb: 3 }}>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{ fontWeight: "bold" }}
+                >
                   Informations de l'entretien
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
 
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
-                    <Typography variant="subtitle2">Date d'entretien:</Typography>
+                    <Typography variant="subtitle2">
+                      Date d'entretien:
+                    </Typography>
                   </Grid>
                   <Grid item xs={6}>
                     <Typography>{formattedDateEntretien}</Typography>
                   </Grid>
 
                   <Grid item xs={6}>
-                    <Typography variant="subtitle2">Type d'entretien:</Typography>
+                    <Typography variant="subtitle2">
+                      Type d'entretien:
+                    </Typography>
                   </Grid>
                   <Grid item xs={6}>
                     <Chip label={typeEntretien || "N/A"} color="primary" />
                   </Grid>
                   <Grid item xs={6}>
-                    <Typography variant="subtitle2">Status d'entretien:</Typography>
+                    <Typography variant="subtitle2">
+                      Status d'entretien:
+                    </Typography>
                   </Grid>
                   <Grid item xs={6}>
-                    <Chip label={statusEntretien   || "N/A"} color="primary" />
+                    <Chip label={statusEntretien || "N/A"} color="primary" />
                   </Grid>
 
                   <Grid item xs={6}>
@@ -151,7 +161,9 @@ export default function ViewEntretienDialog({ open, onClose, entretienId })  {
                   </Grid>
 
                   <Grid item xs={6}>
-                    <Typography variant="subtitle2">Prochain entretien:</Typography>
+                    <Typography variant="subtitle2">
+                      Prochain entretien:
+                    </Typography>
                   </Grid>
                   <Grid item xs={6}>
                     <Typography>{formattedDateProchainEntretien}</Typography>
@@ -163,7 +175,11 @@ export default function ViewEntretienDialog({ open, onClose, entretienId })  {
             {/* Right Column - Camion Info */}
             <Grid item xs={12} md={6}>
               <Paper elevation={0} sx={{ p: 2 }}>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{ fontWeight: "bold" }}
+                >
                   Informations du camion
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
@@ -171,13 +187,13 @@ export default function ViewEntretienDialog({ open, onClose, entretienId })  {
                 {camion ? (
                   <Grid container spacing={2}>
                     <Grid item xs={6}>
-                      <Typography variant="subtitle2">Immatriculation:</Typography>
+                      <Typography variant="subtitle2">
+                        Immatriculation:
+                      </Typography>
                     </Grid>
                     <Grid item xs={6}>
                       <Typography>{camion.immatriculation || "N/A"}</Typography>
                     </Grid>
-
-                   
 
                     <Grid item xs={6}>
                       <Typography variant="subtitle2">status:</Typography>
@@ -187,7 +203,9 @@ export default function ViewEntretienDialog({ open, onClose, entretienId })  {
                     </Grid>
                   </Grid>
                 ) : (
-                  <Typography color="text.secondary">Aucune information sur le camion</Typography>
+                  <Typography color="text.secondary">
+                    Aucune information sur le camion
+                  </Typography>
                 )}
               </Paper>
             </Grid>
@@ -207,4 +225,4 @@ export default function ViewEntretienDialog({ open, onClose, entretienId })  {
       </DialogActions>
     </Dialog>
   );
-};
+}

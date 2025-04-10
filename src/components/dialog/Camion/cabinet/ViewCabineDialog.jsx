@@ -1,6 +1,5 @@
 // import React, { useState, useEffect, useCallback } from "react";
 
-
 // import {
 //   Dialog,
 //   DialogTitle,
@@ -52,7 +51,7 @@
 
 //   const fetchCamionData = useCallback(async () => {
 //     if (!immatriculation) return;
-    
+
 //     setLoading(true);
 //     setError(null);
 //     try {
@@ -101,15 +100,15 @@
 
 //   const handleExportPDF = () => {
 //     const doc = new jsPDF();
-    
+
 //     // Add title
 //     doc.setFontSize(18);
 //     doc.text(`Détails du Camion: ${immatriculation}`, 14, 20);
-    
+
 //     // Add basic info
 //     doc.setFontSize(12);
 //     let yPosition = 30;
-    
+
 //     if (camion) {
 //       doc.text(`Immatriculation: ${camion.immatriculation}`, 14, yPosition);
 //       yPosition += 7;
@@ -119,10 +118,10 @@
 //       yPosition += 7;
 //       doc.text(`Type: ${camion.typeCamion?.type || 'N/A'}`, 14, yPosition);
 //       yPosition += 15;
-      
+
 //       // Add other sections similarly...
 //     }
-    
+
 //     doc.save(`camion_${immatriculation}.pdf`);
 //   };
 
@@ -132,7 +131,7 @@
 //       INACTIVE: { color: 'error', label: 'Inactif' },
 //       MAINTENANCE: { color: 'warning', label: 'Maintenance' },
 //     };
-    
+
 //     const { color, label } = statusMap[status] || { color: 'default', label: status };
 //     return <Chip label={label} color={color} variant="outlined" size="small" />;
 //   };
@@ -200,7 +199,7 @@
 //           </Grid>
 //         )
 //       )}
-      
+
 //       {renderSection(
 //         "Assurance",
 //         camion.assurance && (
@@ -246,7 +245,7 @@
 //           </TableContainer>
 //         )
 //       )}
-      
+
 //       {renderSection(
 //         `Historique des Carburants (${camion.carburants?.length || 0})`,
 //         camion.carburants?.length > 0 && (
@@ -304,7 +303,7 @@
 //             </Box>
 //           </Box>
 //         </DialogTitle>
-        
+
 //         <DialogContent dividers ref={ref} sx={{ overflowY: 'auto' }}>
 //           {loading ? (
 //             <Box display="flex" justifyContent="center" p={4}>
@@ -340,8 +339,8 @@
 //               </IconButton>
 //             </Tooltip>
 //           </Box>
-//           <Button 
-//             onClick={onClose} 
+//           <Button
+//             onClick={onClose}
 //             color="primary"
 //             variant="contained"
 //             sx={{ borderRadius: 2 }}
@@ -368,7 +367,6 @@
 
 // export default ViewCabineDialog;
 
-
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -392,11 +390,11 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow
+  TableRow,
 } from "@mui/material";
 import { Descriptions } from "antd";
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import camionService from './../../../../service/camion/camionService';
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import camionService from "./../../../../service/camion/camionService";
 
 export default function ViewCabineDialog({ open, onClose, immatriculation }) {
   const [camion, setCamion] = useState(null);
@@ -406,12 +404,13 @@ export default function ViewCabineDialog({ open, onClose, immatriculation }) {
   useEffect(() => {
     if (open && immatriculation) {
       setLoading(true);
-      camionService.getById(immatriculation)
-        .then(response => {
+      camionService
+        .getById(immatriculation)
+        .then((response) => {
           setCamion(response.data);
           setError(null);
         })
-        .catch(err => {
+        .catch((err) => {
           setError("Failed to load truck details");
           console.error("Error fetching camion:", err);
         })
@@ -421,26 +420,43 @@ export default function ViewCabineDialog({ open, onClose, immatriculation }) {
 
   const renderStatusChip = (status) => {
     let color;
-    switch(status) {
-      case 'ACTIVE': color = 'success'; break;
-      case 'INACTIVE': color = 'error'; break;
-      case 'MAINTENANCE': color = 'warning'; break;
-      default: color = 'default';
+    switch (status) {
+      case "ACTIVE":
+        color = "success";
+        break;
+      case "INACTIVE":
+        color = "error";
+        break;
+      case "MAINTENANCE":
+        color = "warning";
+        break;
+      default:
+        color = "default";
     }
     return <Chip label={status} color={color} variant="outlined" />;
   };
 
   const renderBasicInfo = () => (
     <Paper elevation={2} sx={{ p: 2, mb: 2 }}>
-      <Typography variant="h6" gutterBottom>Basic Information</Typography>
+      <Typography variant="h6" gutterBottom>
+        Basic Information
+      </Typography>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
-          <Typography><strong>Immatriculation:</strong> {camion.immatriculation}</Typography>
-          <Typography><strong>Poids Max:</strong> {camion.poidsMax} kg</Typography>
+          <Typography>
+            <strong>Immatriculation:</strong> {camion.immatriculation}
+          </Typography>
+          <Typography>
+            <strong>Poids Max:</strong> {camion.poidsMax} kg
+          </Typography>
         </Grid>
         <Grid item xs={12} sm={6}>
-          <Typography><strong>Status:</strong> {renderStatusChip(camion.status)}</Typography>
-          <Typography><strong>Type:</strong> {camion.typeCamion?.type || 'N/A'}</Typography>
+          <Typography>
+            <strong>Status:</strong> {renderStatusChip(camion.status)}
+          </Typography>
+          <Typography>
+            <strong>Type:</strong> {camion.typeCamion?.type || "N/A"}
+          </Typography>
         </Grid>
       </Grid>
     </Paper>
@@ -457,50 +473,92 @@ export default function ViewCabineDialog({ open, onClose, immatriculation }) {
               <Table size="small">
                 <TableBody>
                   <TableRow>
-                    <TableCell><strong>Numéro de Série</strong></TableCell>
-                    <TableCell>{camion.carteGrise.numeroSerie || 'N/A'}</TableCell>
-                    <TableCell><strong>Date Mise en Circulation</strong></TableCell>
-                    <TableCell>{camion.carteGrise.dateMiseEnCirculation || 'N/A'}</TableCell>
+                    <TableCell>
+                      <strong>Numéro de Série</strong>
+                    </TableCell>
+                    <TableCell>
+                      {camion.carteGrise.numeroSerie || "N/A"}
+                    </TableCell>
+                    <TableCell>
+                      <strong>Date Mise en Circulation</strong>
+                    </TableCell>
+                    <TableCell>
+                      {camion.carteGrise.dateMiseEnCirculation || "N/A"}
+                    </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell><strong>Marque</strong></TableCell>
-                    <TableCell>{camion.carteGrise.marque || 'N/A'}</TableCell>
-                    <TableCell><strong>Genre</strong></TableCell>
-                    <TableCell>{camion.carteGrise.genre || 'N/A'}</TableCell>
+                    <TableCell>
+                      <strong>Marque</strong>
+                    </TableCell>
+                    <TableCell>{camion.carteGrise.marque || "N/A"}</TableCell>
+                    <TableCell>
+                      <strong>Genre</strong>
+                    </TableCell>
+                    <TableCell>{camion.carteGrise.genre || "N/A"}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell><strong>Nombre de Places</strong></TableCell>
-                    <TableCell>{camion.carteGrise.nombrePlace || 'N/A'}</TableCell>
-                    <TableCell><strong>Puissance Fiscale</strong></TableCell>
-                    <TableCell>{camion.carteGrise.puissanceFiscale || 'N/A'}</TableCell>
+                    <TableCell>
+                      <strong>Nombre de Places</strong>
+                    </TableCell>
+                    <TableCell>
+                      {camion.carteGrise.nombrePlace || "N/A"}
+                    </TableCell>
+                    <TableCell>
+                      <strong>Puissance Fiscale</strong>
+                    </TableCell>
+                    <TableCell>
+                      {camion.carteGrise.puissanceFiscale || "N/A"}
+                    </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell><strong>Énergie</strong></TableCell>
-                    <TableCell>{camion.carteGrise.energie || 'N/A'}</TableCell>
-                    <TableCell><strong>Propriétaire</strong></TableCell>
-                    <TableCell>{camion.carteGrise.proprietaire || 'N/A'}</TableCell>
+                    <TableCell>
+                      <strong>Énergie</strong>
+                    </TableCell>
+                    <TableCell>{camion.carteGrise.energie || "N/A"}</TableCell>
+                    <TableCell>
+                      <strong>Propriétaire</strong>
+                    </TableCell>
+                    <TableCell>
+                      {camion.carteGrise.proprietaire || "N/A"}
+                    </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell><strong>Poids à Vide</strong></TableCell>
-                    <TableCell>{camion.carteGrise.poidsVide || 'N/A'} kg</TableCell>
-                    <TableCell><strong>Poids Autorisé</strong></TableCell>
-                    <TableCell>{camion.carteGrise.poidsAutorise || 'N/A'} kg</TableCell>
+                    <TableCell>
+                      <strong>Poids à Vide</strong>
+                    </TableCell>
+                    <TableCell>
+                      {camion.carteGrise.poidsVide || "N/A"} kg
+                    </TableCell>
+                    <TableCell>
+                      <strong>Poids Autorisé</strong>
+                    </TableCell>
+                    <TableCell>
+                      {camion.carteGrise.poidsAutorise || "N/A"} kg
+                    </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell><strong>Date de Délivrance</strong></TableCell>
-                    <TableCell colSpan={3}>{camion.carteGrise.dateDelivrance || 'N/A'}</TableCell>
+                    <TableCell>
+                      <strong>Date de Délivrance</strong>
+                    </TableCell>
+                    <TableCell colSpan={3}>
+                      {camion.carteGrise.dateDelivrance || "N/A"}
+                    </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
             </TableContainer>
-  
+
             {/* Photo centrée en dessous */}
             {camion.carteGrise.photoCarteGrise && (
               <Box mt={2} display="flex" justifyContent="center">
                 <img
                   src={`data:image/jpeg;base64,${camion.carteGrise.photoCarteGrise}`}
                   alt="Carte Grise"
-                  style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: 8 }}
+                  style={{
+                    maxWidth: "100%",
+                    maxHeight: "300px",
+                    borderRadius: 8,
+                  }}
                 />
               </Box>
             )}
@@ -513,8 +571,7 @@ export default function ViewCabineDialog({ open, onClose, immatriculation }) {
       </AccordionDetails>
     </Accordion>
   );
-  
-  
+
   const renderAssurance = () => (
     <Accordion>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -527,31 +584,61 @@ export default function ViewCabineDialog({ open, onClose, immatriculation }) {
               <Table size="small">
                 <TableBody>
                   <TableRow>
-                    <TableCell><strong>Compagnie</strong></TableCell>
-                    <TableCell>{camion.assurance.company || 'N/A'}</TableCell>
-                    <TableCell><strong>Numéro Contrat</strong></TableCell>
-                    <TableCell>{camion.assurance.numeroContrat || 'N/A'}</TableCell>
+                    <TableCell>
+                      <strong>Compagnie</strong>
+                    </TableCell>
+                    <TableCell>{camion.assurance.company || "N/A"}</TableCell>
+                    <TableCell>
+                      <strong>Numéro Contrat</strong>
+                    </TableCell>
+                    <TableCell>
+                      {camion.assurance.numeroContrat || "N/A"}
+                    </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell><strong>Type Couverture</strong></TableCell>
-                    <TableCell>{camion.assurance.typeCouverture || 'N/A'}</TableCell>
-                    <TableCell><strong>Montant</strong></TableCell>
-                    <TableCell>{camion.assurance.montant || 'N/A'} DH</TableCell>
+                    <TableCell>
+                      <strong>Type Couverture</strong>
+                    </TableCell>
+                    <TableCell>
+                      {camion.assurance.typeCouverture || "N/A"}
+                    </TableCell>
+                    <TableCell>
+                      <strong>Montant</strong>
+                    </TableCell>
+                    <TableCell>
+                      {camion.assurance.montant || "N/A"} DH
+                    </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell><strong>Prime Annuelle</strong></TableCell>
-                    <TableCell>{camion.assurance.primeAnnuelle || 'N/A'} DH</TableCell>
-                    <TableCell><strong>Numéro Carte Verte</strong></TableCell>
-                    <TableCell>{camion.assurance.numCarteVerte || 'N/A'}</TableCell>
+                    <TableCell>
+                      <strong>Prime Annuelle</strong>
+                    </TableCell>
+                    <TableCell>
+                      {camion.assurance.primeAnnuelle || "N/A"} DH
+                    </TableCell>
+                    <TableCell>
+                      <strong>Numéro Carte Verte</strong>
+                    </TableCell>
+                    <TableCell>
+                      {camion.assurance.numCarteVerte || "N/A"}
+                    </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell><strong>Date Début</strong></TableCell>
-                    <TableCell>{camion.assurance.dateDebut || 'N/A'}</TableCell>
-                    <TableCell><strong>Date Expiration</strong></TableCell>
-                    <TableCell>{camion.assurance.dateExpiration || 'N/A'}</TableCell>
+                    <TableCell>
+                      <strong>Date Début</strong>
+                    </TableCell>
+                    <TableCell>{camion.assurance.dateDebut || "N/A"}</TableCell>
+                    <TableCell>
+                      <strong>Date Expiration</strong>
+                    </TableCell>
+                    <TableCell>
+                      {camion.assurance.dateExpiration || "N/A"}
+                    </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell><strong>Active</strong></TableCell>
+                    <TableCell>
+                      <strong>Active</strong>
+                    </TableCell>
                     <TableCell colSpan={3}>
                       {camion.assurance.active ? (
                         <Chip label="Active" color="success" size="small" />
@@ -563,14 +650,14 @@ export default function ViewCabineDialog({ open, onClose, immatriculation }) {
                 </TableBody>
               </Table>
             </TableContainer>
-  
+
             {/* Photo affichée en dessous */}
             {camion.assurance.photoAssurance && (
               <Box mt={2} display="flex" justifyContent="center">
                 <img
                   src={`data:image/jpeg;base64,${camion.assurance.photoAssurance}`}
                   alt="Assurance"
-                  style={{ maxWidth: '100%', maxHeight: 300, borderRadius: 8 }}
+                  style={{ maxWidth: "100%", maxHeight: 300, borderRadius: 8 }}
                 />
               </Box>
             )}
@@ -583,8 +670,7 @@ export default function ViewCabineDialog({ open, onClose, immatriculation }) {
       </AccordionDetails>
     </Accordion>
   );
-  
-  
+
   const renderEntretiens = () => (
     <Accordion>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -607,20 +693,24 @@ export default function ViewCabineDialog({ open, onClose, immatriculation }) {
               <TableBody>
                 {camion.entretiens.map((entretien, index) => (
                   <TableRow key={index}>
-                    <TableCell>{entretien.dateEntretien || 'N/A'}</TableCell>
-                    <TableCell>{entretien.typeEntretien || 'N/A'}</TableCell>
-                    <TableCell>{entretien.cout ? `${entretien.cout} DH` : 'N/A'}</TableCell>
-                    <TableCell>{entretien.description || 'N/A'}</TableCell>
-                    <TableCell>{entretien.dateProchainEntretien || 'N/A'}</TableCell>
+                    <TableCell>{entretien.dateEntretien || "N/A"}</TableCell>
+                    <TableCell>{entretien.typeEntretien || "N/A"}</TableCell>
+                    <TableCell>
+                      {entretien.cout ? `${entretien.cout} DH` : "N/A"}
+                    </TableCell>
+                    <TableCell>{entretien.description || "N/A"}</TableCell>
+                    <TableCell>
+                      {entretien.dateProchainEntretien || "N/A"}
+                    </TableCell>
                     <TableCell>
                       <Chip
                         label={entretien.statusEntretien}
                         color={
-                          entretien.statusEntretien === 'PROGRAMME'
-                            ? 'primary'
-                            : entretien.statusEntretien === 'REALISE'
-                            ? 'success'
-                            : 'default'
+                          entretien.statusEntretien === "PROGRAMME"
+                            ? "primary"
+                            : entretien.statusEntretien === "REALISE"
+                              ? "success"
+                              : "default"
                         }
                         size="small"
                       />
@@ -638,7 +728,6 @@ export default function ViewCabineDialog({ open, onClose, immatriculation }) {
       </AccordionDetails>
     </Accordion>
   );
-  
 
   const renderCarburants = () => (
     <Accordion>
@@ -663,13 +752,25 @@ export default function ViewCabineDialog({ open, onClose, immatriculation }) {
               <TableBody>
                 {camion.carburants.map((carburant, index) => (
                   <TableRow key={index}>
-                    <TableCell>{carburant.dateRemplissage || 'N/A'}</TableCell>
-                    <TableCell>{carburant.typeCarburant?.type || 'N/A'}</TableCell>
-                    <TableCell>{carburant.quantiteLitres || 'N/A'}</TableCell>
-                    <TableCell>{carburant.prixParLitre ? `${carburant.prixParLitre} DH` : 'N/A'}</TableCell>
-                    <TableCell>{carburant.montantActuel ? `${carburant.montantActuel} DH` : 'N/A'}</TableCell>
-                    <TableCell>{carburant.kilometrageActuel || 'N/A'}</TableCell>
-                    <TableCell>{carburant.consommation || 'N/A'}</TableCell>
+                    <TableCell>{carburant.dateRemplissage || "N/A"}</TableCell>
+                    <TableCell>
+                      {carburant.typeCarburant?.type || "N/A"}
+                    </TableCell>
+                    <TableCell>{carburant.quantiteLitres || "N/A"}</TableCell>
+                    <TableCell>
+                      {carburant.prixParLitre
+                        ? `${carburant.prixParLitre} DH`
+                        : "N/A"}
+                    </TableCell>
+                    <TableCell>
+                      {carburant.montantActuel
+                        ? `${carburant.montantActuel} DH`
+                        : "N/A"}
+                    </TableCell>
+                    <TableCell>
+                      {carburant.kilometrageActuel || "N/A"}
+                    </TableCell>
+                    <TableCell>{carburant.consommation || "N/A"}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -683,23 +784,24 @@ export default function ViewCabineDialog({ open, onClose, immatriculation }) {
       </AccordionDetails>
     </Accordion>
   );
-  
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={onClose} 
-      maxWidth="lg" 
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="lg"
       fullWidth
-      PaperProps={{ sx: { borderRadius: 3, height: '80vh' } }}
+      PaperProps={{ sx: { borderRadius: 3, height: "80vh" } }}
     >
-      <DialogTitle sx={{ bgcolor: "#f5f5f5", borderBottom: 1, borderColor: "divider" }}>
+      <DialogTitle
+        sx={{ bgcolor: "#f5f5f5", borderBottom: 1, borderColor: "divider" }}
+      >
         <Typography variant="h6" component="div">
           Détails du Camion {immatriculation}
         </Typography>
       </DialogTitle>
-      
-      <DialogContent dividers sx={{ p: 3, overflowY: 'auto' }}>
+
+      <DialogContent dividers sx={{ p: 3, overflowY: "auto" }}>
         {loading ? (
           <Box display="flex" justifyContent="center" p={4}>
             <CircularProgress />
@@ -722,8 +824,8 @@ export default function ViewCabineDialog({ open, onClose, immatriculation }) {
       </DialogContent>
 
       <DialogActions sx={{ p: 2, borderTop: 1, borderColor: "divider" }}>
-        <Button 
-          onClick={onClose} 
+        <Button
+          onClick={onClose}
           color="primary"
           variant="contained"
           sx={{ borderRadius: 2 }}
@@ -734,4 +836,3 @@ export default function ViewCabineDialog({ open, onClose, immatriculation }) {
     </Dialog>
   );
 }
-

@@ -13,10 +13,20 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import RemorqueDialog from "../../components/dialog/Camion/remorque/RemorqueDialog";
 import ViewRemorqueDialog from "../../components/dialog/Camion/remorque/ViewRemorqueDialog";
 import EditRemorqueDialog from "../../components/dialog/Camion/remorque/EditRemorqueDialog";
-import remorqueService from "../../service/camion/remorqueService"; // Import the service
+import remorqueService from "../../service/camion/remorqueService";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 import "../../styles/DataGrid.css";
 
-// Custom Toolbar with only the CSV/Excel Export Button
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 function CustomToolbar() {
   return (
     <GridToolbarContainer>
@@ -31,57 +41,67 @@ export default function Remorque() {
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
   const [selectedRow, setSelectedRow] = React.useState(null);
   const [rows, setRows] = React.useState([]);
+  const [isSuccess, setIsSuccess] = React.useState(false);
+  const [isFailed, setIsFailed] = React.useState(false);
+  const [successMessage, setSuccessMessage] = React.useState("");
+  const [errorMessage, setErrorMessage] = React.useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  const [remorqueToDelete, setRemorqueToDelete] = React.useState(null);
 
-  // Load data when the component mounts
   React.useEffect(() => {
     fetchRemorques();
   }, []);
 
-  // Fetch all remorques from the backend
   const fetchRemorques = async () => {
     try {
       const response = await remorqueService.getAll();
       setRows(response.data);
-      console.log(response.data);
     } catch (error) {
       console.error("Error fetching remorques:", error);
+      showError("Échec de la récupération des remorques");
     }
   };
 
-  // Open the dialog to add a remorque
   const handleOpenRemorqueDialog = () => setRemorqueDialogOpen(true);
-
-  // Close the dialog to add a remorque
   const handleCloseRemorqueDialog = () => setRemorqueDialogOpen(false);
 
-  // Handle view action
   const handleView = (row) => {
     setSelectedRow(row);
     setViewDialogOpen(true);
   };
 
-  // Handle edit action
   const handleEdit = (row) => {
     setSelectedRow(row);
     setEditDialogOpen(true);
   };
 
-  // Handle delete action
-  const handleDelete = async (idRemorque) => {
-    console.log("Deleting remorque with ID:", idRemorque); // Debugging log
+  const handleDeleteClick = (idRemorque) => {
+    setRemorqueToDelete(idRemorque);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
     try {
-      await remorqueService.delete(idRemorque);
-      console.log("Remorque deleted:", idRemorque);
-      fetchRemorques(); // Refresh the data after deletion
+      await remorqueService.delete(remorqueToDelete);
+      showSuccess("Remorque supprimée avec succès");
+      setDeleteDialogOpen(false);
+      fetchRemorques();
     } catch (error) {
       console.error("Error deleting remorque:", error);
+      showError("Échec de la suppression de la remorque");
+      setDeleteDialogOpen(false);
     }
   };
 
-  // Handle save action (update)
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setRemorqueToDelete(null);
+  };
+
   const handleSave = async (updatedRemorque) => {
     try {
       await remorqueService.update(updatedRemorque.idRemorque, updatedRemorque);
+      showSuccess("Remorque mise à jour avec succès");
       setRows(
         rows.map((row) =>
           row.idRemorque === updatedRemorque.idRemorque ? updatedRemorque : row
@@ -90,30 +110,48 @@ export default function Remorque() {
       setEditDialogOpen(false);
     } catch (error) {
       console.error("Error updating remorque:", error);
+      showError("Échec de la mise à jour de la remorque");
     }
   };
 
-  // Handle create action (add new remorque)
   const handleCreate = async (newRemorque) => {
     try {
-      console.log(newRemorque);
       const response = await remorqueService.create(newRemorque);
+      showSuccess("Remorque créée avec succès");
       setRows([...rows, response.data]);
       setRemorqueDialogOpen(false);
     } catch (error) {
       console.error("Error adding remorque:", error);
+      showError("Échec de la création de la remorque");
     }
   };
 
-  // Define columns for the DataGrid
+  const showSuccess = (message) => {
+    setSuccessMessage(message);
+    setIsSuccess(true);
+  };
+
+  const showError = (message) => {
+    setErrorMessage(message);
+    setIsFailed(true);
+  };
+
+  const handleCloseSuccess = (event, reason) => {
+    if (reason === "clickaway") return;
+    setIsSuccess(false);
+  };
+
+  const handleCloseFailed = (event, reason) => {
+    if (reason === "clickaway") return;
+    setIsFailed(false);
+  };
+
   const columns = [
     {
       field: "typeRemorque",
       headerName: "Type de Remorque",
       flex: 1,
-      valueGetter: (params) => {
-        return params ? params.type : "N/A";
-      },
+      valueGetter: (params) => params?.type || "N/A",
     },
     {
       field: "volumeStockage",
@@ -133,7 +171,13 @@ export default function Remorque() {
       flex: 1,
       type: "number",
     },
-    { field: "disponible", headerName: "Disponible", flex: 1, type: "boolean" },
+    {
+      field: "disponible",
+      headerName: "Disponible",
+      flex: 1,
+      type: "boolean",
+      renderCell: (params) => (params.value ? "Oui" : "Non"),
+    },
     {
       field: "actions",
       headerName: "Actions",
@@ -151,7 +195,7 @@ export default function Remorque() {
           </IconButton>
           <IconButton
             color="error"
-            onClick={() => handleDelete(params.row.idRemorque)} // Pass idRemorque correctly
+            onClick={() => handleDeleteClick(params.row.idRemorque)}
           >
             <DeleteIcon />
           </IconButton>
@@ -168,7 +212,6 @@ export default function Remorque() {
         </button>
       </div>
 
-      {/* Dialog to add a new remorque */}
       {remorqueDialogOpen && (
         <RemorqueDialog
           open={remorqueDialogOpen}
@@ -177,7 +220,6 @@ export default function Remorque() {
         />
       )}
 
-      {/* Dialog to view remorque details */}
       {viewDialogOpen && (
         <ViewRemorqueDialog
           open={viewDialogOpen}
@@ -186,7 +228,6 @@ export default function Remorque() {
         />
       )}
 
-      {/* Dialog to edit a remorque */}
       {editDialogOpen && (
         <EditRemorqueDialog
           open={editDialogOpen}
@@ -196,11 +237,10 @@ export default function Remorque() {
         />
       )}
 
-      {/* DataGrid to display remorques */}
       <DataGrid
         rows={rows}
         columns={columns}
-        getRowId={(row) => row.idRemorque} // Use idRemorque as the row ID
+        getRowId={(row) => row.idRemorque}
         initialState={{
           pagination: {
             paginationModel: {
@@ -209,17 +249,58 @@ export default function Remorque() {
           },
         }}
         pageSizeOptions={[5, 10, 20]}
-        checkboxSelection
         disableRowSelectionOnClick
         slots={{ toolbar: CustomToolbar }}
-        sx={{
-          "@media print": {
-            ".MuiDataGrid-toolbarContainer": {
-              display: "none",
-            },
-          },
-        }}
+        style={{ border: "none", marginLeft: 30 }}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          Confirmer la suppression
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Êtes-vous sûr de vouloir supprimer cette remorque ? Cette action est
+            irréversible.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog}>Annuler</Button>
+          <Button onClick={handleDelete} color="error" autoFocus>
+            Supprimer
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={isSuccess}
+        autoHideDuration={3000}
+        onClose={handleCloseSuccess}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={handleCloseSuccess} severity="success">
+          {successMessage}
+        </Alert>
+      </Snackbar>
+
+      {/* Error Snackbar */}
+      <Snackbar
+        open={isFailed}
+        autoHideDuration={6000}
+        onClose={handleCloseFailed}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={handleCloseFailed} severity="error">
+          {errorMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

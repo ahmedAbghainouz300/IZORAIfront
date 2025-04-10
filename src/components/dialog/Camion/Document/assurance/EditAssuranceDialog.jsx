@@ -14,7 +14,7 @@ import {
   Typography,
   CircularProgress,
   Alert,
-  Avatar
+  Avatar,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -22,15 +22,15 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { CloudUpload, Delete, AddAPhoto } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 
-const VisuallyHiddenInput = styled('input')({
-  clip: 'rect(0 0 0 0)',
-  clipPath: 'inset(50%)',
+const VisuallyHiddenInput = styled("input")({
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
   height: 1,
-  overflow: 'hidden',
-  position: 'absolute',
+  overflow: "hidden",
+  position: "absolute",
   bottom: 0,
   left: 0,
-  whiteSpace: 'nowrap',
+  whiteSpace: "nowrap",
   width: 1,
 });
 
@@ -39,7 +39,7 @@ export default function EditAssuranceDialog({
   onClose,
   assurance,
   onSave,
-  onSuccess
+  onSuccess,
 }) {
   const [formData, setFormData] = React.useState({
     numeroContrat: "",
@@ -63,12 +63,14 @@ export default function EditAssuranceDialog({
       setFormData({
         ...assurance,
         dateDebut: assurance.dateDebut ? new Date(assurance.dateDebut) : null,
-        dateExpiration: assurance.dateExpiration ? new Date(assurance.dateExpiration) : null
+        dateExpiration: assurance.dateExpiration
+          ? new Date(assurance.dateExpiration)
+          : null,
       });
-      
+
       if (assurance.photoAssurance) {
         // If photo is stored as base64, set it directly
-        if (typeof assurance.photoAssurance === 'string') {
+        if (typeof assurance.photoAssurance === "string") {
           setPhotoPreview(`data:image/jpeg;base64,${assurance.photoAssurance}`);
         }
       }
@@ -76,17 +78,17 @@ export default function EditAssuranceDialog({
   }, [open, assurance]);
 
   const handleRemovePhoto = () => {
-    setFormData(prev => ({ ...prev, photoAssurance: null }));
+    setFormData((prev) => ({ ...prev, photoAssurance: null }));
     setPhotoPreview(null);
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleDateChange = (name) => (newValue) => {
-    setFormData(prev => ({ ...prev, [name]: newValue }));
+    setFormData((prev) => ({ ...prev, [name]: newValue }));
   };
 
   const handlePhotoUpload = async (e) => {
@@ -94,12 +96,13 @@ export default function EditAssuranceDialog({
     if (!file) return;
 
     // Validation du fichier
-    if (!file.type.match('image.*')) {
+    if (!file.type.match("image.*")) {
       setError("Veuillez sélectionner un fichier image valide");
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB max
+    if (file.size > 5 * 1024 * 1024) {
+      // 5MB max
       setError("La taille de l'image ne doit pas dépasser 5MB");
       return;
     }
@@ -112,14 +115,14 @@ export default function EditAssuranceDialog({
       // Convertir en base64 pour le backend
       const base64String = await new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onload = () => resolve(reader.result.split(",")[1]);
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
 
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        photoAssurance: base64String
+        photoAssurance: base64String,
       }));
       setError(null);
     } catch (err) {
@@ -135,25 +138,31 @@ export default function EditAssuranceDialog({
     try {
       // Validation des champs requis
       if (!formData.numeroContrat || !formData.company) {
-        throw new Error("Les champs numéro de contrat et compagnie sont obligatoires");
+        throw new Error(
+          "Les champs numéro de contrat et compagnie sont obligatoires"
+        );
       }
 
       const payload = {
         ...formData,
         dateDebut: formData.dateDebut?.toISOString(),
-        dateExpiration: formData.dateExpiration?.toISOString()
+        dateExpiration: formData.dateExpiration?.toISOString(),
       };
 
       await onSave(payload);
-      
-      if (typeof onSuccess === 'function') {
+
+      if (typeof onSuccess === "function") {
         onSuccess();
       }
-      
+
       onClose();
     } catch (err) {
       console.error("Erreur:", err);
-      setError(err.response?.data?.message || err.message || "Erreur lors de la modification");
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Erreur lors de la modification"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -161,29 +170,29 @@ export default function EditAssuranceDialog({
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Dialog 
-        open={open} 
+      <Dialog
+        open={open}
         onClose={onClose}
         fullWidth
         maxWidth="md"
         PaperProps={{
           sx: {
             borderRadius: 3,
-            p: 2
-          }
+            p: 2,
+          },
         }}
       >
-        <DialogTitle 
-          sx={{ 
-            fontSize: '1.5rem',
-            fontWeight: 'bold',
-            textAlign: 'center',
-            color: 'primary.main'
+        <DialogTitle
+          sx={{
+            fontSize: "1.5rem",
+            fontWeight: "bold",
+            textAlign: "center",
+            color: "primary.main",
           }}
         >
           Modifier l'Assurance
         </DialogTitle>
-        
+
         <DialogContent dividers>
           {error && (
             <Alert severity="error" sx={{ mb: 3 }}>
@@ -203,7 +212,7 @@ export default function EditAssuranceDialog({
                 variant="outlined"
                 required
               />
-              
+
               <TextField
                 fullWidth
                 label="Compagnie"
@@ -214,7 +223,7 @@ export default function EditAssuranceDialog({
                 variant="outlined"
                 required
               />
-              
+
               <TextField
                 fullWidth
                 label="Type de couverture"
@@ -224,7 +233,7 @@ export default function EditAssuranceDialog({
                 margin="normal"
                 variant="outlined"
               />
-              
+
               <TextField
                 fullWidth
                 label="Montant"
@@ -236,7 +245,7 @@ export default function EditAssuranceDialog({
                 variant="outlined"
               />
             </Grid>
-            
+
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
@@ -248,7 +257,7 @@ export default function EditAssuranceDialog({
                 type="number"
                 variant="outlined"
               />
-              
+
               <TextField
                 fullWidth
                 label="Numéro de la carte verte"
@@ -258,7 +267,7 @@ export default function EditAssuranceDialog({
                 margin="normal"
                 variant="outlined"
               />
-              
+
               <TextField
                 fullWidth
                 label="Statut de la carte verte"
@@ -269,65 +278,75 @@ export default function EditAssuranceDialog({
                 variant="outlined"
               />
             </Grid>
-            
+
             <Grid item xs={12} md={6}>
               <DatePicker
                 label="Date de début"
                 value={formData.dateDebut}
                 onChange={handleDateChange("dateDebut")}
                 renderInput={(params) => (
-                  <TextField {...params} fullWidth margin="normal" variant="outlined" />
+                  <TextField
+                    {...params}
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                  />
                 )}
               />
             </Grid>
-            
+
             <Grid item xs={12} md={6}>
               <DatePicker
                 label="Date d'expiration"
                 value={formData.dateExpiration}
                 onChange={handleDateChange("dateExpiration")}
                 renderInput={(params) => (
-                  <TextField {...params} fullWidth margin="normal" variant="outlined" />
+                  <TextField
+                    {...params}
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                  />
                 )}
               />
             </Grid>
-            
+
             <Grid item xs={12}>
               <Box
                 sx={{
-                  border: '1px dashed',
-                  borderColor: 'divider',
+                  border: "1px dashed",
+                  borderColor: "divider",
                   borderRadius: 2,
                   p: 3,
-                  textAlign: 'center',
-                  backgroundColor: 'action.hover',
-                  '&:hover': {
-                    backgroundColor: 'action.selected',
-                  }
+                  textAlign: "center",
+                  backgroundColor: "action.hover",
+                  "&:hover": {
+                    backgroundColor: "action.selected",
+                  },
                 }}
               >
                 {photoPreview ? (
-                  <Box sx={{ position: 'relative' }}>
+                  <Box sx={{ position: "relative" }}>
                     <Avatar
                       src={photoPreview}
                       variant="rounded"
                       sx={{
-                        width: '100%',
+                        width: "100%",
                         height: 200,
-                        mb: 2
+                        mb: 2,
                       }}
                     />
                     <IconButton
                       onClick={handleRemovePhoto}
                       sx={{
-                        position: 'absolute',
+                        position: "absolute",
                         top: 8,
                         right: 8,
-                        backgroundColor: 'error.main',
-                        color: 'white',
-                        '&:hover': {
-                          backgroundColor: 'error.dark',
-                        }
+                        backgroundColor: "error.main",
+                        color: "white",
+                        "&:hover": {
+                          backgroundColor: "error.dark",
+                        },
                       }}
                     >
                       <Delete />
@@ -335,7 +354,11 @@ export default function EditAssuranceDialog({
                   </Box>
                 ) : (
                   <>
-                    <CloudUpload fontSize="large" color="action" sx={{ mb: 1 }} />
+                    <CloudUpload
+                      fontSize="large"
+                      color="action"
+                      sx={{ mb: 1 }}
+                    />
                     <Typography variant="subtitle1" gutterBottom>
                       Glissez-déposez la photo de l'assurance ou
                     </Typography>
@@ -346,13 +369,17 @@ export default function EditAssuranceDialog({
                       sx={{ mt: 1 }}
                     >
                       Sélectionner une image
-                      <VisuallyHiddenInput 
-                        type="file" 
-                        accept="image/*" 
-                        onChange={handlePhotoUpload} 
+                      <VisuallyHiddenInput
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoUpload}
                       />
                     </Button>
-                    <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+                    <Typography
+                      variant="caption"
+                      display="block"
+                      sx={{ mt: 1 }}
+                    >
                       Formats supportés: JPEG, PNG (Max. 5MB)
                     </Typography>
                   </>
@@ -361,13 +388,9 @@ export default function EditAssuranceDialog({
             </Grid>
           </Grid>
         </DialogContent>
-        
+
         <DialogActions sx={{ p: 3 }}>
-          <Button 
-            onClick={onClose} 
-            variant="outlined"
-            disabled={isLoading}
-          >
+          <Button onClick={onClose} variant="outlined" disabled={isLoading}>
             Annuler
           </Button>
           <Button
@@ -376,7 +399,7 @@ export default function EditAssuranceDialog({
             disabled={isLoading}
             startIcon={isLoading ? <CircularProgress size={20} /> : null}
           >
-            {isLoading ? 'Enregistrement...' : 'Enregistrer les modifications'}
+            {isLoading ? "Enregistrement..." : "Enregistrer les modifications"}
           </Button>
         </DialogActions>
       </Dialog>

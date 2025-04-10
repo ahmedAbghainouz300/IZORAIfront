@@ -16,6 +16,13 @@ import ViewEntretienDialog from "../../../components/dialog/Camion/Document/entr
 import EditEntretienDialog from "../../../components/dialog/Camion/Document/entretien/EditEntretienDialog";
 import entretienService from "../../../service/camion/entretienService"; // Importez le service
 import "../../../styles/DataGrid.css";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography,
+} from "@mui/material";
 
 function CustomToolbar() {
   return (
@@ -31,6 +38,8 @@ export default function Entretien() {
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
   const [selectedRow, setSelectedRow] = React.useState(null);
   const [rows, setRows] = React.useState([]);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [entretienToDelete, setEntretienToDelete] = useState(null);
 
   // Charger les données au montage du composant
   useEffect(() => {
@@ -67,16 +76,29 @@ export default function Entretien() {
     fetchEntretiens(); // Recharger les données pour s'assurer que l'ID est valide
 
   };
-
-  const handleDelete = async (id) => {
+  const handleDeleteClick = (id) => {
+    setEntretienToDelete(id); // Store the ID of the item to delete
+    setDeleteDialogOpen(true); // Open the confirmation dialog
+  };
+  const handleDeleteConfirm = async () => {
     try {
-      await entretienService.delete(id);
-      fetchEntretiens(); // Recharger les données après la suppression
+      await entretienService.delete(entretienToDelete); // Delete the item
+      fetchEntretiens(); // Refresh the table
       console.log("Entretien supprimé avec succès");
     } catch (error) {
       console.error("Erreur lors de la suppression de l'entretien:", error);
+    } finally {
+      setDeleteDialogOpen(false); // Close the dialog
+      setEntretienToDelete(null); // Clear the ID
     }
   };
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false); // Close the dialog
+    setEntretienToDelete(null); // Clear the ID
+  };
+
+
+
 
   const handleSave = async (updatedEntretien) => {
     try {
@@ -136,7 +158,10 @@ export default function Entretien() {
           <IconButton color="secondary" onClick={() => handleEdit(params.row)}>
             <EditIcon />
           </IconButton>
-          <IconButton color="error" onClick={() => handleDelete(params.row.id)}>
+          <IconButton
+            color="error"
+            onClick={() => handleDeleteClick(params.row.id)} // Open confirmation dialog
+          >
             <DeleteIcon />
           </IconButton>
         </div>
@@ -204,6 +229,27 @@ export default function Entretien() {
           },
         }}
       />
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">Confirmer la suppression</DialogTitle>
+        <DialogContent>
+          <Typography id="delete-dialog-description">
+            Êtes-vous sûr de vouloir supprimer cet entretien ? Cette action est irréversible.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel} color="primary">
+            Annuler
+          </Button>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+            Supprimer
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
-}
+} 

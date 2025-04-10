@@ -52,7 +52,6 @@ export default function Cabine() {
     fetchCamions();
   }, []);
 
- 
   const fetchCamions = async () => {
     try {
       const response = await camionService.getAll();
@@ -129,7 +128,7 @@ export default function Cabine() {
       console.log(newCabine);
       const response = await camionService.create(newCabine);
       setRows([...rows, response.data]);
-      
+
       setCabineDialogOpen(false);
       setIsSuccess(true);
       fetchCamions();

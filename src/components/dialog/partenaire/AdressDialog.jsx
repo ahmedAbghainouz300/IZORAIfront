@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -8,79 +8,113 @@ import {
   Button,
 } from "@mui/material";
 
-export default function AdressDialog({ open, onClose, onSave }) {
-  const [adressData, setAdressData] = React.useState({
+export default function AdressDialog({ open, onClose, onAdd }) {
+  const [newAdress, setNewAdress] = useState({
     rue: "",
     ville: "",
     codePostal: "",
     pays: "",
   });
 
-  // Gérer les changements dans les champs du formulaire
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setAdressData({ ...adressData, [name]: value });
+  const [errors, setErrors] = useState({});
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setNewAdress({ ...newAdress, [name]: value });
+    setErrors({ ...errors, [name]: "" });
   };
 
-  // Enregistrer l'adresse et réinitialiser le formulaire
-  const handleSave = () => {
-    onSave(adressData); // Envoyer les données de l'adresse au parent
-    onClose(); // Fermer le dialogue
-    setAdressData({ rue: "", ville: "", codePostal: "", pays: "" }); // Réinitialiser le formulaire
+  const validateForm = () => {
+    const newErrors = {};
+    if (!newAdress.rue) newErrors.rue = "La rue est obligatoire";
+    if (!newAdress.ville) newErrors.ville = "La ville est obligatoire";
+    if (!newAdress.codePostal)
+      newErrors.codePostal = "Le code postal est obligatoire";
+    if (!newAdress.pays) newErrors.pays = "Le pays est obligatoire";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  // Valider et soumettre le formulaire
-  const handleSubmit = () => {
-    if (Object.values(adressData).some((val) => val.trim() === "")) {
-      alert("Tous les champs doivent être remplis !");
-      return;
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    try {
+      console.log(newAdress);
+      await onAdd(newAdress);
+      setNewAdress({
+        rue: "",
+        ville: "",
+        codePostal: "",
+        pays: "",
+      });
+      onClose();
+    } catch (error) {
+      console.error("Erreur lors de l'ajout de l'adresse :", error);
     }
-    handleSave(); // Appeler handleSave pour enregistrer l'adresse
   };
 
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Ajouter Adresse</DialogTitle>
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>Ajouter une Adresse</DialogTitle>
       <DialogContent>
         <TextField
+          margin="dense"
+          label="Type d'adresse"
+          name="type"
           fullWidth
+          value={newAdress.type}
+          onChange={handleChange}
+          error={!!errors.type}
+          helperText={errors.type}
+          placeholder="Ex: Domicile, Travail, Livraison..."
+        />
+        <TextField
+          margin="dense"
           label="Rue"
           name="rue"
-          value={adressData.rue}
-          onChange={handleInputChange}
-          margin="normal"
-          autoFocus
+          fullWidth
+          value={newAdress.rue}
+          onChange={handleChange}
+          error={!!errors.rue}
+          helperText={errors.rue}
         />
         <TextField
-          fullWidth
+          margin="dense"
           label="Ville"
           name="ville"
-          value={adressData.ville}
-          onChange={handleInputChange}
-          margin="normal"
+          fullWidth
+          value={newAdress.ville}
+          onChange={handleChange}
+          error={!!errors.ville}
+          helperText={errors.ville}
         />
         <TextField
-          fullWidth
+          margin="dense"
           label="Code Postal"
           name="codePostal"
-          type="number"
-          value={adressData.codePostal}
-          onChange={handleInputChange}
-          margin="normal"
+          fullWidth
+          value={newAdress.codePostal}
+          onChange={handleChange}
+          error={!!errors.codePostal}
+          helperText={errors.codePostal}
         />
         <TextField
-          fullWidth
+          margin="dense"
           label="Pays"
           name="pays"
-          value={adressData.pays}
-          onChange={handleInputChange}
-          margin="normal"
+          fullWidth
+          value={newAdress.pays}
+          onChange={handleChange}
+          error={!!errors.pays}
+          helperText={errors.pays}
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Annuler</Button>
+        <Button onClick={onClose} color="secondary">
+          Annuler
+        </Button>
         <Button onClick={handleSubmit} color="primary">
-          Enregistrer
+          Ajouter
         </Button>
       </DialogActions>
     </Dialog>

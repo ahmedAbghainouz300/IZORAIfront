@@ -14,7 +14,20 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import ViewMoraleDialog from "../../components/dialog/partenaire/morale/ViewMoraleDialog";
 import EditMoraleDialog from "../../components/dialog/partenaire/morale/EditMoraleDialog";
+import {
+  Snackbar,
+  Alert as MuiAlert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+} from "@mui/material";
 import "../../styles/DataGrid.css";
+
+const Alert = React.forwardRef((props, ref) => (
+  <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />
+));
 
 function CustomToolbar() {
   return (
@@ -30,24 +43,35 @@ export default function Morale() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedPartenaire, setSelectedPartenaire] = useState(null);
   const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState({ message: null, severity: "success" });
+  // New state for delete confirmation
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [partenaireToDelete, setPartenaireToDelete] = useState(null);
 
   useEffect(() => {
     fetchAllMorales();
   }, []);
 
   const fetchAllMorales = () => {
+    setLoading(true);
     moraleService
       .getAll()
       .then((response) => {
         setRows(response.data);
-        console.log(rows);
-        console.log(response.data);
+        setLoading(false);
       })
-      .catch((error) => console.error("Erreur:", error));
+      .catch(() => {
+        setAlert({
+          message: "Erreur lors du chargement des partenaires",
+          severity: "error",
+        });
+        setLoading(false);
+      });
   };
 
-  const handleOpenDialog = () => setDialogOpen(true);
-  const handleCloseDialog = () => setDialogOpen(false);
+  const handleCloseAlert = () =>
+    setAlert({ message: null, severity: "success" });
 
   const handleView = (partenaire) => {
     setSelectedPartenaire(partenaire);
@@ -55,30 +79,59 @@ export default function Morale() {
   };
 
   const handleEdit = (partenaire) => {
-    fetchAllMorales();
     setSelectedPartenaire(partenaire);
     setEditDialogOpen(true);
   };
 
   const handleSave = () => {
-    // Mettre à jour les données dans l'état
     fetchAllMorales();
     setEditDialogOpen(false);
+    setAlert({
+      message: "Partenaire mis à jour avec succès",
+      severity: "success",
+    });
   };
 
-  const handleDelete = (idPartenaire) => {
+  const handleAddSuccess = () => {
+    fetchAllMorales();
+    setDialogOpen(false);
+    setAlert({ message: "Partenaire ajouté avec succès", severity: "success" });
+  };
+
+  // New delete confirmation handlers
+  const handleDeleteClick = (idPartenaire) => {
+    setPartenaireToDelete(idPartenaire);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    setLoading(true);
     moraleService
-      .delete(idPartenaire)
+      .delete(partenaireToDelete)
       .then(() => {
-        // Mettre à jour les données en appelant fetchAllMorales, pas besoin de filtrer les lignes
         fetchAllMorales();
+        setAlert({
+          message: "Partenaire supprimé avec succès",
+          severity: "success",
+        });
       })
-      .catch((error) =>
-        console.error("Erreur lors de la suppression :", error)
-      );
+      .catch(() => {
+        setAlert({
+          message: "Erreur lors de la suppression du partenaire",
+          severity: "error",
+        });
+      })
+      .finally(() => {
+        setLoading(false);
+        setDeleteDialogOpen(false);
+      });
   };
 
-  // Définir les colonnes à l'intérieur du composant pour accéder aux fonctions
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setPartenaireToDelete(null);
+  };
+
   const columns = [
     { field: "idPartenaire", headerName: "ID", width: 90 },
     { field: "nom", headerName: "Nom", flex: 1, editable: true },
@@ -98,11 +151,9 @@ export default function Morale() {
     },
     {
       field: "typePartenaire",
-      headerName: "Libellé",
+      headerName: "Type",
       flex: 1,
-      valueGetter: (params) => {
-        return params && params.libelle ? params.libelle : "N/A";
-      },
+      valueGetter: (params) => params?.libelle || "N/A",
       editable: false,
     },
     {
@@ -122,7 +173,8 @@ export default function Morale() {
           </IconButton>
           <IconButton
             color="error"
-            onClick={() => handleDelete(params.row.idPartenaire)}
+            onClick={() => handleDeleteClick(params.row.idPartenaire)}
+            disabled={loading}
           >
             <DeleteIcon />
           </IconButton>
@@ -136,49 +188,49 @@ export default function Morale() {
       <h1>Gestion des Partenaires Moraux :</h1>
 
       <Box>
-        <Button variant="contained" onClick={handleOpenDialog} sx={{ mb: 2 }}>
+        <Button
+          variant="contained"
+          onClick={() => setDialogOpen(true)}
+          sx={{ mb: 2 }}
+        >
           Ajouter un Partenaire Moral
         </Button>
 
         {dialogOpen && (
-          <MoraleDialog open={dialogOpen} onClose={handleCloseDialog} />
+          <MoraleDialog
+            open={dialogOpen}
+            onClose={() => setDialogOpen(false)}
+            onSave={handleAddSuccess}
+          />
         )}
 
         <DataGrid
           rows={rows}
           columns={columns}
+          loading={loading}
           getRowId={(row) => row.idPartenaire}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 5,
-              },
-            },
-          }}
+          initialState={{ pagination: { paginationModel: { pageSize: 5 } } }}
           pageSizeOptions={[5, 10, 20]}
           checkboxSelection
           disableRowSelectionOnClick
           slots={{ toolbar: CustomToolbar }}
           sx={{
             "@media print": {
-              ".MuiDataGrid-toolbarContainer": {
-                display: "none",
-              },
+              ".MuiDataGrid-toolbarContainer": { display: "none" },
             },
           }}
         />
       </Box>
 
-      {/* Dialogue pour Voir les Détails */}
+      {/* Dialogues */}
       {viewDialogOpen && (
         <ViewMoraleDialog
           open={viewDialogOpen}
           onClose={() => setViewDialogOpen(false)}
-          partenaire={selectedPartenaire}
+          partenaireId={selectedPartenaire.idPartenaire}
         />
       )}
 
-      {/* Dialogue pour Modifier */}
       {editDialogOpen && (
         <EditMoraleDialog
           open={editDialogOpen}
@@ -187,6 +239,49 @@ export default function Morale() {
           onSave={handleSave}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">
+          Confirmer la suppression
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Êtes-vous sûr de vouloir supprimer ce partenaire? Cette action est
+            irréversible.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="primary">
+            Annuler
+          </Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            color="error"
+            autoFocus
+            disabled={loading}
+          >
+            Supprimer
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Global Notification Snackbar */}
+      <Snackbar
+        open={!!alert.message}
+        autoHideDuration={6000}
+        onClose={handleCloseAlert}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity={alert.severity} onClose={handleCloseAlert}>
+          {alert.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

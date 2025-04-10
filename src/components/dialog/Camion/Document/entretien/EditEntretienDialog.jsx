@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -9,7 +9,7 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
 } from "@mui/material";
 import CamionSelect from "../../../../select/CamionSelect";
 
@@ -25,7 +25,7 @@ const typeEntretienOptions = [
   { value: "REFROIDISSEMENT", label: "Refroidissement" },
   { value: "ELECTRICITE", label: "Electricité" },
   { value: "TRANSMISSION", label: "Transmission" },
-  { value: "AUTRE", label: "Autre" }
+  { value: "AUTRE", label: "Autre" },
 ];
 
 // Enum options for StatusEntretien
@@ -33,7 +33,7 @@ const statusEntretienOptions = [
   { value: "PROGRAMME", label: "Programmé" },
   { value: "EN_COURS", label: "En Cours" },
   { value: "TERMINE", label: "Terminé" },
-  { value: "ANNULE", label: "Annulé" }
+  { value: "ANNULE", label: "Annulé" },
 ];
 
 export default function EditEntretienDialog({
@@ -47,6 +47,29 @@ export default function EditEntretienDialog({
     statusEntretien: entretien.statusEntretien || "", // Ensure statut exists
   });
   const [isCamionModalOpen, setIsCamionModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState({ message: null, severity: "success" });
+  const [errors, setErrors] = useState({
+    dateEntretien: false,
+    typeEntretien: false,
+    cout: false,
+  });
+
+  useEffect(() => {
+    if (open) {
+      setFormData(entretien);
+      setAlert({ message: null, severity: "success" });
+      setErrors({
+        dateEntretien: false,
+        typeEntretien: false,
+        cout: false,
+      });
+    }
+  }, [open, entretien]);
+
+  const handleCloseAlert = () => {
+    setAlert({ message: null, severity: "success" });
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -58,9 +81,43 @@ export default function EditEntretienDialog({
     setIsCamionModalOpen(false);
   };
 
-  const handleSubmit = () => {
-    onSave(formData);
-    onClose();
+  const validateForm = () => {
+    const newErrors = {
+      dateEntretien: !formData.dateEntretien,
+      typeEntretien: !formData.typeEntretien?.trim(),
+      cout:
+        !formData.cout ||
+        isNaN(formData.cout) ||
+        parseFloat(formData.cout) <= 0,
+    };
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(Boolean);
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    setLoading(true);
+    try {
+      const payload = {
+        ...formData,
+        cout: parseFloat(formData.cout),
+      };
+      await onSave(payload);
+      setAlert({
+        message: "Entretien mis à jour avec succès",
+        severity: "success",
+      });
+      onClose();
+    } catch (error) {
+      console.error("Error updating entretien:", error);
+      setAlert({
+        message: "Erreur lors de la mise à jour de l'entretien",
+        severity: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -175,7 +232,6 @@ export default function EditEntretienDialog({
         </Button>
       </DialogActions>
 
-      {/* Camion Selection Modal */}
       <CamionSelect
         open={isCamionModalOpen}
         onClose={() => setIsCamionModalOpen(false)}

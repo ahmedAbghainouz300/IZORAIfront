@@ -1,219 +1,438 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
-  DialogActions,
-  DialogContent,
   DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
   Button,
   FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
+  Box,
   Snackbar,
+  Alert as MuiAlert,
 } from "@mui/material";
-import AdressDialog from "../AdressDialog";
+import AdressDialog from "../adress/addAdress";
 import physiqueService from "../../../../service/partenaire/physiqueService";
-import typePartenaireService from "../../../../service/partenaire/typePartenaireService";
 import TypePartenaireTable from "../typepartenaire/typePartenaieTable";
+import { LocationOn, Delete, Edit } from "@mui/icons-material";
+import { 
+  Chip,
+  Avatar,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  IconButton,
+  Divider,
+  Typography,
+  Paper
+} from "@mui/material";
 
-export default function PhysiqueDialog({ open, onClose,onAdd }) {
+
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
+export default function PhysiqueDialog({ open, onClose, onAdd }) {
   const [openAdress, setOpenAdress] = useState(false);
-  const [isTypePartenaireModalOpen, setIsTypePartenaireModalOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [isTypePartenaireModalOpen, setIsTypePartenaireModalOpen] =
+    useState(false);
   const [selectedTypePartenaire, setSelectedTypePartenaire] = useState(null);
 
-
-
-  // Centralized form state
   const [formData, setFormData] = useState({
     nom: "",
     prenom: "",
-    email: "",
     telephone: "",
     cni: "",
-    typePartenaire: {},
+    email: "",
+    typePartenaire: null,
     adresses: [],
   });
 
+  const [validationError, setValidationError] = useState("");
+  const [isFailedValidation, setIsFailedValidation] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
-  // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    if (
+      (name === "nom" ||
+        name === "prenom" ||
+        name === "telephone" ||
+        name === "cni") &&
+      validationError
+    ) {
+      setValidationError("");
+    }
   };
 
-  // Add a new address
   const handleAddAdress = (newAdresse) => {
-    setFormData((prev) => ({
-      ...prev,
-      adresses: [...prev.adresses, newAdresse],
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      adresses: [...prevFormData.adresses, newAdresse],
     }));
     setOpenAdress(false);
   };
 
-  // Validate form
   const validateForm = () => {
-    const { nom, prenom, email, telephone, cni, typePartenaire } = formData;
-
-    if (!nom || !prenom || !email || !telephone || !cni || !typePartenaire) {
-      setErrorMessage("Veuillez remplir tous les champs obligatoires.");
+    if (!formData.nom.trim()) {
+      setValidationError("Name is required");
+      setIsFailedValidation(true);
       return false;
     }
-
-    if (isNaN(telephone) || isNaN(cni)) {
-      setErrorMessage("Téléphone et CNI doivent être des nombres.");
+    if (!formData.prenom.trim()) {
+      setValidationError("First name is required");
+      setIsFailedValidation(true);
       return false;
     }
-
+    if (!formData.telephone) {
+      setValidationError("Phone number is required");
+      setIsFailedValidation(true);
+      return false;
+    }
+    if (isNaN(formData.telephone)) {
+      setValidationError("Phone must be a valid number");
+      setIsFailedValidation(true);
+      return false;
+    }
+    if (!formData.cni) {
+      setValidationError("CNI is required");
+      setIsFailedValidation(true);
+      return false;
+    }
+   
+    if (!formData.typePartenaire) {
+      setValidationError("Partner type is required");
+      setIsFailedValidation(true);
+      return false;
+    }
+    setValidationError("");
     return true;
   };
 
-  // Handle form submission
+  const handleCloseFailedValidation = (event, reason) => {
+    if (reason === "clickaway") return;
+    setIsFailedValidation(false);
+  };
+
+  const handleCloseError = (event, reason) => {
+    if (reason === "clickaway") return;
+    setError(null);
+  };
+
+  const handleCloseSuccess = (event, reason) => {
+    if (reason === "clickaway") return;
+    setSuccess(null);
+  };
+
+  const handleSelectTypePartenaire = (selectedType) => {
+    setSelectedTypePartenaire(selectedType);
+    setFormData({ ...formData, typePartenaire: selectedType });
+    setIsTypePartenaireModalOpen(false);
+    if (validationError === "Partner type is required") {
+      setValidationError("");
+    }
+  };
+
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    const newPhysique = {
-      nom: formData.nom,
-      prenom: formData.prenom,
-      email: formData.email,
-      telephone: Number(formData.telephone),
-      cni: Number(formData.cni),
-      typePartenaire: formData.typePartenaire,
-      adresses: formData.adresses,
-    };
-
+    setIsLoading(true);
     try {
+      const newPhysique = {
+        nom: formData.nom,
+        prenom: formData.prenom,
+        telephone: formData.telephone,
+        cni: Number(formData.cni),
+        email: formData.email || null,
+        typePartenaire: formData.typePartenaire,
+        adresses: formData.adresses,
+      };
+
       await physiqueService.create(newPhysique);
+      setSuccess("Partner created successfully");
       resetForm();
       onAdd();
       onClose();
     } catch (error) {
-      console.error("Erreur lors de la création du partenaire physique:", error);
-      setErrorMessage("Une erreur est survenue lors de l'ajout du partenaire physique.");
+      console.error("Error creating Physique:", error);
+      setError(error.response?.data?.message || "Failed to create partner");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Reset form
   const resetForm = () => {
     setFormData({
       nom: "",
       prenom: "",
-      email: "",
       telephone: "",
       cni: "",
-      typePartenaire: {},
+      email: "",
+      typePartenaire: null,
       adresses: [],
     });
-    setErrorMessage("");
+    setSelectedTypePartenaire(null);
   };
 
-  
-  
-  const handleSelectTypePartenaire = (type) => {
-    setFormData((prev) => ({
+  const handleDeleteAddress = (index) => {
+    setFormData(prev => ({
       ...prev,
-      typePartenaire: type,
+      adresses: prev.adresses.filter((_, i) => i !== index)
     }));
-    setSelectedTypePartenaire(type); // Met à jour le type partenaire sélectionné
-    setIsTypePartenaireModalOpen(false); // Ferme le modal
   };
-  
 
   return (
     <>
-      <Dialog open={open} onClose={onClose}>
-        <DialogTitle>Ajouter un Partenaire Physique</DialogTitle>
+      <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+        <DialogTitle>Add Physical Partner</DialogTitle>
         <DialogContent>
-          {/* Nom */}
-          <TextField label="Nom" fullWidth margin="normal" name="nom" value={formData.nom} onChange={handleInputChange}/>
-          {/* Prénom */}
-          <TextField label="Prénom" fullWidth margin="normal" name="prenom" value={formData.prenom} onChange={handleInputChange}/>
-          {/* Email */}
-          <TextField label="Email" fullWidth margin="normal" name="email" value={formData.email} onChange={handleInputChange}/>
-          {/* Téléphone */}
-          <TextField label="Téléphone" fullWidth margin="normal" name="telephone" value={formData.telephone} onChange={handleInputChange}/>
+          <Box sx={{ p: 2 }}>
+            <TextField
+              label="Name*"
+              fullWidth
+              margin="normal"
+              name="nom"
+              value={formData.nom}
+              onChange={handleInputChange}
+              error={!!validationError && !formData.nom.trim()}
+              helperText={
+                validationError && !formData.nom.trim() ? validationError : ""
+              }
+              required
+            />
 
-          {/* CNI */}
-          <TextField label="CNI" fullWidth margin="normal" name="cni" value={formData.cni} onChange={handleInputChange}/>
+            <TextField
+              label="First Name*"
+              fullWidth
+              margin="normal"
+              name="prenom"
+              value={formData.prenom}
+              onChange={handleInputChange}
+              error={!!validationError && !formData.prenom.trim()}
+              helperText={
+                validationError && !formData.prenom.trim()
+                  ? validationError
+                  : ""
+              }
+              required
+            />
 
-          {/* Type Partenaire */}
-          <FormControl fullWidth margin="normal">
-            <Button
-              variant="outlined"
-              onClick={() => setIsTypePartenaireModalOpen(true)}
-              style={{ marginTop: "8px" }}
-            >
-              Sélectionner un Type Partenaire
-            </Button>
+            <TextField
+              label="Phone*"
+              fullWidth
+              margin="normal"
+              name="telephone"
+              value={formData.telephone}
+              onChange={handleInputChange}
+              error={
+                !!validationError &&
+                (!formData.telephone || isNaN(formData.telephone))
+              }
+              helperText={
+                validationError &&
+                (!formData.telephone || isNaN(formData.telephone))
+                  ? validationError
+                  : ""
+              }
+              required
+              inputProps={{ inputMode: "tel", pattern: "[0-9]*" }}
+            />
 
-            {/* Affichage du libellé du type partenaire sélectionné */}
-            {selectedTypePartenaire && (
+            <TextField
+              label="CNI*"
+              fullWidth
+              margin="normal"
+              name="cni"
+              value={formData.cni}
+              onChange={handleInputChange}
+              error={
+                !!validationError && (!formData.cni || isNaN(formData.cni))
+              }
+              helperText={
+                validationError && (!formData.cni || isNaN(formData.cni))
+                  ? validationError
+                  : ""
+              }
+              required
+              inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+            />
+
+            <TextField
+              label="Email"
+              fullWidth
+              margin="normal"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleInputChange}
+            />
+
+            <FormControl fullWidth margin="normal">
               <TextField
-                label="Type Partenaire"
-                value={selectedTypePartenaire.libelle}
+                label="Partner Type"
+                value={selectedTypePartenaire?.libelle || ""}
                 fullWidth
                 margin="normal"
-                InputProps={{
-                  readOnly: true, // Lecture seule pour éviter la modification manuelle
-                }}
+                InputProps={{ readOnly: true }}
+                error={!!validationError && !formData.typePartenaire}
+                helperText={
+                  validationError && !formData.typePartenaire
+                    ? validationError
+                    : ""
+                }
               />
-            )}
-          </FormControl>
+              <Button
+                variant="outlined"
+                onClick={() => setIsTypePartenaireModalOpen(true)}
+                sx={{ mt: 1 }}
+              >
+                {selectedTypePartenaire
+                  ? "Change Partner Type*"
+                  : "Select Partner Type*"}
+              </Button>
+            </FormControl>
 
-
-          {/* Adresses */}
-          <div style={{ marginTop: "20px" }}>
-            <h4>Adresses</h4>
-            {formData.adresses.length > 0 ? (
-              <ul>
-                {formData.adresses.map((adresse, index) => (
-                  <li key={index}>
-                    {adresse.rue}, {adresse.ville}, {adresse.codePostal}, {adresse.pays}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>Aucune adresse ajoutée.</p>
-            )}
-          </div>
+            <Box sx={{ mt: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                Addresses
+              </Typography>
+              
+              {formData.adresses.length > 0 ? (
+                <Paper variant="outlined" sx={{ p: 2 }}>
+                  <List dense>
+                    {formData.adresses.map((adresse, index) => (
+                      <React.Fragment key={index}>
+                        <ListItem
+                          secondaryAction={
+                            <>
+                              <IconButton 
+                                edge="end" 
+                                aria-label="delete"
+                                onClick={() => handleDeleteAddress(index)}
+                              >
+                                <Delete fontSize="small" color="error" />
+                              </IconButton>
+                            </>
+                          }
+                        >
+                          <ListItemAvatar>
+                            <Avatar sx={{ bgcolor: 'primary.main' }}>
+                              <LocationOn />
+                            </Avatar>
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={
+                              <Typography variant="subtitle1" component="div">
+                                {adresse.rue}, {adresse.ville}
+                              </Typography>
+                            }
+                            secondary={
+                              <>
+                                <Typography component="span" variant="body2" color="text.primary">
+                                  {adresse.codePostal}, {adresse.pays}
+                                </Typography>
+                                <Chip 
+                                  label="Primary" 
+                                  size="small" 
+                                  color="primary" 
+                                  sx={{ ml: 1, fontSize: '0.6rem' }} 
+                                />
+                              </>
+                            }
+                          />
+                        </ListItem>
+                        {index < formData.adresses.length - 1 && <Divider variant="inset" component="li" />}
+                      </React.Fragment>
+                    ))}
+                  </List>
+                </Paper>
+              ) : (
+                <Paper variant="outlined" sx={{ p: 3, textAlign: 'center' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    No addresses added yet
+                  </Typography>
+                  <Button 
+                    variant="text" 
+                    size="small" 
+                    startIcon={<LocationOn />}
+                    onClick={() => setOpenAdress(true)}
+                    sx={{ mt: 1 }}
+                  >
+                    Add First Address
+                  </Button>
+                </Paper>
+              )}
+              
+              <Button
+                variant="outlined"
+                startIcon={<LocationOn />}
+                onClick={() => setOpenAdress(true)}
+                sx={{ mt: 2 }}
+              >
+                {formData.adresses.length > 0 ? 'Add Another Address' : 'Add Address'}
+              </Button>
+            </Box>
+          </Box>
         </DialogContent>
-
         <DialogActions>
-          <Button onClick={onClose}>Annuler</Button>
-          <Button onClick={handleSubmit} color="primary">
-            Ajouter
+          <Button onClick={onClose} disabled={isLoading}>
+            Cancel
           </Button>
-          <Button onClick={() => setOpenAdress(true)}>Ajouter une Adresse</Button>
+          
+          <Button onClick={handleSubmit} color="primary" disabled={isLoading}>
+            {isLoading ? "Saving..." : "Add"}
+          </Button>
         </DialogActions>
       </Dialog>
 
-      {/* AdressDialog */}
-      <AdressDialog
-        open={openAdress}
-        onClose={() => setOpenAdress(false)}  
-        onSave={handleAddAdress}
-      />
-
-      {/* TypePartenaireTable Modal */}
       <TypePartenaireTable
         open={isTypePartenaireModalOpen}
         onClose={() => setIsTypePartenaireModalOpen(false)}
-        onSelectTypePartenaire={(selectedType) => {
-          console.log("Type sélectionné :", selectedType)
-          handleSelectTypePartenaire(selectedType)}
-      }
-        />
-      
-
-
-      {/* Snackbar for Error Messages */}
-      <Snackbar
-        open={!!errorMessage}
-        autoHideDuration={6000}
-        onClose={() => setErrorMessage("")}
-        message={errorMessage}
+        onSelectTypePartenaire={handleSelectTypePartenaire}
       />
+
+      <AdressDialog
+        open={openAdress}
+        onClose={() => setOpenAdress(false)}
+        onAdd={handleAddAdress}
+      />
+
+      <Snackbar
+        open={isFailedValidation}
+        autoHideDuration={6000}
+        onClose={handleCloseFailedValidation}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="error" onClose={handleCloseFailedValidation}>
+          {validationError || "Please fill all required fields"}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={handleCloseError}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="error" onClose={handleCloseError}>
+          {error}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={!!success}
+        autoHideDuration={6000}
+        onClose={handleCloseSuccess}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="success" onClose={handleCloseSuccess}>
+          {success}
+        </Alert>
+      </Snackbar>
     </>
   );
 }

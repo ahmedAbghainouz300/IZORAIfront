@@ -12,7 +12,7 @@ import {
   MenuItem,
   CircularProgress,
   Snackbar,
-  Alert,
+  Alert as MuiAlert,
 } from "@mui/material";
 import AssuranceSelect from "../../../select/AssuranceSelect";
 import CarteGriseSelect from "../../../select/CarteGriseSelect";
@@ -37,12 +37,28 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
   useEffect(() => {
     if (open) {
       setFormData(cabine);
+      setValidationError(""); // Clear validation errors when opening
+      setShowValidationError(false); // Reset validation error display
     }
   }, [open, cabine]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    // Clear validation error when user types in immatriculation
+    if (name === "immatriculation" && validationError) {
+      setValidationError("");
+    }
+  };
+
+  const validateForm = () => {
+    if (!formData.immatriculation?.trim()) {
+      setValidationError("L'immatriculation est obligatoire");
+      setShowValidationError(true);
+      return false;
+    }
+    setValidationError("");
+    return true;
   };
 
   const handleSelectAssurance = (assurance) => {
@@ -80,18 +96,27 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
       <DialogTitle>Modifier la Cabine</DialogTitle>
       <DialogContent>
         {loading ? (
-          <div style={{ display: "flex", justifyContent: "center", height: "200px" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              height: "200px",
+            }}
+          >
             <CircularProgress />
           </div>
         ) : (
           <>
             <TextField
               name="immatriculation"
-              label="Immatriculation"
+              label="Immatriculation*"
               value={formData.immatriculation || ""}
               onChange={handleChange}
               fullWidth
               margin="normal"
+              error={!!validationError}
+              helperText={validationError}
+              required
             />
 
             <FormControl fullWidth margin="normal">
@@ -121,7 +146,6 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
               type="number"
             />
 
-     
             <FormControl fullWidth margin="normal">
               <InputLabel id="status-label">Statut</InputLabel>
               <Select
@@ -212,9 +236,21 @@ export default function EditCabineDialog({ open, onClose, cabine, onSave }) {
         open={!!error}
         autoHideDuration={6000}
         onClose={() => setError(null)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert onClose={() => setError(null)} severity="error">
           {error}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={showValidationError}
+        autoHideDuration={6000}
+        onClose={handleCloseValidationError}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="error">
+          Veuillez remplir tous les champs obligatoires
         </Alert>
       </Snackbar>
     </Dialog>
