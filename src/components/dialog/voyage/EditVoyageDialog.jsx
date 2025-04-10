@@ -35,6 +35,7 @@ import camionService from "../../../service/camion/camionService";
 import remorqueService from "../../../service/camion/remorqueService";
 import marchandiseService from "../../../service/marchandise/marchandiseService";
 import AddAddress from "../partenaire/adress/addAdress";
+import chaufeurService from "../../../service/partenaire/chaufeurService";
 
 export default function EditVoyageDialog({ open, onClose, onSave, voyageId }) {
   const { enqueueSnackbar } = useSnackbar();
@@ -98,7 +99,7 @@ export default function EditVoyageDialog({ open, onClose, onSave, voyageId }) {
       try {
         const [chauffeursRes, camionsRes, remorquesRes, marchandisesRes] =
           await Promise.all([
-            chauffeurService.getAll(),
+            chaufeurService.getAll(),
             camionService.getAll(),
             remorqueService.getAll(),
             marchandiseService.getAll(),
@@ -201,7 +202,7 @@ export default function EditVoyageDialog({ open, onClose, onSave, voyageId }) {
         ...prev.listMarchandises,
         {
           marchandise: selectedMarchandise,
-          qte: parseInt(qteMarchandise),
+          quantite: parseInt(qteMarchandise),
         },
       ],
     }));
@@ -602,7 +603,7 @@ export default function EditVoyageDialog({ open, onClose, onSave, voyageId }) {
                         <Grid item xs={12} md={5}>
                           <Autocomplete
                             options={marchandises}
-                            getOptionLabel={(option) => option.nom}
+                            getOptionLabel={(option) => option.libelle}
                             value={selectedMarchandise}
                             onChange={(_, value) =>
                               setSelectedMarchandise(value)
@@ -668,9 +669,10 @@ export default function EditVoyageDialog({ open, onClose, onSave, voyageId }) {
                               }}
                             >
                               <Typography>
-                                {item.marchandise?.nom ||
+                                {item.marchandise?.libelle ||
                                   "Marchandise inconnue"}{" "}
-                                - {item.qte} {item.marchandise?.unite || ""}
+                                - {item.quantite}{" "}
+                                {item.marchandise?.unite.unite || ""}
                               </Typography>
                               {canEdit && (
                                 <IconButton

@@ -33,6 +33,7 @@ import {
 import voyageService from "../../../service/voyage/voyageService";
 import { useSnackbar } from "notistack";
 import EditVoyageDialog from "./EditVoyageDialog";
+import { blue } from "@mui/material/colors";
 
 const statusColors = {
   PLANIFIE: { bgcolor: "#BBDEFB", color: "#0D47A1" },
@@ -84,9 +85,22 @@ export default function ViewVoyageDialog({ open, onClose, voyageId }) {
     if (!resource) return "Non spécifié";
     if (resource.nom && resource.prenom)
       return `${resource.nom} ${resource.prenom}`;
-    if (resource.marque && resource.modele)
-      return `${resource.marque} ${resource.modele} (${resource.immatriculation})`;
-    if (resource.type) return `${resource.type} (${resource.immatriculation})`;
+    if (resource.immatriculation && resource.poidsMax !== null)
+      return (
+        <Box>
+          <Box sx={{ color: "blue" }}>immatriculation :</Box>
+          {resource.immatriculation} <br />
+          <Box sx={{ color: "blue" }}>poids maximal :</Box>
+          {resource.poidsMax}
+        </Box>
+      );
+    if (resource.typeRemorque)
+      return (
+        <Box>
+          <Box sx={{ color: "blue" }}>TYPE :</Box>
+          {resource.typeRemorque.type}
+        </Box>
+      );
     return "Ressource inconnue";
   };
 
@@ -385,11 +399,12 @@ export default function ViewVoyageDialog({ open, onClose, voyageId }) {
                             {voyage.listMarchandises.map((item, index) => (
                               <TableRow key={index}>
                                 <TableCell sx={{ fontWeight: "bold" }}>
-                                  {item.marchandise?.nom ||
+                                  {item.marchandise?.libelle ||
                                     "Marchandise inconnue"}
                                 </TableCell>
                                 <TableCell>
-                                  {item.qte} {item.marchandise?.unite || ""}
+                                  {item.quantite}{" "}
+                                  {item.marchandise?.unite.unite || ""}
                                 </TableCell>
                                 <TableCell>
                                   {item.marchandise?.description ||
