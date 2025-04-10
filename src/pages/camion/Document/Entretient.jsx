@@ -191,7 +191,7 @@ export default function Entretien() {
         <ViewEntretienDialog
           open={viewDialogOpen}
           onClose={() => setViewDialogOpen(false)}
-          entretienId={selectedRow.id}
+          entretienId={selectedRow ? selectedRow.id : null}
         />
       )}
 

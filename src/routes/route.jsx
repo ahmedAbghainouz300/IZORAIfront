@@ -19,6 +19,7 @@ import CarteGrise from "../pages/camion/Document/CarteGrise";
 import CredentialsSignInPage from "../components/Login";
 import Marchandise from "../pages/marchandise/Marchandise";
 import DemandeCotation from "../pages/demande/DemandeCotation";
+import Voyage from "../pages/voyage/Voyage";
 import Traject from "../pages/Traject";
 
 function AppRoutes() {
@@ -67,6 +68,7 @@ function AppRoutes() {
         </Route>
         {/* Marchandise Section */}
         <Route path={allRoutes.marchandise.base} element={<Marchandise />} />
+        <Route path={allRoutes.voyage.base} element={<Voyage />} />
         <Route
           path={allRoutes.demandeCotation.base}
           element={<DemandeCotation />}

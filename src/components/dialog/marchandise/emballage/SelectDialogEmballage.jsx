@@ -14,22 +14,22 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { useSnackbar } from "notistack";
-import categorieService from "../../../../service/marchandise/categorieService";
-import CategorieDialog from "./CategorieDialog";
+import emballageService from "../../../../service/marchandise/emballageService";
+import EmballageDialog from "./EmballageDialog";
 
-export default function SelectDialogCategorie({ open, onClose, onSelect }) {
-  const [categories, setCategories] = useState([]);
-  const [categorieDialogOpen, setCategorieDialogOpen] = useState(false);
-  const [selectedCategorie, setSelectedCategorie] = useState(null);
+export default function SelectDialogEmballage({ open, onClose, onSelect }) {
+  const [emballages, setEmballages] = useState([]);
+  const [emballageDialogOpen, setEmballageDialogOpen] = useState(false);
+  const [selectedEmballage, setSelectedEmballage] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
 
-  const fetchCategories = () => {
-    categorieService
+  const fetchEmballages = () => {
+    emballageService
       .getAll()
-      .then((res) => setCategories(res.data))
+      .then((res) => setEmballages(res.data))
       .catch((error) => {
-        console.error("Error fetching categories:", error);
-        enqueueSnackbar("Erreur lors du chargement des catégories", {
+        console.error("Error fetching emballages:", error);
+        enqueueSnackbar("Erreur lors du chargement des emballages", {
           variant: "error",
         });
       });
@@ -37,24 +37,22 @@ export default function SelectDialogCategorie({ open, onClose, onSelect }) {
 
   useEffect(() => {
     if (open) {
-      fetchCategories();
+      fetchEmballages();
     }
   }, [open]);
 
   const handleDelete = (id) => {
-    if (
-      window.confirm("Êtes-vous sûr de vouloir supprimer cette catégorie ?")
-    ) {
-      categorieService
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer cet emballage ?")) {
+      emballageService
         .delete(id)
         .then(() => {
-          enqueueSnackbar("Catégorie supprimée avec succès", {
+          enqueueSnackbar("Emballage supprimé avec succès", {
             variant: "success",
           });
-          fetchCategories();
+          fetchEmballages();
         })
         .catch((error) => {
-          console.error("Error deleting category:", error);
+          console.error("Error deleting emballage:", error);
           enqueueSnackbar(
             error.response?.data?.message || "Erreur lors de la suppression",
             { variant: "error" }
@@ -63,15 +61,14 @@ export default function SelectDialogCategorie({ open, onClose, onSelect }) {
     }
   };
 
-  const handleEdit = (categorie) => {
-    setSelectedCategorie(categorie);
-    setCategorieDialogOpen(true);
+  const handleEdit = (emballage) => {
+    setSelectedEmballage(emballage);
+    setEmballageDialogOpen(true);
   };
 
   const columns = [
-    { field: "id", headerName: "ID", width: 100 },
-    { field: "libelle", headerName: "Libellé", flex: 1 },
-    { field: "description", headerName: "Description", flex: 1 },
+    { field: "nom", headerName: "Nom", flex: 1 },
+    { field: "capacite", headerName: "Capacite", flex: 1 },
     {
       field: "actions",
       headerName: "Actions",
@@ -101,14 +98,14 @@ export default function SelectDialogCategorie({ open, onClose, onSelect }) {
     <>
       <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
         <DialogTitle>
-          Sélectionner une catégorie
+          Sélectionner un emballage
           <Button
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
             onClick={() => {
-              setSelectedCategorie(null);
-              setCategorieDialogOpen(true);
+              setSelectedEmballage(null);
+              setEmballageDialogOpen(true);
             }}
             sx={{ float: "right", mr: 2 }}
           >
@@ -118,7 +115,7 @@ export default function SelectDialogCategorie({ open, onClose, onSelect }) {
         <DialogContent>
           <Box sx={{ height: 400 }}>
             <DataGrid
-              rows={categories}
+              rows={emballages}
               columns={columns}
               getRowId={(row) => row.id}
               pageSize={5}
@@ -133,18 +130,18 @@ export default function SelectDialogCategorie({ open, onClose, onSelect }) {
         </DialogActions>
       </Dialog>
 
-      <CategorieDialog
-        open={categorieDialogOpen}
+      <EmballageDialog
+        open={emballageDialogOpen}
         onClose={() => {
-          setCategorieDialogOpen(false);
-          setSelectedCategorie(null);
+          setEmballageDialogOpen(false);
+          setSelectedEmballage(null);
         }}
         onSave={() => {
-          fetchCategories();
-          setCategorieDialogOpen(false);
-          setSelectedCategorie(null);
+          fetchEmballages();
+          setEmballageDialogOpen(false);
+          setSelectedEmballage(null);
         }}
-        categorie={selectedCategorie}
+        emballage={selectedEmballage}
       />
     </>
   );

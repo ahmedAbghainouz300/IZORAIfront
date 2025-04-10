@@ -14,22 +14,22 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { useSnackbar } from "notistack";
-import categorieService from "../../../../service/marchandise/categorieService";
-import CategorieDialog from "./CategorieDialog";
+import uniteService from "../../../../service/marchandise/uniteService";
+import UniteDialog from "./UniteDialog";
 
-export default function SelectDialogCategorie({ open, onClose, onSelect }) {
-  const [categories, setCategories] = useState([]);
-  const [categorieDialogOpen, setCategorieDialogOpen] = useState(false);
-  const [selectedCategorie, setSelectedCategorie] = useState(null);
+export default function SelectDialogUnite({ open, onClose, onSelect }) {
+  const [unites, setUnites] = useState([]);
+  const [uniteDialogOpen, setUniteDialogOpen] = useState(false);
+  const [selectedUnite, setSelectedUnite] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
 
-  const fetchCategories = () => {
-    categorieService
+  const fetchUnites = () => {
+    uniteService
       .getAll()
-      .then((res) => setCategories(res.data))
+      .then((res) => setUnites(res.data))
       .catch((error) => {
-        console.error("Error fetching categories:", error);
-        enqueueSnackbar("Erreur lors du chargement des catégories", {
+        console.error("Error fetching units:", error);
+        enqueueSnackbar("Erreur lors du chargement des unités", {
           variant: "error",
         });
       });
@@ -37,24 +37,22 @@ export default function SelectDialogCategorie({ open, onClose, onSelect }) {
 
   useEffect(() => {
     if (open) {
-      fetchCategories();
+      fetchUnites();
     }
   }, [open]);
 
   const handleDelete = (id) => {
-    if (
-      window.confirm("Êtes-vous sûr de vouloir supprimer cette catégorie ?")
-    ) {
-      categorieService
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer cette unité ?")) {
+      uniteService
         .delete(id)
         .then(() => {
-          enqueueSnackbar("Catégorie supprimée avec succès", {
+          enqueueSnackbar("Unité supprimée avec succès", {
             variant: "success",
           });
-          fetchCategories();
+          fetchUnites();
         })
         .catch((error) => {
-          console.error("Error deleting category:", error);
+          console.error("Error deleting unit:", error);
           enqueueSnackbar(
             error.response?.data?.message || "Erreur lors de la suppression",
             { variant: "error" }
@@ -63,14 +61,14 @@ export default function SelectDialogCategorie({ open, onClose, onSelect }) {
     }
   };
 
-  const handleEdit = (categorie) => {
-    setSelectedCategorie(categorie);
-    setCategorieDialogOpen(true);
+  const handleEdit = (unite) => {
+    setSelectedUnite(unite);
+    setUniteDialogOpen(true);
   };
 
   const columns = [
     { field: "id", headerName: "ID", width: 100 },
-    { field: "libelle", headerName: "Libellé", flex: 1 },
+    { field: "unite", headerName: "Unite", flex: 1 },
     { field: "description", headerName: "Description", flex: 1 },
     {
       field: "actions",
@@ -78,6 +76,9 @@ export default function SelectDialogCategorie({ open, onClose, onSelect }) {
       width: 300,
       renderCell: (params) => (
         <Box>
+          <IconButton color="primary" onClick={() => onSelect(params.row)}>
+            <VisibilityIcon />
+          </IconButton>
           <IconButton color="secondary" onClick={() => handleEdit(params.row)}>
             <EditIcon />
           </IconButton>
@@ -101,14 +102,14 @@ export default function SelectDialogCategorie({ open, onClose, onSelect }) {
     <>
       <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
         <DialogTitle>
-          Sélectionner une catégorie
+          Sélectionner une unité
           <Button
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
             onClick={() => {
-              setSelectedCategorie(null);
-              setCategorieDialogOpen(true);
+              setSelectedUnite(null);
+              setUniteDialogOpen(true);
             }}
             sx={{ float: "right", mr: 2 }}
           >
@@ -118,7 +119,7 @@ export default function SelectDialogCategorie({ open, onClose, onSelect }) {
         <DialogContent>
           <Box sx={{ height: 400 }}>
             <DataGrid
-              rows={categories}
+              rows={unites}
               columns={columns}
               getRowId={(row) => row.id}
               pageSize={5}
@@ -133,18 +134,18 @@ export default function SelectDialogCategorie({ open, onClose, onSelect }) {
         </DialogActions>
       </Dialog>
 
-      <CategorieDialog
-        open={categorieDialogOpen}
+      <UniteDialog
+        open={uniteDialogOpen}
         onClose={() => {
-          setCategorieDialogOpen(false);
-          setSelectedCategorie(null);
+          setUniteDialogOpen(false);
+          setSelectedUnite(null);
         }}
         onSave={() => {
-          fetchCategories();
-          setCategorieDialogOpen(false);
-          setSelectedCategorie(null);
+          fetchUnites();
+          setUniteDialogOpen(false);
+          setSelectedUnite(null);
         }}
-        categorie={selectedCategorie}
+        unite={selectedUnite}
       />
     </>
   );

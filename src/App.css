@@ -42,3 +42,7 @@
 .h6.MuiTypography-root.MuiTypography-h6.css-14tatqh-MuiTypography-root{
   color: white;
 }
+
+.voyage-page ~ .ant-layout-sider {
+  display: none;
+}

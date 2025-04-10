@@ -36,8 +36,8 @@ const AllRoutes = {
   demandeCotation: {
     base: "/demandeCotation",
   },
-  traject: {
-    base: "/traject",
+  voyage: {
+    base: "/voyage",
   },
 };
 
