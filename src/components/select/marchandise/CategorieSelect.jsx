@@ -106,7 +106,7 @@ export default function CategorieSelect({ open, onClose, onSelectCategorie }) {
         )
       );
       setEditingCategorie(null);
-      setNewCategorie({ categorie: "", description: "" });
+      setNewCategorie({ libelle: "", description: "" });
       setIsSuccess(true);
     } catch (error) {
       console.error("Error updating category:", error);

@@ -3,12 +3,9 @@ import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
-import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
-import Slide from "@mui/material/Slide";
 import {
   Button,
   TextField,
@@ -17,16 +14,18 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Grid,
 } from "@mui/material";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 import AssuranceSelect from "../../../select/AssuranceSelect";
 import CarteGriseSelect from "../../../select/CarteGriseSelect";
 import TypeCabineSelect from "../../../select/TypeCabineSelect";
 
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-// Status options based on your enum
 const statusOptions = [
   { value: "EN_SERVICE", label: "En Service" },
   { value: "EN_REPARATION", label: "En Réparation" },
@@ -36,44 +35,87 @@ const statusOptions = [
 
 export default function CabineDialog({ open, onClose, onSave }) {
   const [isAssuranceModalOpen, setIsAssuranceModalOpen] = React.useState(false);
-  const [isCarteGriseModalOpen, setIsCarteGriseModalOpen] =
-    React.useState(false);
-  const [isTypeCabineModalOpen, setIsTypeCabineModalOpen] =
-    React.useState(false);
+  const [isCarteGriseModalOpen, setIsCarteGriseModalOpen] = React.useState(false);
+  const [isTypeCabineModalOpen, setIsTypeCabineModalOpen] = React.useState(false);
 
   const [cabineData, setCabineData] = React.useState({
     immatriculation: "",
     typeCamion: null,
     poidsMax: "",
-    status: "", // Added status field
+    status: "",
     assurance: null,
     carteGrise: null,
   });
 
+  const [errors, setErrors] = React.useState({});
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setCabineData({ ...cabineData, [name]: value });
-    // Clear validation error when user types
-    if (name === "immatriculation" && validationError) {
-      setValidationError("");
-    }
+    setCabineData((prevData) => ({ ...prevData, [name]: value }));
+    setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
   };
 
   const validateForm = () => {
+    const newErrors = {};
+
     if (!cabineData.immatriculation.trim()) {
-      setValidationError("L'immatriculation est obligatoire");
-      setIsFailedValidation(true);
-      return false;
+      newErrors.immatriculation = "L'immatriculation est obligatoire";
     }
-    setValidationError("");
-    return true;
+
+    if (!cabineData.typeCamion) {
+      newErrors.typeCamion = "Le type de camion est obligatoire";
+    }
+
+    if (!cabineData.poidsMax) {
+      newErrors.poidsMax = "Le poids max est obligatoire";
+    } else if (isNaN(cabineData.poidsMax)) {
+      newErrors.poidsMax = "Le poids max doit être un nombre valide";
+    } else if (Number(cabineData.poidsMax) <= 0) {
+      newErrors.poidsMax = "Le poids max doit être supérieur à 0";
+    } else if (Number(cabineData.poidsMax) > 100000) {
+      newErrors.poidsMax = "Le poids max ne doit pas dépasser 100000 kg";
+    }
+
+    if (!cabineData.status) {
+      newErrors.status = "Le statut est obligatoire";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleCloseFailedValidation = (event, reason) => {
-    if (reason === "clickaway") return;
-    setIsFailedValidation(false);
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      setSnackbarOpen(true);
+      return;
+    }
+
+    const payload = {
+      immatriculation: cabineData.immatriculation,
+      typeCamion: cabineData.typeCamion,
+      poidsMax: Number(cabineData.poidsMax),
+      status: cabineData.status,
+      assurance: cabineData.assurance,
+      carteGrise: cabineData.carteGrise,
+    };
+    onSave(payload);
+
+    // Reset form data
+    setCabineData({
+      immatriculation: "",
+      typeCamion: null,
+      poidsMax: "",
+      status: "",
+      assurance: null,
+      carteGrise: null,
+    });
   };
 
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
+  };
+  
   const handleSelectAssurance = (assurance) => {
     setCabineData({ ...cabineData, assurance });
     setIsAssuranceModalOpen(false);
@@ -84,198 +126,218 @@ export default function CabineDialog({ open, onClose, onSave }) {
     setIsCarteGriseModalOpen(false);
   };
 
-  const handleSelectTypeCabine = (typeCabine) => {
-    setCabineData({ ...cabineData, typeCabine });
+  const handleSelectTypeCabine = (typeCamion) => {
+    setCabineData({ ...cabineData, typeCamion });
     setIsTypeCabineModalOpen(false);
   };
 
-  const handleSubmit = async () => {
-    if (!validateForm()) return;
-
-    const payload = {
-      immatriculation: cabineData.immatriculation,
-      typeCabine: cabineData.typeCabine,
-      poidsMax: Number(cabineData.poidsMax),
-      status: cabineData.status, // Include status in payload
-      assurance: cabineData.assurance,
-      carteGrise: cabineData.carteGrise,
-    };
-
-    setCabineData({
-      immatriculation: "",
-      typeCamion: null,
-      poidsMax: "",
-      status: "", // Reset status
-      assurance: null,
-      carteGrise: null,
-    });
-    onSave(payload);
-  };
-
   return (
-    <Dialog
-      fullScreen
-      open={open}
-      onClose={onClose}
-      TransitionComponent={Transition}
-    >
-      <AppBar sx={{ position: "relative" }}>
-        <Toolbar>
-          <IconButton
-            edge="start"
-            color="inherit"
-            onClick={onClose}
-            aria-label="close"
-          >
-            <CloseIcon />
-          </IconButton>
-          <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
-            Ajout d'une cabine
-          </Typography>
-          <Button autoFocus color="inherit" onClick={handleSubmit}>
-            Save
+    <>
+      <Dialog
+        open={open}
+        onClose={onClose}
+        maxWidth="md"
+        fullWidth
+        sx={{
+          "& .MuiDialog-paper": {
+            borderRadius: 2,
+          },
+        }}
+      >
+        <DialogTitle sx={{ m: 0, p: 2, borderBottom: 1, borderColor: 'divider' }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6">Ajout d'une cabine</Typography>
+            <IconButton
+              edge="end"
+              color="inherit"
+              onClick={onClose}
+              aria-label="close"
+            >
+              <CloseIcon />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+
+        <DialogContent dividers sx={{ py: 3 }}>
+          <Grid container spacing={3}>
+            {/* Immatriculation */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="Immatriculation*"
+                name="immatriculation"
+                value={cabineData.immatriculation}
+                onChange={handleInputChange}
+                error={!!errors.immatriculation}
+                helperText={errors.immatriculation}
+                size="small"
+              />
+            </Grid>
+
+            {/* Poids Max */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="Poids Max (kg)*"
+                name="poidsMax"
+                value={cabineData.poidsMax}
+                onChange={handleInputChange}
+                type="number"
+                error={!!errors.poidsMax}
+                helperText={errors.poidsMax}
+                size="small"
+              />
+            </Grid>
+
+            {/* Type de Camion */}
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <TextField
+                  value={cabineData.typeCamion ? cabineData.typeCamion.type : ""}
+                  InputProps={{ readOnly: true }}
+                  onClick={() => {
+                          setIsTypeCabineModalOpen(true);
+                          setErrors(
+                            (prevErrors) => (
+                              { ...prevErrors, typeCamion: "" } ));
+                          }}
+                  fullWidth
+                  error={!!errors.typeCamion}
+                  helperText={errors.typeCamion}
+                  label="Type de Camion*"
+                  size="small"
+                />
+                <Button
+                  variant="outlined"
+                  onClick={() =>{
+                     setIsTypeCabineModalOpen(true);}}
+                  sx={{ mt: 1 }}
+                  size="small"
+                >
+                  Sélectionner un Type de Camion
+                </Button>
+              </FormControl>
+            </Grid>
+
+            {/* Statut */}
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth size="small">
+                <InputLabel id="status-label">Statut*</InputLabel>
+                <Select
+                  labelId="status-label"
+                  id="status"
+                  name="status"
+                  value={cabineData.status}
+                  label="Statut"
+                  onChange={  handleInputChange} 
+                  error={!!errors.status}
+                >
+                  {statusOptions.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {errors.status && (
+                  <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
+                    {errors.status}
+                  </Typography>
+                )}
+              </FormControl>
+            </Grid>
+
+            {/* Assurance */}
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <TextField
+                  value={
+                    cabineData.assurance
+                      ? `${cabineData.assurance.company} | ${cabineData.assurance.numeroContrat}`
+                      : ""
+                  }
+                  InputProps={{ readOnly: true }}
+                  onClick={() => setIsAssuranceModalOpen(true)}
+                  fullWidth
+                  label="Assurance*"
+                  size="small"
+                />
+                <Button
+                  variant="outlined"
+                  onClick={() => setIsAssuranceModalOpen(true)}
+                  sx={{ mt: 1 }}
+                  size="small"
+                >
+                  Sélectionner une Assurance
+                </Button>
+              </FormControl>
+            </Grid>
+
+            {/* Carte Grise */}
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <TextField
+                  value={
+                    cabineData.carteGrise
+                      ? `${cabineData.carteGrise.marque} | ${cabineData.carteGrise.numeroSerie}`
+                      : ""
+                  }
+                  InputProps={{ readOnly: true }}
+                  onClick={() => setIsCarteGriseModalOpen(true)}
+                  fullWidth
+                  label="Carte Grise*"
+                  size="small"
+                />
+                <Button
+                  variant="outlined"
+                  onClick={() => setIsCarteGriseModalOpen(true)}
+                  sx={{ mt: 1 }}
+                  size="small"
+                >
+                  Sélectionner une Carte Grise
+                </Button>
+              </FormControl>
+            </Grid>
+          </Grid>
+        </DialogContent>
+
+        <DialogActions sx={{ px: 3, py: 2, borderTop: 1, borderColor: 'divider' }}>
+          <Button onClick={onClose} variant="outlined" color="inherit">
+            Annuler
           </Button>
-        </Toolbar>
-      </AppBar>
-
-      <Box sx={{ p: 3 }}>
-        <TextField
-          fullWidth
-          label="Immatriculation*"
-          name="immatriculation"
-          value={cabineData.immatriculation}
-          onChange={handleInputChange}
-          margin="normal"
-          error={!!validationError}
-          helperText={validationError}
-          required
-        />
-
-        <FormControl fullWidth margin="normal">
-          <TextField
-            value={cabineData.typeCamion ? cabineData.typeCamion.type : ""}
-            InputProps={{
-              readOnly: true,
-            }}
-            onClick={() => setIsTypeCabineModalOpen(true)}
-            fullWidth
-            label="Type de Cabine"
-          />
-          <Button
-            variant="outlined"
-            onClick={() => setIsTypeCabineModalOpen(true)}
-            style={{ marginTop: "8px" }}
-          >
-            Sélectionner un Type de Cabine
+          <Button onClick={handleSubmit} variant="contained" color="primary">
+            Enregistrer
           </Button>
-        </FormControl>
+        </DialogActions>
+      </Dialog>
 
-        <TextField
-          fullWidth
-          label="Poids Max"
-          name="poidsMax"
-          value={cabineData.poidsMax}
-          onChange={handleInputChange}
-          margin="normal"
-          type="number"
-        />
+      {/* Modals for Select Components */}
+      <AssuranceSelect
+        open={isAssuranceModalOpen}
+        onClose={() => setIsAssuranceModalOpen(false)}
+        onSelectAssurance={handleSelectAssurance}
+      />
 
-        {/* Status Dropdown */}
-        <FormControl fullWidth margin="normal">
-          <InputLabel id="status-label">Statut</InputLabel>
-          <Select
-            labelId="status-label"
-            id="status"
-            name="status"
-            value={cabineData.status}
-            label="Statut"
-            onChange={handleInputChange}
-          >
-            {statusOptions.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+      <CarteGriseSelect
+        open={isCarteGriseModalOpen}
+        onClose={() => setIsCarteGriseModalOpen(false)}
+        onSelectCarteGrise={handleSelectCarteGrise}
+      />
 
-        <FormControl fullWidth margin="normal">
-          <TextField
-            value={
-              cabineData.assurance
-                ? `${cabineData.assurance.company} | ${cabineData.assurance.numeroContrat}`
-                : ""
-            }
-            InputProps={{
-              readOnly: true,
-            }}
-            onClick={() => setIsAssuranceModalOpen(true)}
-            fullWidth
-            label="Assurance"
-          />
-          <Button
-            variant="outlined"
-            onClick={() => setIsAssuranceModalOpen(true)}
-            style={{ marginTop: "8px" }}
-          >
-            Sélectionner une Assurance
-          </Button>
-        </FormControl>
+      <TypeCabineSelect
+        open={isTypeCabineModalOpen}
+        onClose={() => setIsTypeCabineModalOpen(false)}
+        onSelect={handleSelectTypeCabine}
+      />
 
-        <FormControl fullWidth margin="normal">
-          <TextField
-            value={
-              cabineData.carteGrise
-                ? `${cabineData.carteGrise.marque} | ${cabineData.carteGrise.numeroSerie}`
-                : ""
-            }
-            InputProps={{
-              readOnly: true,
-            }}
-            onClick={() => setIsCarteGriseModalOpen(true)}
-            fullWidth
-            label="Carte Grise"
-          />
-          <Button
-            variant="outlined"
-            onClick={() => setIsCarteGriseModalOpen(true)}
-            style={{ marginTop: "8px" }}
-          >
-            Sélectionner une Carte Grise
-          </Button>
-        </FormControl>
-
-        {/* Modals for Select Components */}
-        <AssuranceSelect
-          open={isAssuranceModalOpen}
-          onClose={() => setIsAssuranceModalOpen(false)}
-          onSelectAssurance={handleSelectAssurance}
-        />
-
-        <CarteGriseSelect
-          open={isCarteGriseModalOpen}
-          onClose={() => setIsCarteGriseModalOpen(false)}
-          onSelectCarteGrise={handleSelectCarteGrise}
-        />
-
-        <TypeCabineSelect
-          open={isTypeCabineModalOpen}
-          onClose={() => setIsTypeCabineModalOpen(false)}
-          onSelect={handleSelectTypeCabine}
-        />
-      </Box>
-
-      {/* Validation Error Snackbar */}
+      {/* Snackbar for Validation Errors */}
       <Snackbar
-        open={isFailedValidation}
+        open={snackbarOpen}
         autoHideDuration={3000}
-        onClose={handleCloseFailedValidation}
+        onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert severity="error">
-          Veuillez remplir tous les champs obligatoires
-        </Alert>
+        <Alert severity="error">Veuillez remplir tous les champs obligatoires</Alert>
       </Snackbar>
-    </Dialog>
+    </>
   );
 }

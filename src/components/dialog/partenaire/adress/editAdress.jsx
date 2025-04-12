@@ -101,7 +101,7 @@ export default function EditAdress({ open, onClose, adresse, onUpdate }) {
     try {
       await adressService.update(editedAddress.idAdress, editedAddress);
       setSuccess("Address updated successfully");
-      if (onUpdate) onUpdate(); // Notify parent component of the update
+       onUpdate(); // Notify parent component of the update
       onClose(); // Close the dialog
     } catch (error) {
       console.error("Error updating address:", error);

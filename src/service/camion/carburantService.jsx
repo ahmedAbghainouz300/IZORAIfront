@@ -33,6 +33,8 @@
 
     // Taux de consommation moyenne
     getTauxConsommation: () => axiosClient.get("/api/carburants/taux-consommation"),
+     
+    getLastKilometrage: (immatriculationCamion) => axiosClient.get(`/api/carburants/${immatriculationCamion}/last-kilometrage`),
 
   };
 

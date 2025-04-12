@@ -12,7 +12,7 @@ const AvailableDriversDialog = ({  open,  onClose}) => {
 
     useEffect(() => {
         fetchAvailableDrivers();  // Fetch available drivers
-    }, []);
+    }, [open]);
 
     const onToggleAvailability = (idPartenaire) => {
         chauffeurService.toggleAvailability(idPartenaire) // Toggle driver availability status

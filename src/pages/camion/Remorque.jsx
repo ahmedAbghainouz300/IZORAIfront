@@ -102,11 +102,8 @@ export default function Remorque() {
     try {
       await remorqueService.update(updatedRemorque.idRemorque, updatedRemorque);
       showSuccess("Remorque mise à jour avec succès");
-      setRows(
-        rows.map((row) =>
-          row.idRemorque === updatedRemorque.idRemorque ? updatedRemorque : row
-        )
-      );
+      console.log("Updated Remorque:", updatedRemorque);
+      fetchRemorques();
       setEditDialogOpen(false);
     } catch (error) {
       console.error("Error updating remorque:", error);
@@ -118,8 +115,9 @@ export default function Remorque() {
     try {
       const response = await remorqueService.create(newRemorque);
       showSuccess("Remorque créée avec succès");
-      setRows([...rows, response.data]);
+      console.log("New Remorque:", response.data);
       setRemorqueDialogOpen(false);
+      fetchRemorques();
     } catch (error) {
       console.error("Error adding remorque:", error);
       showError("Échec de la création de la remorque");

@@ -88,7 +88,7 @@ export default function EditPhysiqueDialog({ open, onClose, partenaire, onSave }
         nom: partenaire.nom || "",
         prenom: partenaire.prenom || "",
         telephone: partenaire.telephone || "",
-        cni: partenaire.cni?.toString() || "",
+        cni: partenaire.cni|| "",
         email: partenaire.email || "",
         typePartenaire: partenaire.typePartenaire || null,
         adresses: partenaire.adresses || []
@@ -157,7 +157,7 @@ export default function EditPhysiqueDialog({ open, onClose, partenaire, onSave }
         nom: formData.nom,
         prenom: formData.prenom,
         telephone: formData.telephone,
-        cni: Number(formData.cni),
+        cni: formData.cni,
         email: formData.email || null,
         typePartenaire: formData.typePartenaire,
       };
@@ -217,6 +217,11 @@ export default function EditPhysiqueDialog({ open, onClose, partenaire, onSave }
     if (reason === "clickaway") return;
     setSuccess(null);
   };
+
+  const handleChangeAdress = ()=>{
+    fetchAdressesById(partenaire.idPartenaire);
+    console.log("address was updatet succesfelly")
+  }
 
   return (
     <>
@@ -355,6 +360,7 @@ export default function EditPhysiqueDialog({ open, onClose, partenaire, onSave }
         open={isEditAddressOpen}
         onClose={() => setIsEditAddressOpen(false)}
         adresse={selectedAddress}
+        onUpdate={handleChangeAdress}
       />
 
       {/* View Address Dialog */}

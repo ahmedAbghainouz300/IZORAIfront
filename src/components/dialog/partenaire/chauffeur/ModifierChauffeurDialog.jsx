@@ -7,9 +7,6 @@ import {
   TextField,
   Button,
   Box,
-  Typography,
-  IconButton,
-  Grid,
   MenuItem,
 } from "@mui/material";
 import chauffeurService from "../../../../service/partenaire/chaufeurService";
@@ -17,6 +14,8 @@ import adressService from "../../../../service/partenaire/adressService";
 import physiqueService from "../../../../service/partenaire/physiqueService";
 import AdressTable from "../adress/AdressTable";
 import AddAddressDialog from "../adress/addAdress"; // à inclure si nécessaire
+import EditAdress from "../adress/editAdress";
+import ViewAdress from "../adress/voirAdress";
 
 export default function ModifierChauffeurDialog({
   open,
@@ -29,6 +28,8 @@ export default function ModifierChauffeurDialog({
   const [isAddAddressOpen, setIsAddAddressOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [errors, setErrors] = useState({});
+  const [isEditAddressOpen, setIsEditAddressOpen] = useState(false);
+ const [isViewAddressOpen, setIsViewAddressOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     nom: "",
@@ -93,16 +94,16 @@ export default function ModifierChauffeurDialog({
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: false }));
   };
 
-  const handleFileChange = (event, type) => {
-    const file = event.target.files[0];
-    if (type === "recto") {
-      setPermisRecto(file);
-      setPreviewRecto(URL.createObjectURL(file));
-    } else {
-      setPermisVerso(file);
-      setPreviewVerso(URL.createObjectURL(file));
-    }
-  };
+  // const handleFileChange = (event, type) => {
+  //   const file = event.target.files[0];
+  //   if (type === "recto") {
+  //     setPermisRecto(file);
+  //     setPreviewRecto(URL.createObjectURL(file));
+  //   } else {
+  //     setPermisVerso(file);
+  //     setPreviewVerso(URL.createObjectURL(file));
+  //   }
+  // };
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
@@ -126,13 +127,27 @@ export default function ModifierChauffeurDialog({
 
   const openEditDialog = (adresse) => {
     setSelectedAddress(adresse);
-    setIsAddAddressOpen(true);
+    setIsEditAddressOpen(true);
   };
 
   const openViewDialog = (adresse) => {
     setSelectedAddress(adresse);
-    setIsAdressModalOpen(true);
+    setIsViewAddressOpen(true);
   };
+    const handleAddAddress = async (newAddress) => {
+      try {
+         await physiqueService.addAdresse(chauffeur.idPartenaire, newAddress);
+        await fetchAdressesById(chauffeur.idPartenaire);
+        setIsAddAddressOpen(false);
+      } catch (error) {
+        console.error("Error adding address:", error);
+        throw error;
+      }
+    };
+    const handleChangeAdress = ()=>{
+      fetchAdressesById(chauffeur.idPartenaire);
+      console.log("address was updatet succesfelly")
+    }
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
@@ -366,9 +381,21 @@ export default function ModifierChauffeurDialog({
           setSelectedAddress(null);
           fetchAdressesById(chauffeur.idPartenaire);
         }}
-        existingAddress={selectedAddress}
-        partenaireId={chauffeur?.idPartenaire}
+        onAdd={handleAddAddress}
       />
+      {/* Edit Address Dialog */}
+      <EditAdress
+        open={isEditAddressOpen}
+        onClose={() => setIsEditAddressOpen(false)}
+        adresse={selectedAddress}
+        onUpdate={handleChangeAdress}
+      />
+      { /* View Address Dialog */}
+      <ViewAdress
+        open={isViewAddressOpen}
+        onClose={() => setIsViewAddressOpen(false)}
+        adresse={selectedAddress}
+      />      
     </Dialog>
   );
 }

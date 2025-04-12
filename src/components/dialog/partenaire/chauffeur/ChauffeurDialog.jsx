@@ -29,7 +29,7 @@ import {
   Divider,
   Paper
 } from "@mui/material";
-export default function ChauffeurDialog({ open, onClose }) {
+export default function ChauffeurDialog({ open, onClose,onSuccess }) {
   const [openAdress, setOpenAdress] = useState(false);
   const [formData, setFormData] = useState({
     nom: "",
@@ -39,7 +39,7 @@ export default function ChauffeurDialog({ open, onClose }) {
     email: "",
     telephone: "",
     cnss: "",
-    dateRecrutement: "",
+    dateRecrutement:  new Date().toISOString().split("T")[0],
     disponibilite: false,
     adresses: [],
     photoPermisRecto: null,
@@ -163,6 +163,7 @@ export default function ChauffeurDialog({ open, onClose }) {
         photoPermisRecto: null,
         photoPermisVerso: null,
       });
+      onSuccess();
     } catch (error) {
       console.error("Erreur lors de la création du chauffeur:", error);
     }

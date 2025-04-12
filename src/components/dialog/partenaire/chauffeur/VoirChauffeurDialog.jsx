@@ -51,7 +51,7 @@ export default function VoirChauffeurDialog({
   const [error, setError] = useState(null);
   const [permisPhotos, setPermisPhotos] = useState({ recto: null, verso: null });
   const [tabValue, setTabValue] = useState(0);
-  const [permisValidity, setPermisValidity] = useState(null);
+  const [permisValidity, setPermisValidity] = useState();
   const theme = useTheme();
 
   useEffect(() => {
@@ -95,10 +95,11 @@ export default function VoirChauffeurDialog({
   const checkPermisValidity = async () => {
     try {
       const response = await chauffeurService.checkPermisValidity(chauffeurId);
-      setPermisValidity(response.data || { isValid: false, message: "Données de permis non disponibles" });
+      setPermisValidity(response.data);
+      console.log("Statut du permis:", response.data);
+      console.log("Détails du :", permisValidity);
     } catch (err) {
       console.error("Erreur lors de la vérification du permis:", err);
-      setPermisValidity({ isValid: false, message: "Erreur de vérification" });
     }
   };
 
@@ -112,7 +113,7 @@ export default function VoirChauffeurDialog({
   };
   const getExpirationInfo = () => {
     // Ne rien afficher si pas de données ou si permis valide
-    if (!permisValidity || permisValidity.isValid || !chauffeur?.dateExpirationPermis) return null;
+    if (permisValidity) return null;
     
     return (
       <Box component="span" display="flex" alignItems="center">
@@ -123,7 +124,7 @@ export default function VoirChauffeurDialog({
   };
 
   const getPermisStatus = () => {
-    if (!permisValidity || permisValidity.isValid) return null;
+    if (permisValidity) return null;
     
     return (
       <Alert severity="error" icon={<WarningIcon />} sx={{ mb: 2, mt: 1 }}>
@@ -358,7 +359,7 @@ export default function VoirChauffeurDialog({
                   </Typography>
 
                   {/* Avertissement si permis expiré - seulement si invalide */}
-                  {permisValidity && !permisValidity.isValid && (
+                  {!permisValidity  && (
                     <Alert severity="error" sx={{ mb: 3 }}>
                       <Typography fontWeight="bold">
                         Attention: Ce permis est expiré ou invalide!

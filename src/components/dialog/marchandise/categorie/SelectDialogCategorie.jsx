@@ -70,7 +70,7 @@ export default function SelectDialogCategorie({ open, onClose, onSelect }) {
 
   const columns = [
     { field: "id", headerName: "ID", width: 100 },
-    { field: "libelle", headerName: "Libellé", flex: 1 },
+    { field: "categorie", headerName: "Libellé", flex: 1 },
     { field: "description", headerName: "Description", flex: 1 },
     {
       field: "actions",

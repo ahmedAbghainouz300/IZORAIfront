@@ -87,7 +87,7 @@ export default function Cabine() {
 
   const handleDelete = async () => {
     try {
-      await camionService.delete(camionToDelete.immatriculation);
+      await camionService.delete(camionToDelete);
       setIsSuccess(true);
       setDeleteDialogOpen(false);
       fetchCamions();

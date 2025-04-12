@@ -146,7 +146,7 @@ export default function PhysiqueDialog({ open, onClose, onAdd }) {
         nom: formData.nom,
         prenom: formData.prenom,
         telephone: formData.telephone,
-        cni: Number(formData.cni),
+        cni: formData.cni,
         email: formData.email || null,
         typePartenaire: formData.typePartenaire,
         adresses: formData.adresses,

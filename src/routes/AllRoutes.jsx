@@ -38,7 +38,7 @@ const AllRoutes = {
   },
   voyage: {
     base: "/voyage",
-  },
+  }
 };
 
 export default AllRoutes;

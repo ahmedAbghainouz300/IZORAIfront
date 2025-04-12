@@ -12,7 +12,7 @@ import categorieService from "../../../../service/marchandise/categorieService";
 
 export default function CategorieDialog({ open, onClose, onSave, categorie }) {
   const [formData, setFormData] = useState({
-    libelle: "",
+    categorie: "",
     description: ""
   });
   const [loading, setLoading] = useState(false);
@@ -23,12 +23,12 @@ export default function CategorieDialog({ open, onClose, onSave, categorie }) {
     if (open) {
       if (categorie) {
         setFormData({
-          libelle: categorie.libelle || "",
+          categorie: categorie.categorie || "",
           description: categorie.description || ""
         });
       } else {
         setFormData({
-          libelle: "",
+          categorie: "",
           description: ""
         });
       }
@@ -36,8 +36,8 @@ export default function CategorieDialog({ open, onClose, onSave, categorie }) {
   }, [open, categorie]);
 
   const handleSubmit = async () => {
-    if (!formData.libelle.trim()) {
-      enqueueSnackbar("Le libellé est obligatoire", { variant: "warning" });
+    if (!formData.categorie.trim()) {
+      enqueueSnackbar("Le categorie est obligatoire", { variant: "warning" });
       return;
     }
 
@@ -80,10 +80,10 @@ export default function CategorieDialog({ open, onClose, onSave, categorie }) {
       </DialogTitle>
       <DialogContent>
         <TextField
-          name="libelle"
+          name="categorie"
           label="Libellé *"
           fullWidth
-          value={formData.libelle}
+          value={formData.categorie}
           onChange={handleChange}
           margin="normal"
           required

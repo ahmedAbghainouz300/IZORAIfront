@@ -6,10 +6,10 @@ import {
   HomeOutlined,
   TeamOutlined,
   CarOutlined,
-  UserOutlined,
   FileOutlined,
-  ProductOutlined,
 } from "@ant-design/icons";
+import { MovingOutlined } from "@mui/icons-material";
+
 import { Button, Layout, Menu } from "antd";
 import allRoutes from "../routes/AllRoutes";
 import "../styles/nav.css";
@@ -108,10 +108,10 @@ const NavComponent = (children) => {
               icon: <FileOutlined />,
               label: "DemandeCotation",
             },
-            {
-              key: allRoutes.traject.base,
-              icon: <FileOutlined />,
-              label: "Traject",
+             {
+              key: allRoutes.voyage.base,
+              icon: <MovingOutlined />,
+              label: "Voyage",
             },
           ]}
         />

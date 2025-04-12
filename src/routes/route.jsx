@@ -20,7 +20,6 @@ import CredentialsSignInPage from "../components/Login";
 import Marchandise from "../pages/marchandise/Marchandise";
 import DemandeCotation from "../pages/demande/DemandeCotation";
 import Voyage from "../pages/voyage/Voyage";
-import Traject from "../pages/Traject";
 
 function AppRoutes() {
   return (
@@ -73,7 +72,6 @@ function AppRoutes() {
           path={allRoutes.demandeCotation.base}
           element={<DemandeCotation />}
         />
-        <Route path={allRoutes.traject.base} element={<Traject />} />
       </Route>
     </Routes>
   );

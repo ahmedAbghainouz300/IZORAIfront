@@ -1,24 +1,21 @@
 import * as React from "react";
 import Dialog from "@mui/material/Dialog";
-import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
-import Slide from "@mui/material/Slide";
 import {
   Button,
   TextField,
   Box,
   FormControl,
+  Grid,
   Snackbar,
   Alert as MuiAlert,
 } from "@mui/material";
 import TypeRemorqueSelect from "../../../select/TypeRemorqueSelect";
-
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -33,49 +30,63 @@ export default function RemorqueDialog({ open, onClose, onCreate }) {
     disponible: true,
   });
 
-  const [isTypeRemorqueModalOpen, setIsTypeRemorqueModalOpen] =
-    React.useState(false);
-  const [validationError, setValidationError] = React.useState("");
-  const [isFailedValidation, setIsFailedValidation] = React.useState(false);
+  const [isTypeRemorqueModalOpen, setIsTypeRemorqueModalOpen] = React.useState(false);
+  const [errors, setErrors] = React.useState({
+    typeRemorque: "",
+    volumeStockage: "",
+    poidsChargeMax: "",
+    poidsVide: "",
+  });
   const [isSuccess, setIsSuccess] = React.useState(false);
   const [isFailed, setIsFailed] = React.useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setRemorqueData({ ...remorqueData, [name]: value });
-    if (validationError) {
-      setValidationError("");
-    }
+    setErrors({ ...errors, [name]: "" }); // Clear error when typing
   };
 
   const handleSelectTypeRemorque = (typeRemorque) => {
     setRemorqueData({ ...remorqueData, typeRemorque });
+    setErrors({ ...errors, typeRemorque: "" }); // Clear type error when selected
     setIsTypeRemorqueModalOpen(false);
   };
 
   const validateForm = () => {
-    if (!remorqueData.volumeStockage) {
-      setValidationError("Le volume de stockage est obligatoire");
-      setIsFailedValidation(true);
-      return false;
-    }
-    if (!remorqueData.poidsChargeMax) {
-      setValidationError("Le poids charge max est obligatoire");
-      setIsFailedValidation(true);
-      return false;
-    }
-    if (!remorqueData.poidsVide) {
-      setValidationError("Le poids vide est obligatoire");
-      setIsFailedValidation(true);
-      return false;
-    }
-    setValidationError("");
-    return true;
-  };
+    let isValid = true;
+    const newErrors = { ...errors };
 
-  const handleCloseFailedValidation = (event, reason) => {
-    if (reason === "clickaway") return;
-    setIsFailedValidation(false);
+    if (!remorqueData.typeRemorque) {
+      newErrors.typeRemorque = "Le type de remorque est obligatoire";
+      isValid = false;
+    }
+
+    if (!remorqueData.volumeStockage) {
+      newErrors.volumeStockage = "Le volume de stockage est obligatoire";
+      isValid = false;
+    } else if (isNaN(remorqueData.volumeStockage) || Number(remorqueData.volumeStockage) <= 0) {
+      newErrors.volumeStockage = "Veuillez entrer un nombre valide > 0";
+      isValid = false;
+    }
+
+    if (!remorqueData.poidsChargeMax) {
+      newErrors.poidsChargeMax = "Le poids charge max est obligatoire";
+      isValid = false;
+    } else if (isNaN(remorqueData.poidsChargeMax) || Number(remorqueData.poidsChargeMax) <= 0) {
+      newErrors.poidsChargeMax = "Veuillez entrer un nombre valide > 0";
+      isValid = false;
+    }
+
+    if (!remorqueData.poidsVide) {
+      newErrors.poidsVide = "Le poids vide est obligatoire";
+      isValid = false;
+    } else if (isNaN(remorqueData.poidsVide) || Number(remorqueData.poidsVide) <= 0) {
+      newErrors.poidsVide = "Veuillez entrer un nombre valide > 0";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
   };
 
   const handleCloseSuccess = (event, reason) => {
@@ -102,7 +113,6 @@ export default function RemorqueDialog({ open, onClose, onCreate }) {
       await onCreate(payload);
       setIsSuccess(true);
       setRemorqueData({
-        idRemorque: 0,
         typeRemorque: null,
         volumeStockage: "",
         poidsChargeMax: "",
@@ -117,96 +127,114 @@ export default function RemorqueDialog({ open, onClose, onCreate }) {
   };
 
   return (
-    <Dialog
-      fullScreen
-      open={open}
-      onClose={onClose}
-      TransitionComponent={Transition}
-    >
-      <AppBar sx={{ position: "relative" }}>
-        <Toolbar>
-          <IconButton
-            edge="start"
-            color="inherit"
-            onClick={onClose}
-            aria-label="close"
-          >
-            <CloseIcon />
-          </IconButton>
-          <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
-            Ajout d'une Remorque
-          </Typography>
-          <Button autoFocus color="inherit" onClick={handleSubmit}>
+    <>
+      <Dialog
+        open={open}
+        onClose={onClose}
+        maxWidth="md"
+        fullWidth
+        sx={{
+          "& .MuiDialog-paper": {
+            borderRadius: 2,
+          },
+        }}
+      >
+        <DialogTitle sx={{ m: 0, p: 2, borderBottom: 1, borderColor: 'divider' }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6">Ajout d'une remorque</Typography>
+            <IconButton
+              edge="end"
+              color="inherit"
+              onClick={onClose}
+              aria-label="close"
+            >
+              <CloseIcon />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+
+        <DialogContent dividers sx={{ py: 3 }}>
+          <Grid container spacing={3}>
+            {/* Type de Remorque */}
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <TextField
+                  value={remorqueData.typeRemorque?.type || ""}
+                  InputProps={{ readOnly: true }}
+                  onClick={() => setIsTypeRemorqueModalOpen(true)}
+                  fullWidth
+                  label="Type de remorque*"
+                  error={!!errors.typeRemorque}
+                  helperText={errors.typeRemorque}
+                  size="small"
+                />
+                <Button
+                  variant="outlined"
+                  onClick={() => setIsTypeRemorqueModalOpen(true)}
+                  sx={{ mt: 1 }}
+                  size="small"
+                >
+                  Sélectionner un type de remorque
+                </Button>
+              </FormControl>
+            </Grid>
+
+            {/* Volume de stockage */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="Volume de stockage (m³)*"
+                name="volumeStockage"
+                value={remorqueData.volumeStockage}
+                onChange={handleInputChange}
+                type="number"
+                error={!!errors.volumeStockage}
+                helperText={errors.volumeStockage}
+                size="small"
+              />
+            </Grid>
+
+            {/* Poids Charge Max */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="Poids charge max (kg)*"
+                name="poidsChargeMax"
+                value={remorqueData.poidsChargeMax}
+                onChange={handleInputChange}
+                type="number"
+                error={!!errors.poidsChargeMax}
+                helperText={errors.poidsChargeMax}
+                size="small"
+              />
+            </Grid>
+
+            {/* Poids Vide */}
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="Poids vide (kg)*"
+                name="poidsVide"
+                value={remorqueData.poidsVide}
+                onChange={handleInputChange}
+                type="number"
+                error={!!errors.poidsVide}
+                helperText={errors.poidsVide}
+                size="small"
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+
+        <DialogActions sx={{ px: 3, py: 2, borderTop: 1, borderColor: 'divider' }}>
+          <Button onClick={onClose} variant="outlined" color="inherit">
+            Annuler
+          </Button>
+          <Button onClick={handleSubmit} variant="contained" color="primary">
             Enregistrer
           </Button>
-        </Toolbar>
-      </AppBar>
-
-      <Box sx={{ p: 3 }}>
-        {/* Type de Remorque Field */}
-        <FormControl fullWidth margin="normal">
-          <TextField
-            value={remorqueData.typeRemorque?.type || ""}
-            InputProps={{ readOnly: true }}
-            onClick={() => setIsTypeRemorqueModalOpen(true)}
-            fullWidth
-            label="Type de Remorque"
-          />
-          <Button
-            variant="outlined"
-            onClick={() => setIsTypeRemorqueModalOpen(true)}
-            style={{ marginTop: "8px" }}
-          >
-            Sélectionner un Type de Remorque
-          </Button>
-        </FormControl>
-
-        {/* Volume de stockage Field */}
-        <TextField
-          fullWidth
-          label="Volume de stockage (m³)*"
-          name="volumeStockage"
-          value={remorqueData.volumeStockage}
-          onChange={handleInputChange}
-          margin="normal"
-          type="number"
-          error={!!validationError && validationError.includes("volume")}
-          helperText={validationError.includes("volume") ? validationError : ""}
-          required
-        />
-
-        {/* Poids Charge Max Field */}
-        <TextField
-          fullWidth
-          label="Poids Charge Max (kg)*"
-          name="poidsChargeMax"
-          value={remorqueData.poidsChargeMax}
-          onChange={handleInputChange}
-          margin="normal"
-          type="number"
-          error={!!validationError && validationError.includes("poids charge")}
-          helperText={
-            validationError.includes("poids charge") ? validationError : ""
-          }
-          required
-        />
-
-        {/* Poids Vide Field */}
-        <TextField
-          fullWidth
-          label="Poids Vide (kg)*"
-          name="poidsVide"
-          value={remorqueData.poidsVide}
-          onChange={handleInputChange}
-          margin="normal"
-          type="number"
-          error={!!validationError && validationError.includes("poids vide")}
-          helperText={
-            validationError.includes("poids vide") ? validationError : ""
-          }
-          required
-        />
-      </Box>
+        </DialogActions>
+      </Dialog>
 
       {/* TypeRemorqueSelect Modal */}
       <TypeRemorqueSelect
@@ -214,18 +242,6 @@ export default function RemorqueDialog({ open, onClose, onCreate }) {
         onClose={() => setIsTypeRemorqueModalOpen(false)}
         onSelect={handleSelectTypeRemorque}
       />
-
-      {/* Validation Error Snackbar */}
-      <Snackbar
-        open={isFailedValidation}
-        autoHideDuration={3000}
-        onClose={handleCloseFailedValidation}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert onClose={handleCloseFailedValidation} severity="error">
-          {validationError}
-        </Alert>
-      </Snackbar>
 
       {/* Success Snackbar */}
       <Snackbar
@@ -250,6 +266,6 @@ export default function RemorqueDialog({ open, onClose, onCreate }) {
           Échec de la création de la remorque
         </Alert>
       </Snackbar>
-    </Dialog>
+    </>
   );
 }
