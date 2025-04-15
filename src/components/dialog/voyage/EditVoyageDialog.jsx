@@ -548,7 +548,7 @@ export default function EditVoyageDialog({ open, onClose, onSave, voyageId }) {
                       <Autocomplete
                         options={camions}
                         getOptionLabel={(option) =>
-                          `${option.marque} ${option.modele} (${option.immatriculation})`
+                          `${option.immatriculation} (${option.poidsMax} kg)`
                         }
                         value={formData.camion}
                         onChange={(_, value) =>
@@ -568,7 +568,7 @@ export default function EditVoyageDialog({ open, onClose, onSave, voyageId }) {
                       <Autocomplete
                         options={remorques}
                         getOptionLabel={(option) =>
-                          `${option.type} (${option.immatriculation})`
+                          `${option.typeRemorque.type} (${option.poidsChargeMax} kg)`
                         }
                         value={formData.remorque}
                         onChange={(_, value) =>

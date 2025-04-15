@@ -1,28 +1,33 @@
 import React, { useState, useEffect } from "react";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
 import {
-  DataGrid,
-  GridToolbarContainer,
-  GridToolbarExport,
-} from "@mui/x-data-grid";
+  Box,
+  Button,
+  IconButton,
+  Card,
+  CardContent,
+  Typography,
+  Chip,
+  Stack,
+  Divider,
+  Avatar,
+  Paper,
+  Grid,
+  Tooltip,
+} from "@mui/material";
+import {
+  LocalShipping,
+  Edit,
+  Delete,
+  Visibility,
+  Category,
+  Scale,
+  Inventory,
+  Inventory2,
+} from "@mui/icons-material";
 import MarchandiseDialog from "../../components/dialog/marchandise/MarchandiseDialog";
 import marchandiseService from "../../service/marchandise/marchandiseService";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import ViewMarchandiseDialog from "../../components/dialog/marchandise/ViewMarchandiseDialog";
 import { useSnackbar } from "notistack";
-import "../../styles/DataGrid.css";
-
-function CustomToolbar() {
-  return (
-    <GridToolbarContainer>
-      <GridToolbarExport />
-    </GridToolbarContainer>
-  );
-}
 
 export default function Marchandise() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -36,9 +41,7 @@ export default function Marchandise() {
       .getAll()
       .then((response) => {
         setRows(response.data);
-        console.log(response.data);
       })
-
       .catch((error) => {
         console.error("Erreur:", error);
         enqueueSnackbar("Erreur lors du chargement des marchandises", {
@@ -90,65 +93,57 @@ export default function Marchandise() {
     }
   };
 
-  const columns = [
-    { field: "libelle", headerName: "Libellé", flex: 1 },
-    { field: "codeMarchandise", headerName: "Code Marchandise", flex: 1 },
-    {
-      field: "categorie",
-      headerName: "Catégorie",
-      flex: 1,
-      valueGetter: (params) => {
-        return params ? params.libelle : "N/A";
-      },
-    },
-    {
-      field: "unite",
-      headerName: "Unite",
-      flex: 1,
-      valueGetter: (params) => {
-        return params ? params.unite : "N/A";
-      },
-    },
-    {
-      field: "emballage",
-      headerName: "Emballage",
-      flex: 1,
-      valueGetter: (params) => {
-        return params ? params.nom : "N/A";
-      },
-    },
-    { field: "description", headerName: "Description", flex: 1 },
-    {
-      field: "actions",
-      headerName: "Actions",
-      width: 150,
-      sortable: false,
-      filterable: false,
-      disableColumnMenu: true,
-      renderCell: (params) => (
-        <div>
-          <IconButton color="primary" onClick={() => handleView(params.row)}>
-            <VisibilityIcon />
-          </IconButton>
-          <IconButton color="secondary" onClick={() => handleEdit(params.row)}>
-            <EditIcon />
-          </IconButton>
-          <IconButton color="error" onClick={() => handleDelete(params.row.id)}>
-            <DeleteIcon />
-          </IconButton>
-        </div>
-      ),
-    },
-  ];
+  const getCategoryColor = (category) => {
+    // You can customize these colors based on your categories
+    const colors = {
+      FRAGILE: { bg: "#FFEBEE", text: "#C62828" },
+      DANGEREUSE: { bg: "#FFF3E0", text: "#E65100" },
+      PERISHABLE: { bg: "#E8F5E9", text: "#2E7D32" },
+      default: { bg: "#E3F2FD", text: "#1565C0" },
+    };
+    return colors[category?.toUpperCase()] || colors.default;
+  };
 
   return (
-    <div>
-      <h1>Gestion des Marchandises</h1>
+    <Box sx={{ p: 3 }}>
+      <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 3,
+          }}
+        >
+          <Typography
+            variant="h4"
+            component="h1"
+            sx={{
+              fontWeight: 700,
+              color: "primary.main",
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
+            <Inventory2 fontSize="large" />
+            Gestion des Marchandises
+          </Typography>
 
-      <Box>
-        <Button variant="contained" onClick={handleOpenDialog} sx={{ mb: 2 }}>
-          Ajouter une Marchandise
-        </Button>
+          <Button
+            variant="contained"
+            onClick={handleOpenDialog}
+            startIcon={<MarchandiseDialog />}
+            sx={{
+              px: 3,
+              borderRadius: 1,
+              textTransform: "none",
+              fontWeight: 600,
+            }}
+          >
+            Ajouter une Marchandise
+          </Button>
+        </Box>
 
         <MarchandiseDialog
           open={dialogOpen}
@@ -157,29 +152,171 @@ export default function Marchandise() {
           onSave={fetchAllMarchandises}
         />
 
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          getRowId={(row) => row.id}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 5,
-              },
-            },
-          }}
-          pageSizeOptions={[5, 10, 20]}
-          disableRowSelectionOnClick
-          slots={{ toolbar: CustomToolbar }}
-          sx={{
-            "@media print": {
-              ".MuiDataGrid-toolbarContainer": {
-                display: "none",
-              },
-            },
-          }}
-        />
-      </Box>
+        {rows.length === 0 ? (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              py: 10,
+              textAlign: "center",
+            }}
+          >
+            <LocalShipping
+              sx={{ fontSize: 60, color: "text.disabled", mb: 2 }}
+            />
+            <Typography variant="h6" color="text.secondary">
+              Aucune marchandise trouvée
+            </Typography>
+            <Typography color="text.secondary" sx={{ mb: 3 }}>
+              Ajoutez votre première marchandise
+            </Typography>
+            <Button variant="outlined" onClick={handleOpenDialog}>
+              Ajouter une marchandise
+            </Button>
+          </Box>
+        ) : (
+          <Grid container spacing={3}>
+            {rows.map((marchandise) => {
+              const categoryColor = getCategoryColor(
+                marchandise.categorie?.categorie
+              );
+              return (
+                <Grid item xs={12} sm={6} md={4} lg={3} key={marchandise.id}>
+                  <Card
+                    sx={{
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      transition: "transform 0.3s, box-shadow 0.3s",
+                      "&:hover": {
+                        transform: "translateY(-4px)",
+                        boxShadow: 6,
+                      },
+                    }}
+                  >
+                    <CardContent>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "flex-start",
+                          mb: 2,
+                        }}
+                      >
+                        <Avatar
+                          sx={{
+                            bgcolor: categoryColor.bg,
+                            color: categoryColor.text,
+                            width: 40,
+                            height: 40,
+                          }}
+                        >
+                          <Inventory />
+                        </Avatar>
+
+                        <Chip
+                          label={
+                            marchandise.categorie?.categorie || "Non catégorisé"
+                          }
+                          size="small"
+                          sx={{
+                            backgroundColor: categoryColor.bg,
+                            color: categoryColor.text,
+                            fontWeight: 600,
+                            px: 1,
+                          }}
+                        />
+                      </Box>
+
+                      <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
+                        {marchandise.libelle}
+                      </Typography>
+
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mb: 2 }}
+                      >
+                        {marchandise.description || "Aucune description"}
+                      </Typography>
+
+                      <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+                        <Chip
+                          icon={<Category fontSize="small" />}
+                          label={marchandise.codeMarchandise}
+                          size="small"
+                          variant="outlined"
+                        />
+                        {marchandise.unite && (
+                          <Chip
+                            icon={<Scale fontSize="small" />}
+                            label={marchandise.unite.unite}
+                            size="small"
+                            variant="outlined"
+                          />
+                        )}
+                      </Stack>
+
+                      {marchandise.emballage && (
+                        <Typography variant="caption" color="text.secondary">
+                          Emballage: {marchandise.emballage.nom}
+                        </Typography>
+                      )}
+
+                      <Divider sx={{ my: 2 }} />
+
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Typography variant="caption" color="text.secondary">
+                          ID: {marchandise.id}
+                        </Typography>
+
+                        <Stack direction="row" spacing={0.5}>
+                          <Tooltip title="Voir détails">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleView(marchandise)}
+                              color="primary"
+                            >
+                              <Visibility fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+
+                          <Tooltip title="Modifier">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleEdit(marchandise)}
+                              color="secondary"
+                            >
+                              <Edit fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+
+                          <Tooltip title="Supprimer">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleDelete(marchandise.id)}
+                              color="error"
+                            >
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Stack>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              );
+            })}
+          </Grid>
+        )}
+      </Paper>
 
       {viewDialogOpen && (
         <ViewMarchandiseDialog
@@ -188,6 +325,6 @@ export default function Marchandise() {
           marchandiseId={selectedMarchandise?.id}
         />
       )}
-    </div>
+    </Box>
   );
 }
