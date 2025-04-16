@@ -13,7 +13,14 @@ import {
   Paper,
   Grid,
   Tooltip,
+  Snackbar,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
 import {
   LocalShipping,
   Edit,
@@ -23,18 +30,28 @@ import {
   Scale,
   Inventory,
   Inventory2,
+  Add,
 } from "@mui/icons-material";
 import MarchandiseDialog from "../../components/dialog/marchandise/MarchandiseDialog";
 import marchandiseService from "../../service/marchandise/marchandiseService";
 import ViewMarchandiseDialog from "../../components/dialog/marchandise/ViewMarchandiseDialog";
-import { useSnackbar } from "notistack";
 
 export default function Marchandise() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedMarchandise, setSelectedMarchandise] = useState(null);
   const [rows, setRows] = useState([]);
-  const { enqueueSnackbar } = useSnackbar();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [marchandiseToDelete, setMarchandiseToDelete] = useState(null);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isFailedMarchandisesFetch, setIsFailedMarchandisesFetch] =
+    useState(false);
+  const [isFailedMarchandiseDelete, setIsFailedMarchandiseDelete] =
+    useState(false);
+  const [isFailedMarchandiseUpdate, setIsFailedMarchandiseUpdate] =
+    useState(false);
+  const [isFailedMarchandiseCreate, setIsFailedMarchandiseCreate] =
+    useState(false);
 
   const fetchAllMarchandises = () => {
     marchandiseService
@@ -43,10 +60,11 @@ export default function Marchandise() {
         setRows(response.data);
       })
       .catch((error) => {
-        console.error("Erreur:", error);
-        enqueueSnackbar("Erreur lors du chargement des marchandises", {
-          variant: "error",
-        });
+        console.error(
+          "Erreur lors de la récupération des marchandises:",
+          error
+        );
+        setIsFailedMarchandisesFetch(true);
       });
   };
 
@@ -71,30 +89,63 @@ export default function Marchandise() {
     setDialogOpen(true);
   };
 
-  const handleDelete = (id) => {
-    if (
-      window.confirm("Êtes-vous sûr de vouloir supprimer cette marchandise ?")
-    ) {
-      marchandiseService
-        .delete(id)
-        .then(() => {
-          enqueueSnackbar("Marchandise supprimée avec succès", {
-            variant: "success",
-          });
-          fetchAllMarchandises();
-        })
-        .catch((error) => {
-          console.error("Erreur lors de la suppression:", error);
-          enqueueSnackbar(
-            error.response?.data?.message || "Erreur lors de la suppression",
-            { variant: "error" }
-          );
-        });
+  const handleDeleteClick = (id) => {
+    setMarchandiseToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    try {
+      await marchandiseService.delete(marchandiseToDelete);
+      setIsSuccess(true);
+      setDeleteDialogOpen(false);
+      fetchAllMarchandises();
+    } catch (error) {
+      console.error("Erreur lors de la suppression:", error);
+      setIsFailedMarchandiseDelete(true);
+      setDeleteDialogOpen(false);
     }
   };
 
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setMarchandiseToDelete(null);
+  };
+
+  const handleSaveSuccess = () => {
+    setIsSuccess(true);
+    fetchAllMarchandises();
+    setDialogOpen(false);
+    setSelectedMarchandise(null);
+  };
+
+  // Close handlers for snackbars
+  const handleCloseSuccess = (event, reason) => {
+    if (reason === "clickaway") return;
+    setIsSuccess(false);
+  };
+
+  const handleCloseFailedMarchandisesFetch = (event, reason) => {
+    if (reason === "clickaway") return;
+    setIsFailedMarchandisesFetch(false);
+  };
+
+  const handleCloseFailedMarchandiseDelete = (event, reason) => {
+    if (reason === "clickaway") return;
+    setIsFailedMarchandiseDelete(false);
+  };
+
+  const handleCloseFailedMarchandiseUpdate = (event, reason) => {
+    if (reason === "clickaway") return;
+    setIsFailedMarchandiseUpdate(false);
+  };
+
+  const handleCloseFailedMarchandiseCreate = (event, reason) => {
+    if (reason === "clickaway") return;
+    setIsFailedMarchandiseCreate(false);
+  };
+
   const getCategoryColor = (category) => {
-    // You can customize these colors based on your categories
     const colors = {
       FRAGILE: { bg: "#FFEBEE", text: "#C62828" },
       DANGEREUSE: { bg: "#FFF3E0", text: "#E65100" },
@@ -133,7 +184,7 @@ export default function Marchandise() {
           <Button
             variant="contained"
             onClick={handleOpenDialog}
-            startIcon={<MarchandiseDialog />}
+            startIcon={<Add />}
             sx={{
               px: 3,
               borderRadius: 1,
@@ -149,7 +200,8 @@ export default function Marchandise() {
           open={dialogOpen}
           onClose={handleCloseDialog}
           marchandise={selectedMarchandise}
-          onSave={fetchAllMarchandises}
+          onSave={handleSaveSuccess}
+          onError={() => setIsFailedMarchandiseCreate(true)}
         />
 
         {rows.length === 0 ? (
@@ -301,7 +353,7 @@ export default function Marchandise() {
                           <Tooltip title="Supprimer">
                             <IconButton
                               size="small"
-                              onClick={() => handleDelete(marchandise.id)}
+                              onClick={() => handleDeleteClick(marchandise.id)}
                               color="error"
                             >
                               <Delete fontSize="small" />
@@ -325,6 +377,120 @@ export default function Marchandise() {
           marchandiseId={selectedMarchandise?.id}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">
+          Confirmer la suppression
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Êtes-vous sûr de vouloir supprimer cette marchandise? Cette action
+            ne peut pas être annulée.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="primary">
+            Annuler
+          </Button>
+          <Button onClick={handleDelete} color="error" autoFocus>
+            Supprimer
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={isSuccess}
+        autoHideDuration={3000}
+        onClose={handleCloseSuccess}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <MuiAlert
+          onClose={handleCloseSuccess}
+          severity="success"
+          sx={{ width: "100%" }}
+          elevation={6}
+          variant="filled"
+        >
+          Opération réussie!
+        </MuiAlert>
+      </Snackbar>
+
+      {/* Error Snackbars */}
+      <Snackbar
+        open={isFailedMarchandisesFetch}
+        autoHideDuration={3000}
+        onClose={handleCloseFailedMarchandisesFetch}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <MuiAlert
+          onClose={handleCloseFailedMarchandisesFetch}
+          severity="error"
+          sx={{ width: "100%" }}
+          elevation={6}
+          variant="filled"
+        >
+          Échec du chargement des marchandises!
+        </MuiAlert>
+      </Snackbar>
+
+      <Snackbar
+        open={isFailedMarchandiseDelete}
+        autoHideDuration={3000}
+        onClose={handleCloseFailedMarchandiseDelete}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <MuiAlert
+          onClose={handleCloseFailedMarchandiseDelete}
+          severity="error"
+          sx={{ width: "100%" }}
+          elevation={6}
+          variant="filled"
+        >
+          Échec de la suppression de la marchandise!
+        </MuiAlert>
+      </Snackbar>
+
+      <Snackbar
+        open={isFailedMarchandiseUpdate}
+        autoHideDuration={3000}
+        onClose={handleCloseFailedMarchandiseUpdate}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <MuiAlert
+          onClose={handleCloseFailedMarchandiseUpdate}
+          severity="error"
+          sx={{ width: "100%" }}
+          elevation={6}
+          variant="filled"
+        >
+          Échec de la mise à jour de la marchandise! Vérifiez les données
+          saisies.
+        </MuiAlert>
+      </Snackbar>
+
+      <Snackbar
+        open={isFailedMarchandiseCreate}
+        autoHideDuration={3000}
+        onClose={handleCloseFailedMarchandiseCreate}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <MuiAlert
+          onClose={handleCloseFailedMarchandiseCreate}
+          severity="error"
+          sx={{ width: "100%" }}
+          elevation={6}
+          variant="filled"
+        >
+          Échec de la création de la marchandise! Vérifiez les données saisies.
+        </MuiAlert>
+      </Snackbar>
     </Box>
   );
 }

@@ -19,7 +19,14 @@ import {
   Tooltip,
   Badge,
   TextField,
+  Snackbar,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
 import {
   DirectionsBoat,
   Edit,
@@ -42,7 +49,6 @@ import {
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { format, isWithinInterval, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
-import { useSnackbar } from "notistack";
 import { styled } from "@mui/material/styles";
 import voyageService from "../../service/voyage/voyageService";
 import ViewVoyageDialog from "../../components/dialog/voyage/ViewVoyageDialog";
@@ -83,8 +89,8 @@ const WarningCard = styled(Card)(({ theme, status }) => {
       boxShadow: theme.shadows[8],
     },
     '&[data-haswarnings="true"]': {
-      borderLeftColor: "#ff3d00", // Vibrant red-orange border
-      backgroundColor: "rgba(255, 61, 0, 0.1)", // Stronger red-orange background
+      borderLeftColor: "#ff3d00",
+      backgroundColor: "rgba(255, 61, 0, 0.1)",
       borderTop: "1px solid rgba(255, 61, 0, 0.2)",
       borderBottom: "1px solid rgba(255, 61, 0, 0.2)",
       animation: "pulse 2s infinite",
@@ -149,7 +155,14 @@ function Voyage() {
   const [selectedVoyageForEtat, setSelectedVoyageForEtat] = useState(null);
   const [warningsDialogOpen, setWarningsDialogOpen] = useState(false);
   const [selectedVoyageWarnings, setSelectedVoyageWarnings] = useState([]);
-  const { enqueueSnackbar } = useSnackbar();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [voyageToDelete, setVoyageToDelete] = useState(null);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isFailedVoyagesFetch, setIsFailedVoyagesFetch] = useState(false);
+  const [isFailedVoyageDelete, setIsFailedVoyageDelete] = useState(false);
+  const [isFailedVoyageUpdate, setIsFailedVoyageUpdate] = useState(false);
+  const [isFailedVoyageCreate, setIsFailedVoyageCreate] = useState(false);
+  const [isFailedEtatChange, setIsFailedEtatChange] = useState(false);
 
   const fetchVoyages = async () => {
     try {
@@ -176,10 +189,8 @@ function Voyage() {
       setRows(voyagesWithWarnings);
       setFilteredRows(voyagesWithWarnings);
     } catch (error) {
-      enqueueSnackbar("Erreur lors du chargement des voyages", {
-        variant: "error",
-      });
-      console.error("Erreur:", error);
+      console.error("Erreur lors de la récupération des voyages:", error);
+      setIsFailedVoyagesFetch(true);
     }
   };
 
@@ -241,20 +252,27 @@ function Voyage() {
     setEditDialogOpen(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer ce voyage ?")) {
-      try {
-        await voyageService.delete(id);
-        enqueueSnackbar("Voyage supprimé avec succès", { variant: "success" });
-        fetchVoyages();
-      } catch (error) {
-        enqueueSnackbar(
-          error.response?.data?.message || "Erreur lors de la suppression",
-          { variant: "error" }
-        );
-        console.error("Erreur lors de la suppression:", error);
-      }
+  const handleDeleteClick = (id) => {
+    setVoyageToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    try {
+      await voyageService.delete(voyageToDelete);
+      setIsSuccess(true);
+      setDeleteDialogOpen(false);
+      fetchVoyages();
+    } catch (error) {
+      console.error("Erreur lors de la suppression du voyage:", error);
+      setIsFailedVoyageDelete(true);
+      setDeleteDialogOpen(false);
     }
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setVoyageToDelete(null);
   };
 
   const handleOpenEtatDialog = (voyage) => {
@@ -273,16 +291,11 @@ function Voyage() {
         id: voyageId,
         etat: newEtat,
       });
-      enqueueSnackbar("Statut du voyage mis à jour avec succès", {
-        variant: "success",
-      });
+      setIsSuccess(true);
       fetchVoyages();
     } catch (error) {
-      enqueueSnackbar(
-        error.response?.data?.message ||
-          "Erreur lors de la mise à jour du statut",
-        { variant: "error" }
-      );
+      console.error("Erreur lors de la mise à jour du statut:", error);
+      setIsFailedEtatChange(true);
     }
   };
 
@@ -292,10 +305,42 @@ function Voyage() {
   };
 
   const handleSaveSuccess = () => {
+    setIsSuccess(true);
     fetchVoyages();
     setDialogOpen(false);
     setEditDialogOpen(false);
     setSelectedVoyage(null);
+  };
+
+  // Close handlers for snackbars
+  const handleCloseSuccess = (event, reason) => {
+    if (reason === "clickaway") return;
+    setIsSuccess(false);
+  };
+
+  const handleCloseFailedVoyagesFetch = (event, reason) => {
+    if (reason === "clickaway") return;
+    setIsFailedVoyagesFetch(false);
+  };
+
+  const handleCloseFailedVoyageDelete = (event, reason) => {
+    if (reason === "clickaway") return;
+    setIsFailedVoyageDelete(false);
+  };
+
+  const handleCloseFailedVoyageUpdate = (event, reason) => {
+    if (reason === "clickaway") return;
+    setIsFailedVoyageUpdate(false);
+  };
+
+  const handleCloseFailedVoyageCreate = (event, reason) => {
+    if (reason === "clickaway") return;
+    setIsFailedVoyageCreate(false);
+  };
+
+  const handleCloseFailedEtatChange = (event, reason) => {
+    if (reason === "clickaway") return;
+    setIsFailedEtatChange(false);
   };
 
   return (
@@ -403,6 +448,7 @@ function Voyage() {
             open={dialogOpen}
             onClose={handleCloseDialog}
             onSave={handleSaveSuccess}
+            onError={() => setIsFailedVoyageCreate(true)}
           />
 
           <EditVoyageDialog
@@ -410,6 +456,7 @@ function Voyage() {
             onClose={() => setEditDialogOpen(false)}
             voyageId={selectedVoyage?.id}
             onSave={handleSaveSuccess}
+            onError={() => setIsFailedVoyageUpdate(true)}
           />
 
           <EtatVoyageComponent
@@ -609,7 +656,7 @@ function Voyage() {
                             <Tooltip title="Supprimer">
                               <IconButton
                                 size="small"
-                                onClick={() => handleDelete(voyage.id)}
+                                onClick={() => handleDeleteClick(voyage.id)}
                                 color="error"
                                 disabled={voyage.etat === "EN_COURS"}
                               >
@@ -621,7 +668,6 @@ function Voyage() {
                       </CardContent>
                     </WarningCard>
 
-                    {/* Facebook-style notification badge */}
                     {voyage.warnings?.length > 0 &&
                       voyage.etat != "TERMINE" &&
                       voyage.etat != "ANNULE" && (
@@ -683,6 +729,136 @@ function Voyage() {
           onClose={() => setWarningsDialogOpen(false)}
           warnings={selectedVoyageWarnings}
         />
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog
+          open={deleteDialogOpen}
+          onClose={handleCloseDeleteDialog}
+          aria-labelledby="delete-dialog-title"
+          aria-describedby="delete-dialog-description"
+        >
+          <DialogTitle id="delete-dialog-title">
+            Confirmer la suppression
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="delete-dialog-description">
+              Êtes-vous sûr de vouloir supprimer ce voyage? Cette action ne peut
+              pas être annulée.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDeleteDialog} color="primary">
+              Annuler
+            </Button>
+            <Button onClick={handleDelete} color="error" autoFocus>
+              Supprimer
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Success Snackbar */}
+        <Snackbar
+          open={isSuccess}
+          autoHideDuration={3000}
+          onClose={handleCloseSuccess}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <MuiAlert
+            onClose={handleCloseSuccess}
+            severity="success"
+            sx={{ width: "100%" }}
+            elevation={6}
+            variant="filled"
+          >
+            Opération réussie!
+          </MuiAlert>
+        </Snackbar>
+
+        {/* Error Snackbars */}
+        <Snackbar
+          open={isFailedVoyagesFetch}
+          autoHideDuration={3000}
+          onClose={handleCloseFailedVoyagesFetch}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <MuiAlert
+            onClose={handleCloseFailedVoyagesFetch}
+            severity="error"
+            sx={{ width: "100%" }}
+            elevation={6}
+            variant="filled"
+          >
+            Échec du chargement des voyages!
+          </MuiAlert>
+        </Snackbar>
+
+        <Snackbar
+          open={isFailedVoyageDelete}
+          autoHideDuration={3000}
+          onClose={handleCloseFailedVoyageDelete}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <MuiAlert
+            onClose={handleCloseFailedVoyageDelete}
+            severity="error"
+            sx={{ width: "100%" }}
+            elevation={6}
+            variant="filled"
+          >
+            Échec de la suppression du voyage!
+          </MuiAlert>
+        </Snackbar>
+
+        <Snackbar
+          open={isFailedVoyageUpdate}
+          autoHideDuration={3000}
+          onClose={handleCloseFailedVoyageUpdate}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <MuiAlert
+            onClose={handleCloseFailedVoyageUpdate}
+            severity="error"
+            sx={{ width: "100%" }}
+            elevation={6}
+            variant="filled"
+          >
+            Échec de la mise à jour du voyage! Vérifiez les données saisies.
+          </MuiAlert>
+        </Snackbar>
+
+        <Snackbar
+          open={isFailedVoyageCreate}
+          autoHideDuration={3000}
+          onClose={handleCloseFailedVoyageCreate}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <MuiAlert
+            onClose={handleCloseFailedVoyageCreate}
+            severity="error"
+            sx={{ width: "100%" }}
+            elevation={6}
+            variant="filled"
+          >
+            Échec de la création du voyage! Vérifiez les données saisies.
+          </MuiAlert>
+        </Snackbar>
+
+        <Snackbar
+          open={isFailedEtatChange}
+          autoHideDuration={3000}
+          onClose={handleCloseFailedEtatChange}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <MuiAlert
+            onClose={handleCloseFailedEtatChange}
+            severity="error"
+            sx={{ width: "100%" }}
+            elevation={6}
+            variant="filled"
+          >
+            Échec du changement de statut!
+          </MuiAlert>
+        </Snackbar>
       </Box>
     </LocalizationProvider>
   );

@@ -21,16 +21,26 @@ const EtatVoyageComponent = ({
   currentEtat,
 }) => {
   const [selectedEtat, setSelectedEtat] = useState(currentEtat);
+  const [error, setError] = useState(null);
 
   const handleChange = (event) => {
     setSelectedEtat(event.target.value);
+    setError(null);
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (selectedEtat !== currentEtat) {
-      onEtatChange(voyage.id, selectedEtat);
+      try {
+        await onEtatChange(voyage.id, selectedEtat);
+        onClose();
+      } catch (error) {
+        setError(
+          error.response?.data?.message || "Erreur lors du changement d'état"
+        );
+      }
+    } else {
+      onClose();
     }
-    onClose();
   };
 
   const etatOptions = [
@@ -41,24 +51,53 @@ const EtatVoyageComponent = ({
     { value: "ANNULE", label: "Annulé" },
   ];
 
-  // Filter out invalid transitions based on current state
   const getValidEtatOptions = () => {
+    const options = [];
+
+    // Always include current state (disabled)
+    options.push({
+      value: currentEtat,
+      label:
+        etatOptions.find((o) => o.value === currentEtat)?.label || currentEtat,
+      disabled: true,
+    });
+
+    // Add valid transitions based on current state
     switch (currentEtat) {
       case "PLANIFIE":
-        return etatOptions.filter((opt) =>
-          ["EN_COURS", "ANNULE"].includes(opt.value)
+        options.push(
+          ...etatOptions.filter((opt) =>
+            ["EN_COURS", "ANNULE"].includes(opt.value)
+          )
         );
+        break;
       case "EN_COURS":
-        return etatOptions.filter((opt) =>
-          ["EN_INCIDENT", "TERMINE"].includes(opt.value)
+        options.push(
+          ...etatOptions.filter((opt) =>
+            ["EN_INCIDENT", "TERMINE"].includes(opt.value)
+          )
         );
+        break;
       case "EN_INCIDENT":
-        return etatOptions.filter((opt) =>
-          ["EN_COURS", "TERMINE"].includes(opt.value)
+        options.push(
+          ...etatOptions.filter((opt) =>
+            ["EN_COURS", "TERMINE"].includes(opt.value)
+          )
         );
-      default:
-        return []; // No changes allowed for TERMINE or ANNULE
+        break;
     }
+
+    // Disable EN_COURS if warnings exist
+    if (voyage?.warnings?.length > 0) {
+      options.forEach((opt) => {
+        if (opt.value === "EN_COURS") {
+          opt.disabled = true;
+          opt.label += " (résoudre les alertes d'abord)";
+        }
+      });
+    }
+
+    return options;
   };
 
   const validOptions = getValidEtatOptions();
@@ -75,6 +114,12 @@ const EtatVoyageComponent = ({
             ID: {voyage?.id}
           </Typography>
 
+          {error && (
+            <Typography color="error" sx={{ mb: 2 }}>
+              {error}
+            </Typography>
+          )}
+
           <FormControl fullWidth sx={{ mt: 3 }}>
             <InputLabel>Nouvel état</InputLabel>
             <Select
@@ -83,7 +128,11 @@ const EtatVoyageComponent = ({
               label="Nouvel état"
             >
               {validOptions.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
+                <MenuItem
+                  key={option.value}
+                  value={option.value}
+                  disabled={option.disabled}
+                >
                   {option.label}
                 </MenuItem>
               ))}
@@ -96,7 +145,7 @@ const EtatVoyageComponent = ({
         <Button
           onClick={handleConfirm}
           variant="contained"
-          disabled={selectedEtat === currentEtat || validOptions.length === 0}
+          disabled={selectedEtat === currentEtat || validOptions.length <= 1} // <=1 because we always include current state
         >
           Confirmer
         </Button>

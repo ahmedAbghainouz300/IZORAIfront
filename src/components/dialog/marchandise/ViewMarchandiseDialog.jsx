@@ -57,14 +57,14 @@ export default function ViewMarchandiseDialog({
             </Typography>
             <Typography variant="body1" gutterBottom>
               <strong>Catégorie :</strong>{" "}
-              {marchandise.categorie?.libelle || "Aucune"}
+              {marchandise.categorie?.categorie || "Aucune"}
             </Typography>
             <Typography variant="body1" gutterBottom>
-              <strong>Unité :</strong> {marchandise.unite?.libelle || "Aucune"}
+              <strong>Unité :</strong> {marchandise.unite?.unite || "Aucune"}
             </Typography>
             <Typography variant="body1" gutterBottom>
               <strong>Emballage :</strong>{" "}
-              {marchandise.emballage?.libelle || "Aucun"}
+              {marchandise.emballage?.nom || "Aucun"}
             </Typography>
           </>
         ) : (
