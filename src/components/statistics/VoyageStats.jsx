@@ -99,7 +99,7 @@ const VoyageStats = ({ stats, loading }) => {
                         <Typography variant="h5" sx={{ fontWeight: "bold" }}>
                           {count}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" color="#001">
                           {percent}%
                         </Typography>
                       </Box>

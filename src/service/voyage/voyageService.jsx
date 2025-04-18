@@ -49,6 +49,12 @@ const voyageService = {
 
   // Get voyage statistics
   getStatistics: () => axiosClient.get("/api/voyages/statistics"),
+
+  changeEtat: (voyageEtatDTO) =>
+    axiosClient.put("/api/voyages/changeEtat", voyageEtatDTO),
+
+  checkWarnings: (voyageId) =>
+    axiosClient.get(`/api/voyages/warnings/${voyageId}`),
 };
 
 export default voyageService;

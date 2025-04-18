@@ -493,7 +493,7 @@ export default function VoyageDialog({ open, onClose, onSave }) {
                       <Autocomplete
                         options={marchandises}
                         getOptionLabel={(option) =>
-                          `${option.libelle} (${option.categorie.libelle})`
+                          `${option.libelle} (${option.categorie.categorie})`
                         }
                         value={selectedMarchandise}
                         onChange={(_, value) => setSelectedMarchandise(value)}

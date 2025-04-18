@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -18,47 +18,58 @@ import {
   Box,
   IconButton,
   Tooltip,
-  Stack
-} from '@mui/material';
-import { LocationOn, Edit, Delete, Check, Close, MoreVert } from '@mui/icons-material';
-import { useSnackbar } from 'notistack';
-import demandeCotationService from '../../../service/demande/demandeCotationService';
-import AddAdress from '../partenaire/adress/addAdress';
+  Stack,
+} from "@mui/material";
+import {
+  LocationOn,
+  Edit,
+  Delete,
+  Check,
+  Close,
+  MoreVert,
+} from "@mui/icons-material";
+import { useSnackbar } from "notistack";
+import demandeCotationService from "../../../service/demande/demandeCotationService";
 
 const typeRemorqueOptions = [
-  'FRIGORIFIQUE',
-  'PLATEAU',
-  'BENNE',
-  'CITERNE',
-  'REFRIGEREE'
+  "FRIGORIFIQUE",
+  "PLATEAU",
+  "BENNE",
+  "CITERNE",
+  "REFRIGEREE",
 ];
 
 const typeMarchandiseOptions = [
-  'ALIMENTAIRE',
-  'MATERIAUX_CONSTRUCTION',
-  'PRODUITS_CHIMIQUES',
-  'EQUIPEMENTS_INDUSTRIELS'
+  "ALIMENTAIRE",
+  "MATERIAUX_CONSTRUCTION",
+  "PRODUITS_CHIMIQUES",
+  "EQUIPEMENTS_INDUSTRIELS",
 ];
 
 const statusOptions = [
-  { value: 'EN_ATTENTE', label: 'En attente' },
-  { value: 'VALIDEE', label: 'Validée', color: 'success' },
-  { value: 'REJETEE', label: 'Rejetée', color: 'error' }
+  { value: "EN_ATTENTE", label: "En attente" },
+  { value: "VALIDEE", label: "Validée", color: "success" },
+  { value: "REJETEE", label: "Rejetée", color: "error" },
 ];
 
-export default function EditDemandeCotationDialog({ open, onClose, onSave, demandeId }) {
+export default function EditDemandeCotationDialog({
+  open,
+  onClose,
+  onSave,
+  demandeId,
+}) {
   const { enqueueSnackbar } = useSnackbar();
   const [formData, setFormData] = useState({
-    typeRemorque: '',
-    typeMarchandise: '',
-    exigencesParticulieres: '',
+    typeRemorque: "",
+    typeMarchandise: "",
+    exigencesParticulieres: "",
     transitEtranger: false,
-    dateDemande: new Date().toISOString().split('T')[0],
-    periodeTransport: '',
-    statut: 'EN_ATTENTE',
+    dateDemande: new Date().toISOString().split("T")[0],
+    periodeTransport: "",
+    statut: "EN_ATTENTE",
     adresseChargement: null,
     adresseDechargement: null,
-    physique: null
+    physique: null,
   });
 
   const [openAdress, setOpenAdress] = useState(false);
@@ -72,19 +83,23 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
         try {
           const response = await demandeCotationService.getById(demandeId);
           setFormData({
-            typeRemorque: response.data.typeRemorque || '',
-            typeMarchandise: response.data.typeMarchandise || '',
-            exigencesParticulieres: response.data.exigencesParticulieres || '',
+            typeRemorque: response.data.typeRemorque || "",
+            typeMarchandise: response.data.typeMarchandise || "",
+            exigencesParticulieres: response.data.exigencesParticulieres || "",
             transitEtranger: response.data.transitEtranger || false,
-            dateDemande: response.data.dateDemande || new Date().toISOString().split('T')[0],
-            periodeTransport: response.data.periodeTransport || '',
-            statut: response.data.statut || 'EN_ATTENTE',
+            dateDemande:
+              response.data.dateDemande ||
+              new Date().toISOString().split("T")[0],
+            periodeTransport: response.data.periodeTransport || "",
+            statut: response.data.statut || "EN_ATTENTE",
             adresseChargement: response.data.adresseChargement || null,
             adresseDechargement: response.data.adresseDechargement || null,
-            physique: response.data.physique || null
+            physique: response.data.physique || null,
           });
         } catch (error) {
-          enqueueSnackbar('Erreur lors du chargement de la demande', { variant: 'error' });
+          enqueueSnackbar("Erreur lors du chargement de la demande", {
+            variant: "error",
+          });
         }
       }
     };
@@ -96,9 +111,9 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
 
   const handleChange = (e) => {
     const { name, value, checked, type } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -106,14 +121,19 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
     try {
       console.log(newStatus);
       await demandeCotationService.updateStatus(demandeId, newStatus);
-      setFormData(prev => ({ ...prev, statut: newStatus }));
-      enqueueSnackbar(`Statut changé à ${newStatus === 'VALIDEE' ? 'Validée' : 'Rejetée'}`, { 
-        variant: 'success' 
-      });
+      setFormData((prev) => ({ ...prev, statut: newStatus }));
+      enqueueSnackbar(
+        `Statut changé à ${newStatus === "VALIDEE" ? "Validée" : "Rejetée"}`,
+        {
+          variant: "success",
+        }
+      );
       onSave({ ...formData, statut: newStatus });
     } catch (error) {
-      enqueueSnackbar('Erreur lors du changement de statut', { variant: 'error' });
-      console.error('Error updating status:', error);
+      enqueueSnackbar("Erreur lors du changement de statut", {
+        variant: "error",
+      });
+      console.error("Error updating status:", error);
     } finally {
       setStatusMenuAnchor(null);
     }
@@ -125,103 +145,100 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
     setOpenAdress(true);
   };
 
-  const handleAddAdress = (newAddress) => {
-    if (currentAddressType === 'chargement') {
-      setFormData(prev => ({
-        ...prev,
-        adresseChargement: newAddress
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        adresseDechargement: newAddress
-      }));
-    }
-    setOpenAdress(false);
-    enqueueSnackbar('Adresse enregistrée avec succès', { variant: 'success' });
-  };
-
   const handleRemoveAddress = (type) => {
-    if (type === 'chargement') {
-      setFormData(prev => ({
+    if (type === "chargement") {
+      setFormData((prev) => ({
         ...prev,
-        adresseChargement: null
+        adresseChargement: null,
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        adresseDechargement: null
+        adresseDechargement: null,
       }));
     }
-    enqueueSnackbar('Adresse supprimée', { variant: 'info' });
+    enqueueSnackbar("Adresse supprimée", { variant: "info" });
   };
 
   const handleSubmit = async () => {
     try {
       if (!formData.typeMarchandise || !formData.typeRemorque) {
-        enqueueSnackbar('Les champs Type Marchandise et Type Remorque sont obligatoires', { variant: 'warning' });
+        enqueueSnackbar(
+          "Les champs Type Marchandise et Type Remorque sont obligatoires",
+          { variant: "warning" }
+        );
         return;
       }
 
       let result;
       if (demandeId) {
         result = await demandeCotationService.update(demandeId, formData);
-        enqueueSnackbar('Demande mise à jour avec succès', { variant: 'success' });
+        enqueueSnackbar("Demande mise à jour avec succès", {
+          variant: "success",
+        });
       } else {
         result = await demandeCotationService.create(formData);
-        enqueueSnackbar('Demande créée avec succès', { variant: 'success' });
+        enqueueSnackbar("Demande créée avec succès", { variant: "success" });
       }
-      
+
       onSave(result);
       onClose();
     } catch (error) {
-      console.error('Error saving demande:', error);
+      console.error("Error saving demande:", error);
       enqueueSnackbar(
-        error.response?.data?.message || 'Erreur lors de la sauvegarde', 
-        { variant: 'error' }
+        error.response?.data?.message || "Erreur lors de la sauvegarde",
+        { variant: "error" }
       );
     }
   };
 
   const formatAddress = (address) => {
-    if (!address) return 'Non spécifiée';
+    if (!address) return "Non spécifiée";
     return `${address.rue}, ${address.codePostal} ${address.ville}, ${address.pays}`;
   };
 
   return (
     <>
       <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-        <DialogTitle sx={{ 
-          bgcolor: 'primary.main', 
-          color: 'white',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
+        <DialogTitle
+          sx={{
+            bgcolor: "primary.main",
+            color: "white",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <Box>
-            {demandeId ? 'Modifier la Demande' : 'Nouvelle Demande de Cotation'}
+            {demandeId ? "Modifier la Demande" : "Nouvelle Demande de Cotation"}
           </Box>
           {demandeId && (
             <Stack direction="row" spacing={1} alignItems="center">
-              <Chip 
-                label={statusOptions.find(s => s.value === formData.statut)?.label || formData.statut}
-                color={statusOptions.find(s => s.value === formData.statut)?.color || 'default'}
-                sx={{ color: 'white', fontWeight: 'bold' }}
+              <Chip
+                label={
+                  statusOptions.find((s) => s.value === formData.statut)
+                    ?.label || formData.statut
+                }
+                color={
+                  statusOptions.find((s) => s.value === formData.statut)
+                    ?.color || "default"
+                }
+                sx={{ color: "white", fontWeight: "bold" }}
               />
-              {formData.statut === 'EN_ATTENTE' && (
+              {formData.statut === "EN_ATTENTE" && (
                 <>
                   <Tooltip title="Valider la demande">
-                    <IconButton 
-                      onClick={() => handleStatusChange('VALIDEE')}
-                      sx={{ color: 'white' }}
+                    <IconButton
+                      onClick={() => handleStatusChange("VALIDEE")}
+                      sx={{ color: "white" }}
                     >
                       <Check />
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="Rejeter la demande">
-                    <IconButton 
-                      onClick={() => handleStatusChange('REJETEE')}
-                      sx={{ color: 'white' }}
+                    <IconButton
+                      onClick={() => handleStatusChange("REJETEE")}
+                      sx={{ color: "white" }}
                     >
                       <Close />
                     </IconButton>
@@ -231,7 +248,7 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
             </Stack>
           )}
         </DialogTitle>
-        
+
         <DialogContent dividers>
           <Grid container spacing={3} sx={{ pt: 2 }}>
             {/* Basic Information Section */}
@@ -252,7 +269,7 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
                         value={formData.typeMarchandise}
                         onChange={handleChange}
                         size="small"
-                        disabled={formData.statut !== 'EN_ATTENTE'}
+                        disabled={formData.statut !== "EN_ATTENTE"}
                       >
                         {typeMarchandiseOptions.map((option) => (
                           <MenuItem key={option} value={option}>
@@ -270,7 +287,7 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
                         value={formData.typeRemorque}
                         onChange={handleChange}
                         size="small"
-                        disabled={formData.statut !== 'EN_ATTENTE'}
+                        disabled={formData.statut !== "EN_ATTENTE"}
                       >
                         {typeRemorqueOptions.map((option) => (
                           <MenuItem key={option} value={option}>
@@ -289,7 +306,7 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
                         onChange={handleChange}
                         size="small"
                         InputLabelProps={{ shrink: true }}
-                        disabled={formData.statut !== 'EN_ATTENTE'}
+                        disabled={formData.statut !== "EN_ATTENTE"}
                       />
                     </Grid>
                     <Grid item xs={12} md={6}>
@@ -300,7 +317,7 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
                             onChange={handleChange}
                             name="transitEtranger"
                             color="primary"
-                            disabled={formData.statut !== 'EN_ATTENTE'}
+                            disabled={formData.statut !== "EN_ATTENTE"}
                           />
                         }
                         label="Transit à l'étranger"
@@ -324,27 +341,38 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
                       <Typography variant="subtitle1" gutterBottom>
                         Adresse de Chargement
                       </Typography>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
                         <Chip
                           icon={<LocationOn />}
                           label={formatAddress(formData.adresseChargement)}
-                          color={formData.adresseChargement ? 'primary' : 'default'}
-                          sx={{ flexGrow: 1, justifyContent: 'flex-start' }}
+                          color={
+                            formData.adresseChargement ? "primary" : "default"
+                          }
+                          sx={{ flexGrow: 1, justifyContent: "flex-start" }}
                         />
-                        {formData.statut === 'EN_ATTENTE' && (
+                        {formData.statut === "EN_ATTENTE" && (
                           <>
-                            <IconButton 
+                            <IconButton
                               color="primary"
-                              onClick={() => handleOpenAddressDialog('chargement', formData.adresseChargement)}
-                              disabled={formData.statut !== 'EN_ATTENTE'}
+                              onClick={() =>
+                                handleOpenAddressDialog(
+                                  "chargement",
+                                  formData.adresseChargement
+                                )
+                              }
+                              disabled={formData.statut !== "EN_ATTENTE"}
                             >
                               <Edit />
                             </IconButton>
                             {formData.adresseChargement && (
-                              <IconButton 
+                              <IconButton
                                 color="error"
-                                onClick={() => handleRemoveAddress('chargement')}
-                                disabled={formData.statut !== 'EN_ATTENTE'}
+                                onClick={() =>
+                                  handleRemoveAddress("chargement")
+                                }
+                                disabled={formData.statut !== "EN_ATTENTE"}
                               >
                                 <Delete />
                               </IconButton>
@@ -357,27 +385,38 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
                       <Typography variant="subtitle1" gutterBottom>
                         Adresse de Déchargement
                       </Typography>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
                         <Chip
                           icon={<LocationOn />}
                           label={formatAddress(formData.adresseDechargement)}
-                          color={formData.adresseDechargement ? 'primary' : 'default'}
-                          sx={{ flexGrow: 1, justifyContent: 'flex-start' }}
+                          color={
+                            formData.adresseDechargement ? "primary" : "default"
+                          }
+                          sx={{ flexGrow: 1, justifyContent: "flex-start" }}
                         />
-                        {formData.statut === 'EN_ATTENTE' && (
+                        {formData.statut === "EN_ATTENTE" && (
                           <>
-                            <IconButton 
+                            <IconButton
                               color="primary"
-                              onClick={() => handleOpenAddressDialog('dechargement', formData.adresseDechargement)}
-                              disabled={formData.statut !== 'EN_ATTENTE'}
+                              onClick={() =>
+                                handleOpenAddressDialog(
+                                  "dechargement",
+                                  formData.adresseDechargement
+                                )
+                              }
+                              disabled={formData.statut !== "EN_ATTENTE"}
                             >
                               <Edit />
                             </IconButton>
                             {formData.adresseDechargement && (
-                              <IconButton 
+                              <IconButton
                                 color="error"
-                                onClick={() => handleRemoveAddress('dechargement')}
-                                disabled={formData.statut !== 'EN_ATTENTE'}
+                                onClick={() =>
+                                  handleRemoveAddress("dechargement")
+                                }
+                                disabled={formData.statut !== "EN_ATTENTE"}
                               >
                                 <Delete />
                               </IconButton>
@@ -408,7 +447,7 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
                         value={formData.periodeTransport}
                         onChange={handleChange}
                         size="small"
-                        disabled={formData.statut !== 'EN_ATTENTE'}
+                        disabled={formData.statut !== "EN_ATTENTE"}
                       />
                     </Grid>
                     <Grid item xs={12} md={6}>
@@ -419,7 +458,7 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
                         value={formData.exigencesParticulieres}
                         onChange={handleChange}
                         size="small"
-                        disabled={formData.statut !== 'EN_ATTENTE'}
+                        disabled={formData.statut !== "EN_ATTENTE"}
                       />
                     </Grid>
                   </Grid>
@@ -430,20 +469,13 @@ export default function EditDemandeCotationDialog({ open, onClose, onSave, deman
         </DialogContent>
         <DialogActions>
           <Button onClick={onClose}>Annuler</Button>
-          {formData.statut === 'EN_ATTENTE' && (
+          {formData.statut === "EN_ATTENTE" && (
             <Button onClick={handleSubmit} variant="contained" color="primary">
               {demandeId ? "Mettre à jour" : "Créer"}
             </Button>
           )}
         </DialogActions>
       </Dialog>
-
-      <AddAdress
-        open={openAdress}
-        onClose={() => setOpenAdress(false)}
-        onAdd={handleAddAdress}
-        address={editAddress}
-      />
     </>
   );
 }

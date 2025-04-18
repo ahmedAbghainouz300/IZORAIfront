@@ -207,7 +207,7 @@ export default function EditMarchandiseDialog({
             <TextField
               label="Catégorie *"
               fullWidth
-              value={formData.categorie?.libelle || ""}
+              value={formData.categorie?.categorie || ""}
               onClick={() => setCategorieDialogOpen(true)}
               InputProps={{ readOnly: true }}
               margin="normal"
