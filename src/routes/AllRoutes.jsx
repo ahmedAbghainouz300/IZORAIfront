@@ -29,6 +29,7 @@ const AllRoutes = {
     entretient: "/document/entretient",
     carburant: "/document/carburant",
     carteGrise: "/document/carteGrise",
+    VisiteTechnique :"/document/VisiteTechnique"
   },
   marchandise: {
     base: "/marchandise",
@@ -38,7 +39,8 @@ const AllRoutes = {
   },
   voyage: {
     base: "/voyage",
-  }
+  },
+ 
 };
 
 export default AllRoutes;

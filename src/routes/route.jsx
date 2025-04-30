@@ -20,6 +20,8 @@ import CredentialsSignInPage from "../components/Login";
 import Marchandise from "../pages/marchandise/Marchandise";
 import DemandeCotation from "../pages/demande/DemandeCotation";
 import Voyage from "../pages/voyage/Voyage";
+import { element } from "prop-types";
+import VisiteTechnique from "../pages/camion/Document/VisiteTechnique";
 
 function AppRoutes() {
   return (
@@ -62,8 +64,9 @@ function AppRoutes() {
           <Route path={allRoutes.document.carburant} element={<Carburant />} />
           <Route
             path={allRoutes.document.carteGrise}
-            element={<CarteGrise />}
+            element={<CarteGrise />}            
           />
+          <Route path={allRoutes.document.VisiteTechnique} element={<VisiteTechnique />}/>
         </Route>
         {/* Marchandise Section */}
         <Route path={allRoutes.marchandise.base} element={<Marchandise />} />

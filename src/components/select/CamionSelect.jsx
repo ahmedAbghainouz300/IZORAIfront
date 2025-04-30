@@ -65,15 +65,6 @@ export default function CamionSelect({ open, onClose, onSelect }) {
           margin="normal"
         />
 
-        {/* Add/Edit Camion Form */}
-        <Box sx={{ display: "flex", gap: 2, marginBottom: 2 }}>
-          <TextField
-            fullWidth
-            label="Nouveau Camion"
-            value={newCamion.immatriculation}
-            onChange={(e) => setNewCamion(e.target.value)}
-          />
-        </Box>
 
         {/* Camion Table */}
         <TableContainer component={Paper}>

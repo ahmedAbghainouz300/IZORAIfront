@@ -39,9 +39,7 @@ const validateForm = (formData) => {
   
   if (!formData.cni) {
     errors.cni = "CNI is required";
-  } else if (isNaN(formData.cni)) {
-    errors.cni = "CNI must be a valid number";
-  }
+  }   
   
   if (!formData.typePartenaire) {
     errors.typePartenaire = "Partner type is required";

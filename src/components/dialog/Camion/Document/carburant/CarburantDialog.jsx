@@ -497,85 +497,85 @@ export default function CarburantDialog({ open, onClose, onCreate }) {
             </Grid>
           </Grid>
 
-          {/* Camion Selection Modal */}
-          <Dialog
-            open={isCamionModalOpen}
-            onClose={() => setIsCamionModalOpen(false)}
-            maxWidth="md"
-            fullWidth
-            PaperProps={{
-              sx: {
-                borderRadius: 3,
-                p: 2
-              }
-            }}
-          >
-            <DialogTitle 
-              sx={{ 
-                fontSize: '1.2rem',
-                fontWeight: 'bold',
-                textAlign: 'center',
-                mb: 2
+            {/* Camion Selection Modal */}
+            <Dialog
+              open={isCamionModalOpen}
+              onClose={() => setIsCamionModalOpen(false)}
+              maxWidth="md"
+              fullWidth
+              PaperProps={{
+                sx: {
+                  borderRadius: 3,
+                  p: 2
+                }
               }}
             >
-              Sélectionner un Camion
-            </DialogTitle>
-            <DialogContent dividers>
-              <TextField
-                fullWidth
-                label="Rechercher un camion"
-                value={camionFilter}
-                onChange={(e) => setCamionFilter(e.target.value)}
-                margin="normal"
-                variant="outlined"
-                sx={{ mb: 3 }}
-              />
-              
-              <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
-                <Grid container spacing={2}>
-                  {filteredCamions.map((camion) => (
-                    <Grid item xs={12} key={camion.immatriculation}>
-                      <Box
-                        sx={{
-                          p: 2,
-                          border: '1px solid',
-                          borderColor: carburantData.camion?.immatriculation === camion.immatriculation 
-                            ? 'primary.main' 
-                            : 'divider',
-                          borderRadius: 1,
-                          backgroundColor: carburantData.camion?.immatriculation === camion.immatriculation 
-                            ? 'primary.light' 
-                            : 'background.paper',
-                          '&:hover': {
-                            backgroundColor: 'action.hover',
-                          }
-                        }}
-                        onClick={() => handleSelectCamion(camion)}
-                      >
-                        <Typography variant="subtitle1" fontWeight="bold">
-                          {camion.immatriculation}
-                        </Typography>
-                        <Typography variant="body2">
-                          Marque: {camion.typeCabine}
-                        </Typography>
-                        <Typography variant="body2">
-                          Poids Max: {camion.poidsMax}
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  ))}
-                </Grid>
-              </Box>
-            </DialogContent>
-            <DialogActions sx={{ p: 2 }}>
-              <Button 
-                onClick={() => setIsCamionModalOpen(false)} 
-                variant="outlined"
+              <DialogTitle 
+                sx={{ 
+                  fontSize: '1.2rem',
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  mb: 2
+                }}
               >
-                Fermer
-              </Button>
-            </DialogActions>
-          </Dialog>
+                Sélectionner un Camion
+              </DialogTitle>
+              <DialogContent dividers>
+                <TextField
+                  fullWidth
+                  label="Rechercher un camion"
+                  value={camionFilter}
+                  onChange={(e) => setCamionFilter(e.target.value)}
+                  margin="normal"
+                  variant="outlined"
+                  sx={{ mb: 3 }}
+                />
+                
+                <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+                  <Grid container spacing={2}>
+                    {filteredCamions.map((camion) => (
+                      <Grid item xs={12} key={camion.immatriculation}>
+                        <Box
+                          sx={{
+                            p: 2,
+                            border: '1px solid',
+                            borderColor: carburantData.camion?.immatriculation === camion.immatriculation 
+                              ? 'primary.main' 
+                              : 'divider',
+                            borderRadius: 1,
+                            backgroundColor: carburantData.camion?.immatriculation === camion.immatriculation 
+                              ? 'primary.light' 
+                              : 'background.paper',
+                            '&:hover': {
+                              backgroundColor: 'action.hover',
+                            }
+                          }}
+                          onClick={() => handleSelectCamion(camion)}
+                        >
+                          <Typography variant="subtitle1" fontWeight="bold">
+                            {camion.immatriculation}
+                          </Typography>
+                          <Typography variant="body2">
+                            Marque: {camion.typeCabine}
+                          </Typography>
+                          <Typography variant="body2">
+                            Poids Max: {camion.poidsMax}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Box>
+              </DialogContent>
+              <DialogActions sx={{ p: 2 }}>
+                <Button 
+                  onClick={() => setIsCamionModalOpen(false)} 
+                  variant="outlined"
+                >
+                  Fermer
+                </Button>
+              </DialogActions>
+            </Dialog>
 
           {/* TypeCarburant Selection Modal */}
           <TypeCarburantSelect

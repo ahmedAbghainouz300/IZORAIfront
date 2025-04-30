@@ -36,7 +36,7 @@ export default function VoyageDialog({ open, onClose, onSave }) {
     dateDepart: "",
     dateArrivePrevue: "",
     dateArriveReelle: "",
-    lieuDepart: "",
+    lieuDepart: null,
     lieuArrive: null,
     distance: 0,
     etat: "PLANIFIE",
@@ -208,6 +208,7 @@ export default function VoyageDialog({ open, onClose, onSave }) {
       console.log("Submitting voyage data:", voyageData);
 
       // 1. First create the voyage (addresses will be cascaded)
+      console.log("Creating voyage with data:", voyageData);
       const voyageResponse = await voyageService.create(voyageData);
       const voyageId = voyageResponse.data.id;
 

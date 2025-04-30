@@ -94,6 +94,10 @@ const NavComponent = (children) => {
                       key: allRoutes.document.carteGrise,
                       label: "Carte Grise",
                     },
+                    {
+                      key : allRoutes.document.VisiteTechnique,
+                      label : "VisiteTechnique"
+                    }
                   ],
                 },
               ],
