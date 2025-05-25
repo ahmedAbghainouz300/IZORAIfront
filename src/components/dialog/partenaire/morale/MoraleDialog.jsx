@@ -167,7 +167,7 @@ export default function MoraleDialog({ open, onClose, onSave }) {
       onSave();
       onClose();
     } catch (error) {
-      console.error("Error creating Morale:", error);
+      console.error("echec d'ajoute un nouveau partenaire morale:", error);
       setError(
         error.response?.data?.message ||
           "Une erreur est survenue lors de l'ajout du partenaire moral"
@@ -379,7 +379,7 @@ export default function MoraleDialog({ open, onClose, onSave }) {
               ) : (
                 <Paper variant="outlined" sx={{ p: 3, textAlign: 'center' }}>
                   <Typography variant="body2" color="text.secondary">
-                    No addresses added yet
+                    Aucune adresse ajoutée. Cliquez sur "Ajouter une Adresse" pour commencer.
                   </Typography>
                   <Button 
                     variant="text" 
@@ -388,7 +388,7 @@ export default function MoraleDialog({ open, onClose, onSave }) {
                     onClick={() => setOpenAdress(true)}
                     sx={{ mt: 1 }}
                   >
-                    Add First Address
+                    Ajouter une Adresse
                   </Button>
                 </Paper>
               )}

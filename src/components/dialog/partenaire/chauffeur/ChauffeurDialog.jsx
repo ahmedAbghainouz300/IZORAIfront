@@ -242,6 +242,8 @@ export default function ChauffeurDialog({ open, onClose,onSuccess }) {
             <TextField
               label="CNSS"
               name="cnss"
+              error={errors.telephone}
+              helperText={errors.telephone ? "Ce champ est obligatoire" : ""}
               fullWidth
               value={formData.cnss}
               onChange={handleChange}
@@ -332,6 +334,8 @@ export default function ChauffeurDialog({ open, onClose,onSuccess }) {
                       accept="image/*"
                       ref={rectoInputRef}
                       onChange={(e) => handleFileChange(e, "photoPermisRecto")}
+                      error={errors.photoPermisRecto}
+                      helperText={errors.photoPermisRecto ? "Ce champ est obligatoire" : ""}
                     />
                   </Button>
                   <Typography variant="caption" display="block">
@@ -376,6 +380,8 @@ export default function ChauffeurDialog({ open, onClose,onSuccess }) {
                       accept="image/*"
                       ref={versoInputRef}
                       onChange={(e) => handleFileChange(e, "photoPermisVerso")}
+                      error={errors.photoPermisVerso}
+                      helperText={errors.photoPermisVerso ? "Ce champ est obligatoire" : ""}
                     />
                   </Button>
                   <Typography variant="caption" display="block">
@@ -444,7 +450,7 @@ export default function ChauffeurDialog({ open, onClose,onSuccess }) {
            ) : (
              <Paper variant="outlined" sx={{ p: 3, textAlign: 'center' }}>
                <Typography variant="body2" color="text.secondary">
-                 No addresses added yet
+                  Aucune adresse ajoutée. Cliquez sur le bouton ci-dessous pour ajouter une adresse.
                </Typography>
                <Button 
                  variant="text" 
@@ -453,7 +459,7 @@ export default function ChauffeurDialog({ open, onClose,onSuccess }) {
                  onClick={() => setOpenAdress(true)}
                  sx={{ mt: 1 }}
                >
-                 Add First Address
+                 ajouter une adresse
                </Button>
              </Paper>
            )}

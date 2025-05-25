@@ -1,36 +1,37 @@
 import * as React from "react";
 import { AppProvider } from "@toolpad/core/AppProvider";
 import { useTheme } from "@mui/material/styles";
-import "../styles/login.css"; // Import your CSS file
+import { useNavigate } from "react-router-dom"; // Add this import
+import "../styles/login.css";
 import authService from "../service/auth/authService";
 
 const CredentialsSignInPage = () => {
   const theme = useTheme();
   const [error, setError] = React.useState("");
-
+  const navigate = useNavigate(); // Initialize navigate
 
   // Handle form submission
-  const handleSignIn = (event) => {
-    event.preventDefault(); // Prevent default form submission
+  const handleSignIn = async (event) => {
+    event.preventDefault();
 
-    // Get form data
     const formData = new FormData(event.target);
     const username = formData.get("username");
     const password = formData.get("password");
 
-    try{
-      const token = authService.login(username,password);
-      console.log("token",token)
-
-    }catch( err){
-      setError(err);
-        console.log("Erreur : ",err)
+    try {
+      const token = await authService.login(username, password);
+      console.log("Login successful, token:", token);
+      
+      // Set up axios authorization header
+      // axiosClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      
+      // Redirect to home/dashboard page
+      navigate("/home"); // Change this to your desired route after login
+      
+    } catch (err) {
+      setError(err.message || "Login failed");
+      console.error("Login error:", err);
     }
-
-    // Display alert with email and password
-    alert(
-      `Signing in with credentials:\nusername: ${username}\nPassword: ${password}`
-    );
   };
 
   return (
@@ -42,6 +43,12 @@ const CredentialsSignInPage = () => {
         </div>
         <div className="form-container">
           <div className="heading">Sign In</div>
+          {/* Display error message if exists */}
+          {error && (
+            <div className="error-message" style={{ color: "red", marginBottom: "10px" }}>
+              {error}
+            </div>
+          )}
           <form className="form" onSubmit={handleSignIn}>
             <input
               required
@@ -65,7 +72,7 @@ const CredentialsSignInPage = () => {
             <input
               className="login-button"
               type="submit"
-              value="Sign In" // Use `value` instead of `defaultValue` for controlled input
+              value="Sign In"
             />
           </form>
           <div className="social-account-container">

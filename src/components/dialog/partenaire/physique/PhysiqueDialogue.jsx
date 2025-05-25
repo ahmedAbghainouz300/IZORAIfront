@@ -192,7 +192,7 @@ export default function PhysiqueDialog({ open, onClose, onAdd }) {
         <DialogContent>
           <Box sx={{ p: 2 }}>
             <TextField
-              label="Name*"
+              label="Nom*"
               fullWidth
               margin="normal"
               name="nom"
@@ -206,7 +206,7 @@ export default function PhysiqueDialog({ open, onClose, onAdd }) {
             />
 
             <TextField
-              label="First Name*"
+              label="prenom*"
               fullWidth
               margin="normal"
               name="prenom"
@@ -222,7 +222,7 @@ export default function PhysiqueDialog({ open, onClose, onAdd }) {
             />
 
             <TextField
-              label="Phone*"
+              label="télèphone*"
               fullWidth
               margin="normal"
               name="telephone"
@@ -273,7 +273,7 @@ export default function PhysiqueDialog({ open, onClose, onAdd }) {
 
             <FormControl fullWidth margin="normal">
               <TextField
-                label="Partner Type"
+                label=" Type Paartenaire*"
                 value={selectedTypePartenaire?.libelle || ""}
                 fullWidth
                 margin="normal"
@@ -291,8 +291,8 @@ export default function PhysiqueDialog({ open, onClose, onAdd }) {
                 sx={{ mt: 1 }}
               >
                 {selectedTypePartenaire
-                  ? "Change Partner Type*"
-                  : "Select Partner Type*"}
+                  ? "Changer Type partenaire*"
+                  : "Selectionner Type partenaire*"}
               </Button>
             </FormControl>
 
@@ -310,8 +310,8 @@ export default function PhysiqueDialog({ open, onClose, onAdd }) {
                           secondaryAction={
                             <>
                               <IconButton 
-                                edge="end" 
-                                aria-label="delete"
+                                edge="finis" 
+                                aria-label="supprimer"
                                 onClick={() => handleDeleteAddress(index)}
                               >
                                 <Delete fontSize="small" color="error" />
@@ -353,7 +353,7 @@ export default function PhysiqueDialog({ open, onClose, onAdd }) {
               ) : (
                 <Paper variant="outlined" sx={{ p: 3, textAlign: 'center' }}>
                   <Typography variant="body2" color="text.secondary">
-                    No addresses added yet
+                    aucun addresses ajouter
                   </Typography>
                   <Button 
                     variant="text" 
@@ -373,7 +373,7 @@ export default function PhysiqueDialog({ open, onClose, onAdd }) {
                 onClick={() => setOpenAdress(true)}
                 sx={{ mt: 2 }}
               >
-                {formData.adresses.length > 0 ? 'Add Another Address' : 'Add Address'}
+                {formData.adresses.length > 0 ? 'ajouter autre Address' : 'ajouter Address'}
               </Button>
             </Box>
           </Box>
@@ -384,7 +384,7 @@ export default function PhysiqueDialog({ open, onClose, onAdd }) {
           </Button>
           
           <Button onClick={handleSubmit} color="primary" disabled={isLoading}>
-            {isLoading ? "Saving..." : "Add"}
+            {isLoading ? "Saving..." : "ajouter"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -408,7 +408,7 @@ export default function PhysiqueDialog({ open, onClose, onAdd }) {
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert severity="error" onClose={handleCloseFailedValidation}>
-          {validationError || "Please fill all required fields"}
+          {validationError || "remplir tous les champs obligatoires"}
         </Alert>
       </Snackbar>
 

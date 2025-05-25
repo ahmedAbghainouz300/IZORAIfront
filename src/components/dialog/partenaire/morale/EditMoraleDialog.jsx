@@ -91,8 +91,8 @@ export default function EditMoraleDialog({
         setFormData((prev) => ({ ...prev, adresses: response.data || [] }));
       })
       .catch((error) => {
-        console.error("Error fetching addresses:", error);
-        setError("Failed to load addresses");
+        console.error("echec de recuperer les addresses:", error);
+        setError("Echec de recuperer les adresses");
       })
       .finally(() => setIsLoading(false));
   };
@@ -110,32 +110,32 @@ export default function EditMoraleDialog({
 
   const validateForm = () => {
     if (!formData.nom.trim()) {
-      setValidationError("Name is required");
+      setValidationError("Nom est requis");
       setIsFailedValidation(true);
       return false;
     }
     if (!formData.ice) {
-      setValidationError("ICE is required");
+      setValidationError("ICE est requis");
       setIsFailedValidation(true);
       return false;
     }
     if (isNaN(formData.ice)) {
-      setValidationError("ICE must be a valid number");
+      setValidationError("ICE doit être un nombre valide");
       setIsFailedValidation(true);
       return false;
     }
     if (!formData.telephone) {
-      setValidationError("Phone number is required");
+      setValidationError("numéro de téléphone est requis");
       setIsFailedValidation(true);
       return false;
     }
     if (isNaN(formData.telephone)) {
-      setValidationError("Phone must be a valid number");
+      setValidationError("numéro de téléphone doit être un nombre valide");
       setIsFailedValidation(true);
       return false;
     }
     if (!formData.typePartenaire) {
-      setValidationError("Partner type is required");
+      setValidationError("type de partenaire est requis");
       setIsFailedValidation(true);
       return false;
     }
@@ -147,7 +147,7 @@ export default function EditMoraleDialog({
     setSelectedTypePartenaire(selectedType);
     setFormData({ ...formData, typePartenaire: selectedType });
     setIsTypePartenaireModalOpen(false);
-    if (validationError === "Partner type is required") {
+    if (validationError === "type de partenaire est requis") {
       setValidationError("");
     }
   };
@@ -169,12 +169,12 @@ export default function EditMoraleDialog({
       };
 
       await moraleService.update(partenaire.idPartenaire, updatedData);
-      setSuccess("Partner updated successfully");
+      setSuccess("partenaire mis à jour avec succès");
       onSave();
       onClose();
     } catch (error) {
-      console.error("Update error:", error);
-      setError(error.response?.data?.message || "Failed to update partner");
+      console.error("echec de mise a jour:", error);
+      setError(error.response?.data?.message || "echec de mise a jour");
     } finally {
       setIsLoading(false);
     }
@@ -186,11 +186,11 @@ export default function EditMoraleDialog({
       setIsLoading(true);
       await moraleService.addAdresse(partenaire.idPartenaire, newAddress);
       await fetchAdressesById(partenaire.idPartenaire);
-      setSuccess("Address added successfully");
+      setSuccess("addresses est ajoutée avec succès");
       setIsAddAddressOpen(false);
     } catch (error) {
       console.error("Add address error:", error);
-      setError("Failed to add address");
+      setError("echec de l'ajout de l'adresse");
     } finally {
       setIsLoading(false);
     }
@@ -204,11 +204,11 @@ export default function EditMoraleDialog({
         updatedAddress
       );
       await fetchAdressesById(partenaire.idPartenaire);
-      setSuccess("Address updated successfully");
+      setSuccess("addresses sont mises à jour avec succès");
       setIsEditAddressOpen(false);
     } catch (error) {
       console.error("Update address error:", error);
-      setError("Failed to update address");
+      setError("echec de mise à jour de l'adresse");
     } finally {
       setIsLoading(false);
     }
@@ -219,10 +219,10 @@ export default function EditMoraleDialog({
       setIsLoading(true);
       await adressService.delete(id);
       await fetchAdressesById(partenaire.idPartenaire);
-      setSuccess("Address deleted successfully");
+      setSuccess("Adresse supprimée avec succès");
     } catch (error) {
       console.error("Delete address error:", error);
-      setError("Failed to delete address");
+      setError("echec de suppression de l'adresse");
     } finally {
       setIsLoading(false);
     }
@@ -262,7 +262,7 @@ export default function EditMoraleDialog({
         <DialogContent>
           <Box sx={{ p: 2 }}>
             <TextField
-              label="Name*"
+              label="Nom*"
               fullWidth
               margin="normal"
               name="nom"
@@ -296,7 +296,7 @@ export default function EditMoraleDialog({
             />
 
             <TextField
-              label="RC Number"
+              label="numero RC"
               fullWidth
               margin="normal"
               name="numeroRC"
@@ -307,7 +307,7 @@ export default function EditMoraleDialog({
             />
 
             <TextField
-              label="Phone*"
+              label="télèphone*"
               fullWidth
               margin="normal"
               name="telephone"
@@ -357,7 +357,7 @@ export default function EditMoraleDialog({
 
             <FormControl fullWidth margin="normal">
               <TextField
-                label="Partner Type"
+                label="type de partenaire*"
                 value={selectedTypePartenaire?.libelle || ""}
                 fullWidth
                 margin="normal"
@@ -375,8 +375,8 @@ export default function EditMoraleDialog({
                 sx={{ mt: 1 }}
               >
                 {selectedTypePartenaire
-                  ? "Change Partner Type*"
-                  : "Select Partner Type*"}
+                  ? "changer Type Partenaire*"
+                  : "Selectionner Type Partenaire*"}
               </Button>
             </FormControl>
 
@@ -393,7 +393,7 @@ export default function EditMoraleDialog({
         </DialogContent>
         <DialogActions>
           <Button onClick={onClose} disabled={isLoading}>
-            Cancel
+            annuler
           </Button>
           <Button
             onClick={handleSubmitEdit}
@@ -454,7 +454,7 @@ export default function EditMoraleDialog({
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert severity="error" onClose={handleCloseFailedValidation}>
-          {validationError || "Please fill all required fields"}
+          {validationError || "Veuillez remplir tous les champs requis."}
         </Alert>
       </Snackbar>
 

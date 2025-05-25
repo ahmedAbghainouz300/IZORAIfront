@@ -27,8 +27,9 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<CredentialsSignInPage />}></Route>
+      <Route path="/"  element={<CredentialsSignInPage />} />
       <Route path="/" element={<Layout />}>
-        <Route index element={<Home />} />
+        {/* <Route index element={<Home />} /> */}
 
         <Route path={allRoutes.home} element={<Home />} />
         <Route path="/marchandise" element={<Marchandise />} />

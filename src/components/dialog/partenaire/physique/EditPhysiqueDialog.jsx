@@ -24,17 +24,17 @@ const validateForm = (formData) => {
   const errors = {};
   
   if (!formData.nom?.trim()) {
-    errors.nom = "Name is required";
+    errors.nom = "nom is required";
   }
   
   if (!formData.prenom?.trim()) {
-    errors.prenom = "First name is required";
+    errors.prenom = "Le prénom est requis";
   }
   
   if (!formData.telephone) {
-    errors.telephone = "Phone number is required";
+    errors.telephone = "Le téléphone est requis";
   } else if (isNaN(formData.telephone)) {
-    errors.telephone = "Phone must be a valid number";
+    errors.telephone = "Le téléphone doit être un nombre";
   }
   
   if (!formData.cni) {
@@ -42,7 +42,7 @@ const validateForm = (formData) => {
   }   
   
   if (!formData.typePartenaire) {
-    errors.typePartenaire = "Partner type is required";
+    errors.typePartenaire = "Le type partenaire est requis";
   }
   
   return {
@@ -145,7 +145,7 @@ export default function EditPhysiqueDialog({ open, onClose, partenaire, onSave }
     setValidationErrors(errors);
     
     if (!isValid) {
-      setError("Please fill all required fields correctly");
+      setError("sil vous plaît, corrigez les erreurs dans le formulaire");
       return;
     }
 
@@ -161,12 +161,12 @@ export default function EditPhysiqueDialog({ open, onClose, partenaire, onSave }
       };
 
       await physiqueService.update(partenaire.idPartenaire, updatedData);
-      setSuccess("Partner updated successfully");
+      setSuccess("Partenaire physique mis à jour avec succès");
       onSave();
       onClose();
     } catch (error) {
-      console.error("Update error:", error);
-      setError(error.response?.data?.message || "Failed to update partner");
+      console.error("erreur de mise a jour:", error);
+      setError(error.response?.data?.message || "Échec de la mise à jour du partenaire physique");
     } finally {
       setIsSubmitting(false);
     }
@@ -176,11 +176,11 @@ export default function EditPhysiqueDialog({ open, onClose, partenaire, onSave }
     try {
       const address = await physiqueService.addAdresse(partenaire.idPartenaire, newAddress);
       await fetchAdressesById(partenaire.idPartenaire);
-      setSuccess("Address added successfully");
+      setSuccess("Les addresse a été ajoutée avec succès");
       setIsAddAddressOpen(false);
     } catch (error) {
-      console.error("Error adding address:", error);
-      setError("Failed to add address");
+      console.error("Echec de l'ajout les addresses:", error);
+      setError("Échec de l'ajout de l'adresse");a
       throw error;
     }
   };
@@ -189,10 +189,10 @@ export default function EditPhysiqueDialog({ open, onClose, partenaire, onSave }
     try {
       await adressService.delete(id);
       await fetchAdressesById(partenaire.idPartenaire);
-      setSuccess("Address deleted successfully");
+      setSuccess("addresse supprimée avec succès");
     } catch (error) {
-      console.error("Error deleting address:", error);
-      setError("Failed to delete address");
+      console.error("Echec de la susppression l'adresse:", error);
+      setError("Échec de la suppression de l'adresse");
     }
   };
 
@@ -218,7 +218,7 @@ export default function EditPhysiqueDialog({ open, onClose, partenaire, onSave }
 
   const handleChangeAdress = ()=>{
     fetchAdressesById(partenaire.idPartenaire);
-    console.log("address was updatet succesfelly")
+    console.log("Adresse mise à jour");
   }
 
   return (

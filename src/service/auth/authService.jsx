@@ -1,6 +1,6 @@
 import axiosClient from "../axiosClient";
 
-const authService = {
+const authService = { 
     
   login: async (username, password) => {
     try {
@@ -15,7 +15,7 @@ const authService = {
       localStorage.setItem("jwtToken", access_token);
       
       // Configuration du header Axios par défaut
-      axiosClient.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
+      // axiosClient.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
       
       return access_token;
     } catch (error) {
@@ -55,15 +55,15 @@ const authService = {
   },
 
   // Initialisation au chargement de l'app
-  init: () => {
-    const token = localStorage.getItem("jwtToken");
-    if (token) {
-      axiosClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    }
-  },
+  // init: () => {
+  //   const token = localStorage.getItem("jwtToken");
+  //   if (token) {
+  //     axiosClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  //   }
+  // },
 };
 
 // Initialiser les headers au démarrage
-authService.init();
+// authService.init();
 
 export default authService;

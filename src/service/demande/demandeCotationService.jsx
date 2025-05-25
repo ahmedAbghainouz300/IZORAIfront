@@ -12,7 +12,7 @@ const demandeCotationService = {
   delete: (id) => axiosClient.delete(`/api/demandes-cotation/${id}`),
   
   updateStatus: (id, newStatus) => 
-    axiosClient.patch(`/api/demandes-cotation/${id}/status?newStatus=${newStatus}`),
+    axiosClient.put(`/api/demandes-cotation/${id}/status?newStatus=${newStatus}`),
   
   getByStatus: (status) => 
     axiosClient.get(`/api/demandes-cotation/by-status?status=${status}`),
